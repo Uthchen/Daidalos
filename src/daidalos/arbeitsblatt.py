@@ -57,7 +57,7 @@ class Gelesen:
     vorhanden: bool = True
     geaendert: bool = False  # Inhalt passt nicht mehr zum Hash der Messung
     kdoc_datei: str | None = None
-    # Kommentar ohne KDoc vor der ersten Deklaration (z. B. ``// WEGWERF-CODE (…)``), gekürzt
+    # Kommentar ohne KDoc vor der ersten Deklaration (z. B. ``// Prototyp (…)``), gekürzt
     kopfkommentar: str | None = None
     # (Art, Name, Zeile, erste KDoc-Zeile) der Deklarationen der obersten Ebene
     deklariert: list[tuple[str, str, int, str | None]] = field(default_factory=list)

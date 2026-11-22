@@ -53,7 +53,9 @@ Die Zusammenfassung (Markdown, meist unter 300 Zeilen) enthält Zahlen, Module u
 `daidalos.json` selbst; sie ist groß. `daidalos zusammenfassung --json` gibt dasselbe als JSON.
 
 Liegen Messung und Deutung nicht im Standardordner, gib sie an allen Befehlen mit
-`--daten DATEI` und `--deutung DATEI` an (auch bei `arbeitsblatt` und `deutung`).
+`--daten DATEI` und `--deutung DATEI` an (auch bei `arbeitsblatt` und `deutung`); dann schreibt
+`daidalos scan --ausgabe DATEI` die Messung und `daidalos render --ausgabe ORDNER` die Karte
+dorthin. Eine `daidalos.toml` außerhalb des Zielrepos gibst du mit `--konfiguration DATEI` an.
 
 ## 2. Nur Offenes deuten
 
@@ -78,10 +80,17 @@ daidalos arbeitsblatt paket::core/de.beispiel.zeichnen
 daidalos arbeitsblatt datei:core/src/main/kotlin/de/beispiel/Strich.kt
 ```
 
-`KNOTEN` ist eine Id oder ein eindeutiger Suchbegriff (`:core`, Paketname, Dateiname). Ein
-Arbeitsblatt zeigt je Datei: was sie deklariert, die erste KDoc-Zeile, was sie nutzt und wer sie
-nutzt (mit Gewicht und Belegzeilen), ADR-Nummern in Kommentaren. Große Module zeigen nur die
-wichtigen Dateien voll; der Rest steht im Arbeitsblatt je Paket.
+`KNOTEN` ist eine Id oder ein eindeutiger Suchbegriff (`:core`, Paketname, Dateiname oder
+Pfadende wie `zeichnen/Strich.kt`). Ist er mehrdeutig, nennt das Programm die Treffer; dann
+die Id nehmen. Ein Arbeitsblatt zeigt je Datei: was sie deklariert, die erste KDoc-Zeile (ohne
+KDoc den Kopfkommentar, etwa `// Prototyp, nicht übernehmen …`), was sie nutzt und wer sie nutzt (mit Gewicht
+und Belegzeilen), ADR-Nummern in Kommentaren. Große Module zeigen nur die wichtigen Dateien voll;
+die übrigen stehen als Kurzzeile mit erster Kommentarzeile da, alles Weitere im Arbeitsblatt je
+Paket.
+
+Für Beschreibungen reichen meist Kopfzeile, „deklariert“ und die Kurzzeilen; die Listen „nutzt“
+und „genutzt von“ brauchst du vor allem für Befunde und Kantentexte. Ein Satz, der mehr behauptet
+als Kommentar und Deklarationen hergeben, braucht einen Blick in die Datei.
 
 Dann **gezielt** Code lesen:
 - die Dateien, die das Arbeitsblatt als wichtig zeigt, wenn KDoc und Deklarationen nicht reichen;

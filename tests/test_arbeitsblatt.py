@@ -123,9 +123,9 @@ def test_geaenderte_datei_wird_vermerkt(tmp_path: Path) -> None:
 
 def test_kopfkommentar_ohne_kdoc(tmp_path: Path) -> None:
     (tmp_path / "W.kt").write_text(
-        "package a\n// WEGWERF-CODE (Prototyp). Erste Zeile\n// und zweite Zeile.\nclass W\n",
+        "package a\n// Prototyp (Wegwerfcode). Erste Zeile\n// und zweite Zeile.\nclass W\n",
         encoding="utf-8",
     )
     gelesen = lies_quelle(tmp_path, {"pfad": "W.kt", "sprache": "kotlin"})
     assert gelesen.kdoc_datei is None
-    assert gelesen.kopfkommentar == "WEGWERF-CODE (Prototyp). Erste Zeile und zweite Zeile."
+    assert gelesen.kopfkommentar == "Prototyp (Wegwerfcode). Erste Zeile und zweite Zeile."
