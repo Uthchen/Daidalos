@@ -1,0 +1,5 @@
+* text=auto eol=lf
+
+# Testbeispiele mit absichtlichen CRLF-Zeilenenden und Binärdateien unverändert lassen
+tests/beispiele/**/*crlf* -text
+tests/beispiele/**/*.bin binary
