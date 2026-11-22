@@ -455,7 +455,7 @@ Markdown auf stdout für ein Modul, einen Ordner, ein Paket oder eine Datei (Id 
 Suchbegriff wie bei `daidalos pfad`). Die Dateien werden neu gelesen; `daidalos.json` ändert sich
 nicht. Je Datei: Id, Zeilen, Sprache, Quellsatz, Fan-in/Fan-out, Grund als wichtige Datei, Stand
 der Deutung; bei Kotlin die erste KDoc-Zeile der Datei (KDoc vor `package`) und die Deklarationen
-der obersten Ebene mit Zeile und erster KDoc-Zeile (Tags wie `@param` zählen nicht, höchstens 160
+der obersten Ebene mit Zeile und erster KDoc-Zeile, ohne KDoc der Datei den Kommentar vor der ersten Deklaration (Kopfkommentar, höchstens 160 Zeichen) (Tags wie `@param` zählen nicht, höchstens 160
 Zeichen); `nutzt` und `genutzt von` (produktive vor Test-Kanten, nach Gewicht, je Richtung höchstens
 8 Kanten mit je 3 Belegen); `ADR-\d{4}` in Kommentaren (bei Sprachen ohne Adapter im ganzen Text)
 mit Anzahl. Hat sich die Datei seit dem Scan geändert oder fehlt sie, steht ein Vermerk dabei.

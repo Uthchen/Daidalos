@@ -1,6 +1,7 @@
 # Arbeitsblatt · Datei kern/src/commonMain/kotlin/beispiel/kern/Strich.kt
 
 `datei:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt` · 8 Zeilen · kotlin · Quellsatz commonMain · Fan-in 1, Fan-out 2 · wichtig: fan-in · Deutung fehlt
+- Kopfkommentar: Punkt ohne Import (gleiches Paket), verschoben als Erweiterung
 - deklariert:
   - ohne KDoc: class Strich (Z. 4)
 - nutzt:

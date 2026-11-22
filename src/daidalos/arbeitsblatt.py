@@ -57,6 +57,8 @@ class Gelesen:
     vorhanden: bool = True
     geaendert: bool = False  # Inhalt passt nicht mehr zum Hash der Messung
     kdoc_datei: str | None = None
+    # Kommentar ohne KDoc vor der ersten Deklaration (z. B. ``// WEGWERF-CODE (…)``), gekürzt
+    kopfkommentar: str | None = None
     # (Art, Name, Zeile, erste KDoc-Zeile) der Deklarationen der obersten Ebene
     deklariert: list[tuple[str, str, int, str | None]] = field(default_factory=list)
     adr: Counter[str] = field(default_factory=Counter)
@@ -84,6 +86,23 @@ def erste_kdoc_zeile(kommentar: str) -> str | None:
     return None
 
 
+def kopfkommentar(kommentare: list[str]) -> str | None:
+    """Erste Zeilen aufeinanderfolgender Kommentare als ein Text, höchstens ``KDOC_LAENGE``."""
+    teile: list[str] = []
+    for kommentar in kommentare:
+        for roh in kommentar.splitlines():
+            zeile_text = roh.strip().removeprefix("//").removeprefix("/*").removesuffix("*/")
+            zeile_text = zeile_text.strip().lstrip("*").strip()
+            if zeile_text:
+                teile.append(zeile_text)
+        if len(" ".join(teile)) > KDOC_LAENGE:
+            break
+    if not teile:
+        return None
+    ganz = " ".join(teile)
+    return ganz if len(ganz) <= KDOC_LAENGE else ganz[: KDOC_LAENGE - 1].rstrip() + "…"
+
+
 def lies_quelle(ziel: Path, knoten: Knoten) -> Gelesen:
     pfad = ziel / knoten["pfad"]
     try:
@@ -100,7 +119,14 @@ def lies_quelle(ziel: Path, knoten: Knoten) -> Gelesen:
         # als Teil eines anderen Knotens liest (``annotation class`` nach Annotationszeilen).
         kdoc: dict[tuple[int, int], str] = {}
         vorher = None
+        kopf: list[str] = []
+        kopf_offen = True
         for kind in wurzel.named_children:
+            if kopf_offen and kind.type in ("line_comment", "block_comment"):
+                if not text(kind).startswith("/**"):
+                    kopf.append(text(kind))
+            elif kopf_offen and kind.type not in ("package_header", "import", "file_annotation"):
+                kopf_offen = False
             if kind.type == "package_header" and vorher is not None and gelesen.kdoc_datei is None:
                 gelesen.kdoc_datei = erste_kdoc_zeile(text(vorher))
             elif kind.type != "block_comment" and vorher is not None:
@@ -111,6 +137,7 @@ def lies_quelle(ziel: Path, knoten: Knoten) -> Gelesen:
                 vorher = kind
             elif kind.type not in _NUR_ANNOTATION:
                 vorher = None
+        gelesen.kopfkommentar = kopfkommentar(kopf)
         datei = lies_kotlin(inhalt, knoten["pfad"])
         oberste = sorted(
             (d for d in datei.deklarationen if d.oberste_ebene), key=lambda d: (d.zeile, d.name)
@@ -237,6 +264,8 @@ class Arbeitsblatt:
             z.append("- Achtung: Inhalt hat sich seit dem Scan geändert; zuerst neu scannen.")
         if gelesen.kdoc_datei:
             z.append(f"- KDoc der Datei: {gelesen.kdoc_datei}")
+        if gelesen.kopfkommentar:
+            z.append(f"- Kopfkommentar: {gelesen.kopfkommentar}")
         if gelesen.deklariert:
             mit_doc = [d for d in gelesen.deklariert if d[3]]
             ohne_doc = [d for d in gelesen.deklariert if not d[3]]
@@ -265,9 +294,13 @@ class Arbeitsblatt:
         m = k.get("metriken", {})
         test = ", Test" if k.get("rolle") == "test" else ""
         wichtig = ", wichtig" if k["id"] in self.wichtig else ""
-        # Erste KDoc-Zeile der Datei, sonst der ersten dokumentierten Deklaration.
+        # KDoc der Datei, sonst Kopfkommentar, sonst KDoc der ersten dokumentierten Deklaration.
         gelesen = lies_quelle(self.ziel, k)
-        doc = gelesen.kdoc_datei or next((d[3] for d in gelesen.deklariert if d[3]), None)
+        doc = (
+            gelesen.kdoc_datei
+            or gelesen.kopfkommentar
+            or next((d[3] for d in gelesen.deklariert if d[3]), None)
+        )
         return (
             f"- {k['pfad']} ({k.get('zeilen', 0)} Z., Fan-in {m.get('fan_in', 0)}, "
             f"Fan-out {m.get('fan_out', 0)}{test}{wichtig})" + (f": {doc}" if doc else "")
