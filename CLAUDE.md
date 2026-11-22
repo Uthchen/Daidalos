@@ -9,7 +9,8 @@ Verbindlich: [docs/architektur.md](docs/architektur.md) (Architektur) und
 ## Leitplanken
 
 1. **Messen und Deuten bleiben getrennt.** Das Programm schreibt nur Gemessenes in `daidalos.json`,
-   nie Deutungen. `deutung.json` schreibt nur der Skill.
+   nie Deutungen. Den Inhalt von `deutung.json` schreibt nur der Skill; `daidalos deutung
+   uebernehmen` setzt dabei nur Hashes ein, prüft Ids und speichert.
 2. **Determinismus:** Gleicher Stand des Zielrepos ergibt eine byte-gleiche Ausgabe. Keine
    Zeitstempel, keine absoluten Pfade, keine Rechnernamen, stabile Sortierung.
 3. **Unsicher statt raten:** Was sich nicht eindeutig auflösen lässt, wird als unsicher markiert und
@@ -44,6 +45,10 @@ uv sync                                   # Umgebung anlegen
 uv run daidalos scan <zielrepo>           # Zielrepo scannen
 uv run daidalos render <zielrepo>         # karte.html und KARTE.md erzeugen
 uv run daidalos pfad VON NACH --daten D   # kürzester belegter Weg
+uv run daidalos zusammenfassung <zielrepo>          # Übersicht und Offenes für den Skill
+uv run daidalos arbeitsblatt KNOTEN <zielrepo>      # Arbeitsblatt für Modul, Paket oder Datei
+uv run daidalos deutung uebernehmen E.json <zielrepo>   # Entwurf prüfen, Hashes einsetzen
+uv run daidalos deutung pruefen <zielrepo>          # Exit 0, wenn nichts offen ist
 uv run playwright install chromium        # einmalig, für die Browser-Probe (Marker browser)
 uv run python werkzeuge/hole_vendor.py --pruefen   # Prüfsummen der eingebetteten Bibliotheken
 uv run pytest                             # Tests
@@ -58,7 +63,10 @@ uv run ruff format                        # Formatieren
   (Dateien finden und messen), `sprachen.py` (Endungstabelle), `export.py` (JSON schreiben),
   `struktur.py` (Module, Pakete, Kanten, Befunde, Metriken zusammensetzen), `aufloeser.py`
   (Kotlin-Namen → Datei-Kanten), `deutung.py` (`deutung.json` lesen und abgleichen), `render.py`
-  (`karte.html`, `KARTE.md`), `pfad.py` (`daidalos pfad`).
+  (`karte.html`, `KARTE.md`), `pfad.py` (`daidalos pfad`), `zusammenfassung.py` (Übersicht,
+  wichtige Dateien, Offenes), `arbeitsblatt.py` (Arbeitsblätter); `deutung.py` auch für
+  `deutung uebernehmen`.
+- `skills/daidalos/`: der Skill (`SKILL.md`, `vorlagen/`); `.claude-plugin/`: Plugin und Marketplace.
 - `src/daidalos/karte/`: `vorlage.html`, `karte.css`, `karte.js` (die Karte), `vendor/`
   (Cytoscape.js, elkjs, cytoscape-elk mit `HERKUNFT.md`; byte-genau, siehe `.gitattributes`).
 - `src/daidalos/adapter/`: `gradle.py`, `kotlin.py`, `jni.py` (tree-sitter), `baum.py` (Hilfen).

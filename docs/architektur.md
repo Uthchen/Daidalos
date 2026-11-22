@@ -78,6 +78,14 @@ Weicht der Hash einer Beschreibung vom aktuellen ab, deutet der Skill nur diesen
 
 Er erfindet keine Zahlen, er ordnet die gemessenen ein. Ablauf: `daidalos scan` → Zusammenfassung lesen (nicht das ganze JSON) → Bereiche benennen, Module und wichtige Dateien in je einem Satz beschreiben (gezielt Code und ADRs lesen) → 3 bis 10 Befunde gewichten mit Begründung und Vorschlag → `deutung.json` schreiben → `daidalos render` → beim nächsten Lauf nur Knoten mit geändertem Hash neu deuten. Regeln: jede Aussage verweist auf eine Knoten- oder Befund-id; über ungelesenen Code wird nichts geschrieben.
 
+Seit A06 liegt der Skill als `skills/daidalos/SKILL.md` im Repo und ist als Claude-Code-Plugin installierbar (`.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`). Drei Programmhilfen halten ihn knapp und frei von abgeschriebenen Hashes:
+
+- `daidalos zusammenfassung`: Übersicht unter 300 Zeilen, wichtige Dateien nach fester Auswahlregel, Abschnitt **Offen** (fehlende und veraltete Beschreibungen, Befunde ohne Einschätzung, tote Verweise).
+- `daidalos arbeitsblatt KNOTEN`: je Modul, Paket oder Datei, was deklariert ist, erste KDoc-Zeilen, nutzt / genutzt von mit Belegen, ADR-Nummern; liest die Dateien neu, ändert die Messung nicht.
+- `daidalos deutung uebernehmen ENTWURF.json` und `daidalos deutung pruefen`: Der Skill schreibt einen Entwurf ohne Hashes; das Programm prüft alle Ids, setzt die aktuellen Hashes ein, führt mit der bestehenden `deutung.json` zusammen und speichert deterministisch. `pruefen` meldet Offenes mit Exit-Code 1.
+
+**Leitplanke 1 bleibt gewahrt:** Den Inhalt der Deutung (Namen, Texte, Prioritäten) schreibt nur der Skill. Das Programm wählt nach festen Regeln aus (wichtige Dateien), setzt Hashes ein, prüft und speichert, aber es deutet nicht.
+
 ## Die Karte
 
 Geflecht zum Hineinzoomen, Cytoscape.js eingebettet, offline, kein Netzwerk zur Laufzeit.

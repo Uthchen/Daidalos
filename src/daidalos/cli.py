@@ -1,4 +1,4 @@
-"""Befehlszeile: ``daidalos scan``, ``daidalos render`` und ``daidalos pfad``."""
+"""Befehlszeile von Daidalos: scan, render, pfad, zusammenfassung, arbeitsblatt, deutung."""
 
 from __future__ import annotations
 
@@ -11,8 +11,16 @@ from pathlib import Path
 from typing import Any
 
 from daidalos import __version__
-from daidalos.deutung import DeutungsFehler, gleiche_ab, lies_deutung
-from daidalos.export import schreibe_json, schreibe_text
+from daidalos.arbeitsblatt import Arbeitsblatt, ArbeitsblattFehler
+from daidalos.deutung import (
+    DeutungsFehler,
+    EntwurfFehler,
+    gleiche_ab,
+    lies_deutung,
+    lies_json,
+    uebernimm,
+)
+from daidalos.export import als_json, schreibe_json, schreibe_text
 from daidalos.konfiguration import (
     DATEINAME,
     Konfiguration,
@@ -30,6 +38,7 @@ from daidalos.render import (
     wurzel_relativ,
 )
 from daidalos.scanner import scanne, zaehle_sprachen
+from daidalos.zusammenfassung import Zusammenfassung, finde_offenes, wichtige_dateien
 
 EXIT_OK = 0
 EXIT_UNERWARTET = 1
@@ -37,6 +46,7 @@ EXIT_BEDIENFEHLER = 2
 
 STANDARD_ORDNER = Path("docs") / "daidalos"
 STANDARD_AUSGABE = STANDARD_ORDNER / "daidalos.json"
+STANDARD_DEUTUNG = STANDARD_ORDNER / "deutung.json"
 
 
 class _Parser(argparse.ArgumentParser):
@@ -97,7 +107,47 @@ def _baue_parser() -> argparse.ArgumentParser:
         "--daten", metavar="DATEI", help="Messung (Standard: ./docs/daidalos/daidalos.json)"
     )
     pfad.add_argument("--json", action="store_true", help="Ausgabe als JSON")
+
+    zusammen = befehle.add_parser(
+        "zusammenfassung", help="kurze Übersicht der Messung und was in der Deutung offen ist"
+    )
+    _ziel_daten_deutung(zusammen)
+    zusammen.add_argument("--json", action="store_true", help="Ausgabe als JSON")
+
+    blatt = befehle.add_parser(
+        "arbeitsblatt", help="Arbeitsblatt für ein Modul, ein Paket oder eine Datei"
+    )
+    blatt.add_argument("knoten", metavar="KNOTEN", help="Id oder eindeutiger Suchbegriff")
+    _ziel_daten_deutung(blatt)
+
+    deutung = befehle.add_parser("deutung", help="Entwurf übernehmen oder deutung.json prüfen")
+    deutung_befehle = deutung.add_subparsers(
+        dest="deutung_befehl", metavar="AKTION", parser_class=_Parser, required=True
+    )
+    uebernehmen = deutung_befehle.add_parser(
+        "uebernehmen", help="Entwurf prüfen, Hashes einsetzen und in deutung.json übernehmen"
+    )
+    uebernehmen.add_argument("entwurf", metavar="ENTWURF", help="Entwurf (JSON ohne hash)")
+    _ziel_daten_deutung(uebernehmen)
+    pruefen = deutung_befehle.add_parser(
+        "pruefen", help="veraltete, fehlende und tote Einträge melden (Exit-Code 1, wenn offen)"
+    )
+    _ziel_daten_deutung(pruefen)
     return parser
+
+
+def _ziel_daten_deutung(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "ziel", nargs="?", default=".", metavar="ZIEL", help="Zielrepo (Standard: .)"
+    )
+    parser.add_argument(
+        "--daten", metavar="DATEI", help="Messung (Standard: <ZIEL>/docs/daidalos/daidalos.json)"
+    )
+    parser.add_argument(
+        "--deutung",
+        metavar="DATEI",
+        help="Deutung (Standard: <ZIEL>/docs/daidalos/deutung.json)",
+    )
 
 
 def _anzeigepfad(pfad: Path) -> str:
@@ -286,13 +336,129 @@ def _befehl_pfad(argumente: argparse.Namespace) -> int:
     return EXIT_OK
 
 
-BEFEHLE = {"scan": _befehl_scan, "render": _befehl_render, "pfad": _befehl_pfad}
+def _pfade(argumente: argparse.Namespace) -> tuple[Path, Path, Path]:
+    ziel = Path(argumente.ziel)
+    daten = Path(argumente.daten) if argumente.daten else ziel / STANDARD_AUSGABE
+    deutung = Path(argumente.deutung) if argumente.deutung else ziel / STANDARD_DEUTUNG
+    return ziel, daten, deutung
+
+
+def _lade_beides(daten: Path, deutung: Path) -> tuple[dict[str, Any], dict[str, Any] | None]:
+    """Messung und rohe Deutung (``None``, wenn die Datei fehlt)."""
+    messung = lade_messung(daten)
+    return messung, lies_deutung(deutung) if deutung.is_file() else None
+
+
+def _befehl_zusammenfassung(argumente: argparse.Namespace) -> int:
+    _, daten, deutung = _pfade(argumente)
+    try:
+        messung, roh = _lade_beides(daten, deutung)
+    except (RenderFehler, DeutungsFehler) as fehler:
+        print(f"Fehler: {fehler}", file=sys.stderr)
+        return EXIT_BEDIENFEHLER
+    zusammenfassung = Zusammenfassung(messung, roh)
+    if argumente.json:
+        print(als_json(zusammenfassung.als_json()), end="")
+    else:
+        print(zusammenfassung.als_markdown(), end="")
+    return EXIT_OK
+
+
+def _befehl_arbeitsblatt(argumente: argparse.Namespace) -> int:
+    ziel, daten, deutung = _pfade(argumente)
+    try:
+        messung, roh = _lade_beides(daten, deutung)
+        knoten = finde_knoten(messung, argumente.knoten, None)
+        print(Arbeitsblatt(messung, ziel, roh).baue(knoten), end="")
+    except (RenderFehler, DeutungsFehler, ArbeitsblattFehler) as fehler:
+        print(f"Fehler: {fehler}", file=sys.stderr)
+        return EXIT_BEDIENFEHLER
+    except PfadFehler as fehler:
+        return _pfad_fehler(fehler)
+    return EXIT_OK
+
+
+def _befehl_deutung(argumente: argparse.Namespace) -> int:
+    if argumente.deutung_befehl == "uebernehmen":
+        return _deutung_uebernehmen(argumente)
+    return _deutung_pruefen(argumente)
+
+
+def _anzahl(entwurf: dict[str, Any], schluessel: str) -> int:
+    return len(entwurf.get(schluessel) or [])
+
+
+def _deutung_uebernehmen(argumente: argparse.Namespace) -> int:
+    _, daten, deutung = _pfade(argumente)
+    try:
+        messung, bestand = _lade_beides(daten, deutung)
+        entwurf = lies_json(Path(argumente.entwurf))
+        neu = uebernimm(entwurf, bestand, messung)
+    except (RenderFehler, DeutungsFehler) as fehler:
+        print(f"Fehler: {fehler}", file=sys.stderr)
+        return EXIT_BEDIENFEHLER
+    except EntwurfFehler as fehler:
+        print(f"Fehler: {fehler}; nichts geschrieben.", file=sys.stderr)
+        for problem in fehler.probleme:
+            print(f"  {problem}", file=sys.stderr)
+        return EXIT_BEDIENFEHLER
+    schreibe_json(neu, deutung)
+    print(
+        f"Übernommen: {_anzahl(entwurf, 'beschreibungen')} Beschreibungen, "
+        f"{_anzahl(entwurf, 'bereiche')} Bereiche, "
+        f"{_anzahl(entwurf, 'einschaetzungen')} Einschätzungen, "
+        f"{_anzahl(entwurf, 'kanten')} Kantentexte, {_anzahl(entwurf, 'entfernen')} entfernt"
+    )
+    print(
+        f"Bestand:    {len(neu['beschreibungen'])} Beschreibungen, {len(neu['bereiche'])} "
+        f"Bereiche, {len(neu['einschaetzungen'])} Einschätzungen, {len(neu['kanten'])} Kantentexte"
+    )
+    print(f"Deutung:    {_anzeigepfad(deutung)}")
+    return EXIT_OK
+
+
+def _deutung_pruefen(argumente: argparse.Namespace) -> int:
+    _, daten, deutung = _pfade(argumente)
+    try:
+        messung, roh = _lade_beides(daten, deutung)
+    except (RenderFehler, DeutungsFehler) as fehler:
+        print(f"Fehler: {fehler}", file=sys.stderr)
+        return EXIT_BEDIENFEHLER
+    if roh is None:
+        print(f"Hinweis: {_anzeigepfad(deutung)} fehlt; alles ist offen.")
+    offen = finde_offenes(messung, roh, wichtige_dateien(messung))
+    stand = offen.beschreibungen
+    gruppen = (
+        ("Beschreibung fehlt", sorted(i for i, s in stand.items() if s == "fehlt")),
+        ("Beschreibung veraltet", sorted(i for i, s in stand.items() if s == "veraltet")),
+        ("Befund ohne Einschätzung", offen.befunde),
+        ("Toter Verweis", offen.tote_verweise),
+    )
+    for titel, eintraege in gruppen:
+        for eintrag in eintraege:
+            print(f"{titel}: {eintrag}")
+    anzahl = sum(len(e) for _, e in gruppen)
+    zaehlung = ", ".join(f"{titel} {len(e)}" for titel, e in gruppen)
+    print(f"Offen: {anzahl} ({zaehlung})")
+    return EXIT_OK if offen.leer else EXIT_UNERWARTET
+
+
+BEFEHLE = {
+    "scan": _befehl_scan,
+    "render": _befehl_render,
+    "pfad": _befehl_pfad,
+    "zusammenfassung": _befehl_zusammenfassung,
+    "arbeitsblatt": _befehl_arbeitsblatt,
+    "deutung": _befehl_deutung,
+}
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    # Ausgaben immer UTF-8, auch in Pipes unter Windows (sonst Codepage 1252 und keine Umlaute
+    # für Werkzeuge wie den Skill, die die Ausgabe weiterlesen).
     for strom in (sys.stdout, sys.stderr):
         if hasattr(strom, "reconfigure"):
-            strom.reconfigure(errors="replace")
+            strom.reconfigure(encoding="utf-8", errors="replace")
     parser = _baue_parser()
     argumente = parser.parse_args(argv)
     if argumente.befehl is None:

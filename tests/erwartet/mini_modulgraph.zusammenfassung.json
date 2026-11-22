@@ -1,0 +1,455 @@
+{
+  "befunde": [
+    {
+      "einschaetzung": false,
+      "id": "befund:jni-ohne-gegenstueck:nativ/src/main/kotlin/beispiel/nativ/Insel.kt:beispiel.nativ.Insel.fehlt",
+      "kurz": "JNI ohne Gegenstück (kotlin): beispiel.nativ.Insel.fehlt"
+    },
+    {
+      "einschaetzung": false,
+      "id": "befund:unaufgeloest:kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt",
+      "kurz": "1 unaufgelöste interne Importe"
+    },
+    {
+      "einschaetzung": false,
+      "id": "befund:zyklus:datei:produktiv:c55399e18586",
+      "kurz": "Zyklus, Ebene datei, produktiv, 2 Knoten, Trennstelle `kante:nutzt:datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt:produktiv` (Gewicht 1)"
+    },
+    {
+      "einschaetzung": true,
+      "id": "befund:zyklus:datei:produktiv:f45327fbce97",
+      "kurz": "Zyklus, Ebene datei, produktiv, 3 Knoten, Trennstelle `kante:nutzt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt:produktiv` (Gewicht 1)"
+    },
+    {
+      "einschaetzung": false,
+      "id": "befund:zyklus:paket:produktiv:99e6584ba329",
+      "kurz": "Zyklus, Ebene paket, produktiv, 2 Knoten, Trennstelle `kante:nutzt:paket::kern-labor/beispiel.kern.labor.protokoll->paket::kern-labor/beispiel.kern.labor.messung:produktiv` (Gewicht 1)"
+    }
+  ],
+  "daidalos": "0.1.0",
+  "gruppen": [
+    {
+      "dateien": 3,
+      "deutung": "veraltet",
+      "fan_in": 0,
+      "fan_out": 2,
+      "gradle": [
+        "kern (impl)",
+        "kern-labor (impl)",
+        "kern-labor (test)",
+        "nativ (impl)",
+        "regeln (plugin)"
+      ],
+      "id": "modul::anwendung",
+      "zeilen": 30
+    },
+    {
+      "dateien": 7,
+      "deutung": "ok",
+      "fan_in": 2,
+      "fan_out": 0,
+      "gradle": [
+        "regeln (plugin)"
+      ],
+      "id": "modul::kern",
+      "zeilen": 52
+    },
+    {
+      "dateien": 6,
+      "deutung": "fehlt",
+      "fan_in": 0,
+      "fan_out": 1,
+      "gradle": [
+        "kern (api)",
+        "regeln (plugin)"
+      ],
+      "id": "modul::kern-labor",
+      "zeilen": 61
+    },
+    {
+      "dateien": 3,
+      "deutung": "fehlt",
+      "fan_in": 1,
+      "fan_out": 0,
+      "gradle": [
+        "kern (impl)",
+        "regeln (plugin)"
+      ],
+      "id": "modul::nativ",
+      "zeilen": 21
+    },
+    {
+      "dateien": 2,
+      "deutung": "fehlt",
+      "fan_in": 0,
+      "fan_out": 0,
+      "gradle": [],
+      "id": "modul::regeln",
+      "zeilen": 6
+    },
+    {
+      "dateien": 4,
+      "deutung": "fehlt",
+      "fan_in": 0,
+      "fan_out": 0,
+      "gradle": [],
+      "id": "ordner:.",
+      "zeilen": 21
+    },
+    {
+      "dateien": 1,
+      "deutung": "fehlt",
+      "fan_in": 0,
+      "fan_out": 0,
+      "gradle": [],
+      "id": "ordner:werkzeug",
+      "zeilen": 3
+    }
+  ],
+  "offen": {
+    "befunde_ohne_einschaetzung": [
+      "befund:jni-ohne-gegenstueck:nativ/src/main/kotlin/beispiel/nativ/Insel.kt:beispiel.nativ.Insel.fehlt",
+      "befund:unaufgeloest:kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt",
+      "befund:zyklus:datei:produktiv:c55399e18586",
+      "befund:zyklus:paket:produktiv:99e6584ba329"
+    ],
+    "beschreibungen": [
+      {
+        "id": "datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt",
+        "stand": "fehlt"
+      },
+      {
+        "id": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt",
+        "stand": "fehlt"
+      },
+      {
+        "id": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt",
+        "stand": "fehlt"
+      },
+      {
+        "id": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Journal.kt",
+        "stand": "fehlt"
+      },
+      {
+        "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt",
+        "stand": "fehlt"
+      },
+      {
+        "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt",
+        "stand": "fehlt"
+      },
+      {
+        "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt",
+        "stand": "fehlt"
+      },
+      {
+        "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt",
+        "stand": "fehlt"
+      },
+      {
+        "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt",
+        "stand": "fehlt"
+      },
+      {
+        "id": "datei:nativ/src/main/cpp/insel_jni.c",
+        "stand": "fehlt"
+      },
+      {
+        "id": "datei:nativ/src/main/kotlin/beispiel/nativ/Insel.kt",
+        "stand": "fehlt"
+      },
+      {
+        "id": "modul::anwendung",
+        "stand": "veraltet"
+      },
+      {
+        "id": "modul::kern-labor",
+        "stand": "fehlt"
+      },
+      {
+        "id": "modul::nativ",
+        "stand": "fehlt"
+      },
+      {
+        "id": "modul::regeln",
+        "stand": "fehlt"
+      },
+      {
+        "id": "ordner:.",
+        "stand": "fehlt"
+      },
+      {
+        "id": "ordner:werkzeug",
+        "stand": "fehlt"
+      },
+      {
+        "id": "paket::anwendung/beispiel.anwendung",
+        "stand": "fehlt"
+      },
+      {
+        "id": "paket::kern-labor/beispiel.kern.labor.messung",
+        "stand": "fehlt"
+      },
+      {
+        "id": "paket::kern-labor/beispiel.kern.labor.protokoll",
+        "stand": "fehlt"
+      },
+      {
+        "id": "paket::kern/beispiel.kern",
+        "stand": "fehlt"
+      },
+      {
+        "id": "paket::nativ/beispiel.nativ",
+        "stand": "fehlt"
+      },
+      {
+        "id": "paket::regeln/beispiel.regeln",
+        "stand": "fehlt"
+      },
+      {
+        "id": "paket:ordner:werkzeug/werkzeug",
+        "stand": "fehlt"
+      }
+    ],
+    "tote_verweise": [
+      "bereiche bereich:zeichnen: paket::verschwunden/x",
+      "beschreibungen: modul::gibt-es-nicht",
+      "einschaetzungen: befund:zyklus:datei:produktiv:000000000000",
+      "kanten: kante:nutzt:datei:a.kt->datei:b.kt:produktiv"
+    ]
+  },
+  "pakete": [
+    {
+      "dateien": 2,
+      "deutung": "fehlt",
+      "fan_in": 1,
+      "fan_out": 3,
+      "gruppe": "modul::anwendung",
+      "id": "paket::anwendung/beispiel.anwendung",
+      "zeilen": 18
+    },
+    {
+      "dateien": 0,
+      "deutung": "fremd",
+      "fan_in": 1,
+      "fan_out": 1,
+      "gruppe": "modul::anwendung",
+      "id": "paket::anwendung/beispiel.anwendung.fremd",
+      "zeilen": 0
+    },
+    {
+      "dateien": 3,
+      "deutung": "fehlt",
+      "fan_in": 2,
+      "fan_out": 0,
+      "gruppe": "modul::kern",
+      "id": "paket::kern/beispiel.kern",
+      "zeilen": 22
+    },
+    {
+      "dateien": 3,
+      "deutung": "ok",
+      "fan_in": 1,
+      "fan_out": 0,
+      "gruppe": "modul::kern",
+      "id": "paket::kern/beispiel.kern.zyklus",
+      "zeilen": 23
+    },
+    {
+      "dateien": 3,
+      "deutung": "fehlt",
+      "fan_in": 1,
+      "fan_out": 3,
+      "gruppe": "modul::kern-labor",
+      "id": "paket::kern-labor/beispiel.kern.labor.messung",
+      "zeilen": 31
+    },
+    {
+      "dateien": 2,
+      "deutung": "fehlt",
+      "fan_in": 1,
+      "fan_out": 1,
+      "gruppe": "modul::kern-labor",
+      "id": "paket::kern-labor/beispiel.kern.labor.protokoll",
+      "zeilen": 14
+    },
+    {
+      "dateien": 1,
+      "deutung": "fehlt",
+      "fan_in": 1,
+      "fan_out": 0,
+      "gruppe": "modul::nativ",
+      "id": "paket::nativ/beispiel.nativ",
+      "zeilen": 7
+    },
+    {
+      "dateien": 1,
+      "deutung": "fehlt",
+      "fan_in": 0,
+      "fan_out": 0,
+      "gruppe": "modul::regeln",
+      "id": "paket::regeln/beispiel.regeln",
+      "zeilen": 3
+    },
+    {
+      "dateien": 1,
+      "deutung": "fehlt",
+      "fan_in": 0,
+      "fan_out": 0,
+      "gruppe": "ordner:werkzeug",
+      "id": "paket:ordner:werkzeug/werkzeug",
+      "zeilen": 3
+    }
+  ],
+  "wichtige_dateien": [
+    {
+      "deutung": "fehlt",
+      "fan_in": 3,
+      "fan_out": 0,
+      "gruende": [
+        "fan-in"
+      ],
+      "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt",
+      "zeilen": 3
+    },
+    {
+      "deutung": "fehlt",
+      "fan_in": 2,
+      "fan_out": 2,
+      "gruende": [
+        "fan-in",
+        "befund",
+        "einstieg",
+        "trennstelle"
+      ],
+      "id": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt",
+      "zeilen": 11
+    },
+    {
+      "deutung": "fehlt",
+      "fan_in": 2,
+      "fan_out": 1,
+      "gruende": [
+        "fan-in"
+      ],
+      "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt",
+      "zeilen": 11
+    },
+    {
+      "deutung": "ok",
+      "fan_in": 2,
+      "fan_out": 1,
+      "gruende": [
+        "fan-in",
+        "befund",
+        "einstieg",
+        "trennstelle"
+      ],
+      "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt",
+      "zeilen": 7
+    },
+    {
+      "deutung": "fehlt",
+      "fan_in": 1,
+      "fan_out": 3,
+      "gruende": [
+        "fan-in"
+      ],
+      "id": "datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt",
+      "zeilen": 11
+    },
+    {
+      "deutung": "fehlt",
+      "fan_in": 1,
+      "fan_out": 1,
+      "gruende": [
+        "fan-in",
+        "befund",
+        "trennstelle"
+      ],
+      "id": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt",
+      "zeilen": 9
+    },
+    {
+      "deutung": "fehlt",
+      "fan_in": 1,
+      "fan_out": 0,
+      "gruende": [
+        "fan-in"
+      ],
+      "id": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Journal.kt",
+      "zeilen": 5
+    },
+    {
+      "deutung": "fehlt",
+      "fan_in": 1,
+      "fan_out": 2,
+      "gruende": [
+        "fan-in"
+      ],
+      "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt",
+      "zeilen": 8
+    },
+    {
+      "deutung": "fehlt",
+      "fan_in": 1,
+      "fan_out": 1,
+      "gruende": [
+        "fan-in",
+        "befund"
+      ],
+      "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt",
+      "zeilen": 9
+    },
+    {
+      "deutung": "fehlt",
+      "fan_in": 1,
+      "fan_out": 1,
+      "gruende": [
+        "fan-in",
+        "befund",
+        "trennstelle"
+      ],
+      "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt",
+      "zeilen": 7
+    },
+    {
+      "deutung": "fehlt",
+      "fan_in": 1,
+      "fan_out": 0,
+      "gruende": [
+        "fan-in",
+        "befund",
+        "jni"
+      ],
+      "id": "datei:nativ/src/main/kotlin/beispiel/nativ/Insel.kt",
+      "zeilen": 7
+    },
+    {
+      "deutung": "fehlt",
+      "fan_in": 0,
+      "fan_out": 0,
+      "gruende": [
+        "jni"
+      ],
+      "id": "datei:nativ/src/main/cpp/insel_jni.c",
+      "zeilen": 7
+    }
+  ],
+  "zahlen": {
+    "befunde": 5,
+    "dateien": 27,
+    "dateien_fremd": 1,
+    "dateikanten": 21,
+    "module": 5,
+    "ordner": 2,
+    "pakete": 9,
+    "wichtige_dateien": 12,
+    "zeilen": 202
+  },
+  "ziel": {
+    "git_aenderungen": null,
+    "git_commit": null,
+    "name": "Modulgraph"
+  }
+}

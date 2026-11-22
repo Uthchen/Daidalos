@@ -1,0 +1,13 @@
+{
+  "name": "daidalos",
+  "version": "0.1.0",
+  "description": "Karte der Verflechtung einer Codebase: Daidalos misst Module, Pakete, Dateien, Kanten und Zyklen, der Skill deutet die Messung (Bereiche, Beschreibungen, Einschätzungen) und zeichnet die Karte.",
+  "author": {
+    "name": "Manuel Grimm",
+    "url": "https://github.com/Uthchen"
+  },
+  "homepage": "https://github.com/Uthchen/Daidalos",
+  "repository": "https://github.com/Uthchen/Daidalos",
+  "license": "MIT",
+  "keywords": ["codebase", "architektur", "karte", "abhaengigkeiten", "zyklen", "kotlin", "gradle"]
+}

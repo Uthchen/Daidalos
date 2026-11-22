@@ -147,6 +147,28 @@ def klick_symbol(s: Any, knoten_id: str, abstand: float = 11) -> None:
     s.wait_for_timeout(80)
 
 
+# Wahr, wenn die Karte fertig gezeichnet ist, nichts animiert und der Knoten sichtbar ganz im Bild
+# steht, an derselben Stelle wie bei der vorigen Abfrage (zwei gleiche Messungen hintereinander).
+_RUHIG_SICHTBAR = """(id) => {
+  const d = window.daidalos;
+  if (!d || document.documentElement.dataset.zustand !== 'bereit' || d.cy.animated()) return false;
+  const n = d.cy.getElementById(id);
+  if (n.empty() || !n.visible() || n.animated()) return false;
+  const bb = n.renderedBoundingBox({ includeLabels: false });
+  if (bb.x1 < 0 || bb.y1 < 0 || bb.x2 > d.cy.width() || bb.y2 > d.cy.height()) return false;
+  const stand = [bb.x1, bb.y1, bb.x2, bb.y2].map(v => v.toFixed(1)).join();
+  const vorher = window.__daidalosRuhe;
+  window.__daidalosRuhe = stand;
+  return vorher === stand;
+}"""
+
+
+def warte_bis_ruhig_sichtbar(s: Any, knoten_id: str) -> None:
+    """Wartet auf das Ende des Zeichnens und eine sichtbare, ruhige Position des Knotens."""
+    s.evaluate("window.__daidalosRuhe = null")
+    s.wait_for_function(_RUHIG_SICHTBAR, arg=knoten_id, polling=50, timeout=30000)
+
+
 def position(s: Any, knoten_id: str) -> dict[str, float]:
     return s.evaluate(f"daidalos.cy.getElementById({json.dumps(knoten_id)}).position()")
 
@@ -501,17 +523,23 @@ FOKUS_ZOOM = """(() => {
 })()"""
 
 
-def test_fokus_zoom_nicht_unter_0_6(browser: Any, karte: Path) -> None:
-    # Kleine Kartenfläche, damit Strich.kt mit seinen Nachbarn nur unter Zoom 0,6 ins Bild passt.
+def test_fokus_zoom_haelt_dateinamen_lesbar(browser: Any, karte: Path) -> None:
+    # Kleine Kartenfläche, damit Strich.kt mit seinen Nachbarn nur unter dem Mindestzoom ins Bild
+    # passt. Der Mindestzoom ist der Zoom, bei dem Dateinamen 11 px hoch erscheinen.
     kontext, s, fehler = _neue_seite(browser, reduced_motion="reduce")
     oeffne(s, karte, "#ebene=datei")
+    mindest = s.evaluate("daidalos.MIN_ZOOM_FOKUS")
+    schrift = s.evaluate(
+        f"parseFloat(daidalos.cy.getElementById({json.dumps(STRICH)}).style('font-size'))"
+    )
+    assert mindest * schrift == pytest.approx(11)
     s.add_style_tag(content="#cy { width: 300px !important; height: 220px !important; }")
     s.evaluate("daidalos.cy.resize()")
     s.evaluate(f"daidalos.zeigeKnoten('{STRICH}')")
     warte(s, 100)
     r = s.evaluate(FOKUS_ZOOM % json.dumps(STRICH))
-    assert r["passend"] < 0.6
-    assert r["zoom"] == pytest.approx(0.6)
+    assert r["passend"] < mindest
+    assert r["zoom"] == pytest.approx(mindest)
     assert abs(r["dx"]) < 1 and abs(r["dy"]) < 1
     # Auch der Sprung aus einer Liste der Seitenleiste hält den Mindestzoom.
     ziel_id = s.eval_on_selector(
@@ -519,15 +547,15 @@ def test_fokus_zoom_nicht_unter_0_6(browser: Any, karte: Path) -> None:
     )
     warte(s, 100)
     r = s.evaluate(FOKUS_ZOOM % json.dumps(ziel_id))
-    assert r["zoom"] >= 0.6 - 1e-9
-    if r["passend"] < 0.6:
+    assert r["zoom"] >= mindest - 1e-9
+    if r["passend"] < mindest:
         assert abs(r["dx"]) < 1 and abs(r["dy"]) < 1
-    # Auf der vollen Fläche passt die Umgebung: dann wie bisher alles im Bild.
+    # Auf der vollen Fläche: nie unter dem Mindestzoom.
     s.evaluate("document.querySelector('style:last-of-type').remove(); daidalos.cy.resize()")
     s.evaluate(f"daidalos.zeigeKnoten('{STRICH}')")
     warte(s, 100)
     r = s.evaluate(FOKUS_ZOOM % json.dumps(STRICH))
-    assert r["passend"] >= 0.6 and r["zoom"] >= 0.6
+    assert r["zoom"] >= mindest - 1e-9
     assert fehler == []
     kontext.close()
 
@@ -806,8 +834,9 @@ def test_editor_link_aus_file_seite(seite: tuple[Any, list[str]], karte: Path, z
     assert s.is_disabled("#seite .symbole button")  # Code-Ansicht ausgegraut
     # Editor-Symbol am Kasten öffnet denselben Link.
     s.click("#ebenen button[data-ebene=datei]")
-    warte(s)
+    warte_bis_ruhig_sichtbar(s, STRICH)
     klick_symbol(s, STRICH, 29)
+    s.wait_for_function("daidalos.letzterLink() !== null", timeout=5000)
     assert s.evaluate("daidalos.letzterLink()") == href
     assert s.evaluate("daidalos.zustand.auswahl") is None
     # Der Klick löst nur die Editor-Adresse aus, keinen Netzzugriff.
