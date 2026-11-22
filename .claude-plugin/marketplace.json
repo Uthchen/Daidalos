@@ -1,0 +1,16 @@
+{
+  "name": "daidalos",
+  "description": "Daidalos: Karte der Verflechtung einer Codebase für Claude Code.",
+  "owner": {
+    "name": "Manuel Grimm",
+    "url": "https://github.com/Uthchen"
+  },
+  "plugins": [
+    {
+      "name": "daidalos",
+      "source": "./",
+      "description": "Skill, der die Messung von Daidalos deutet und die Karte (karte.html, KARTE.md) zeichnet.",
+      "category": "productivity"
+    }
+  ]
+}

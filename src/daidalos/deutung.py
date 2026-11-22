@@ -129,3 +129,206 @@ def gleiche_ab(
         "kanten": kanten_texte,
         "schema": SCHEMA_DEUTUNG,
     }
+
+
+# ---------------------------------------------------------------- Entwurf übernehmen
+
+_ENTWURF_SCHLUESSEL = _BEKANNT | {"entfernen"}
+_FELDER_BEREICH = frozenset({"id", "name", "beschreibung", "knoten"})
+_FELDER_EINSCHAETZUNG = frozenset({"befund", "prioritaet", "titel", "begruendung", "vorschlag"})
+
+
+class EntwurfFehler(Exception):
+    """Der Entwurf passt nicht zur Messung; nichts wird geschrieben. Exit-Code 2."""
+
+    def __init__(self, probleme: list[str]) -> None:
+        super().__init__(f"{len(probleme)} Problem(e) im Entwurf")
+        self.probleme = probleme
+
+
+def lies_json(pfad: Path) -> Any:
+    try:
+        return json.loads(pfad.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError) as fehler:
+        raise DeutungsFehler(f"{pfad.name}: nicht lesbar ({fehler})") from fehler
+    except json.JSONDecodeError as fehler:
+        raise DeutungsFehler(f"{pfad.name}: kein gültiges JSON ({fehler})") from fehler
+
+
+def _nicht_leer(wert: Any) -> bool:
+    return isinstance(wert, str) and wert.strip() != ""
+
+
+def _pruefe_beschreibungen(roh: Any, knoten: set[str], p: list[str]) -> None:
+    if not isinstance(roh, dict):
+        p.append("beschreibungen: kein Objekt")
+        return
+    for knoten_id, eintrag in sorted(roh.items()):
+        if knoten_id not in knoten:
+            p.append(f"beschreibungen: unbekannter Knoten {knoten_id}")
+        if not isinstance(eintrag, dict) or not _nicht_leer(eintrag.get("text")):
+            p.append(f"beschreibungen: {knoten_id} braucht einen nicht leeren text")
+        elif set(eintrag) - {"text", "hash"}:
+            p.append(f"beschreibungen: {knoten_id} hat unbekannte Felder")
+
+
+def _pruefe_bereiche(roh: Any, knoten: set[str], p: list[str]) -> None:
+    if not isinstance(roh, list):
+        p.append("bereiche: keine Liste")
+        return
+    ids: set[str] = set()
+    for eintrag in roh:
+        if not isinstance(eintrag, dict) or not _nicht_leer(eintrag.get("id")):
+            p.append("bereiche: Eintrag ohne id")
+            continue
+        bid = eintrag["id"]
+        if not bid.startswith("bereich:"):
+            p.append(f"bereiche: id {bid} beginnt nicht mit bereich:")
+        if bid in ids:
+            p.append(f"bereiche: id {bid} doppelt")
+        ids.add(bid)
+        if set(eintrag) - _FELDER_BEREICH:
+            p.append(f"bereiche: {bid} hat unbekannte Felder")
+        for feld in ("name", "beschreibung"):
+            if not _nicht_leer(eintrag.get(feld)):
+                p.append(f"bereiche: {bid} braucht {feld}")
+        mitglieder = eintrag.get("knoten")
+        if not isinstance(mitglieder, list) or not mitglieder:
+            p.append(f"bereiche: {bid} braucht eine nicht leere Liste knoten")
+            continue
+        for knoten_id in mitglieder:
+            if knoten_id not in knoten:
+                p.append(f"bereiche: {bid}: unbekannter Knoten {knoten_id}")
+
+
+def _pruefe_einschaetzungen(roh: Any, befunde: set[str], p: list[str]) -> None:
+    if not isinstance(roh, list):
+        p.append("einschaetzungen: keine Liste")
+        return
+    gesehen: set[str] = set()
+    for eintrag in roh:
+        befund = eintrag.get("befund") if isinstance(eintrag, dict) else None
+        if not isinstance(befund, str):
+            p.append("einschaetzungen: Eintrag ohne befund")
+            continue
+        if befund not in befunde:
+            p.append(f"einschaetzungen: unbekannter Befund {befund}")
+        if befund in gesehen:
+            p.append(f"einschaetzungen: {befund} doppelt")
+        gesehen.add(befund)
+        if set(eintrag) - _FELDER_EINSCHAETZUNG:
+            p.append(f"einschaetzungen: {befund} hat unbekannte Felder")
+        prioritaet = eintrag.get("prioritaet")
+        if prioritaet is not None and (
+            not isinstance(prioritaet, int) or isinstance(prioritaet, bool) or prioritaet < 1
+        ):
+            p.append(f"einschaetzungen: {befund}: prioritaet muss eine ganze Zahl ≥ 1 sein")
+        for feld in ("titel", "begruendung"):
+            if not _nicht_leer(eintrag.get(feld)):
+                p.append(f"einschaetzungen: {befund} braucht {feld}")
+        if prioritaet is not None and not _nicht_leer(eintrag.get("vorschlag")):
+            p.append(f"einschaetzungen: {befund} mit prioritaet braucht einen vorschlag")
+
+
+def _pruefe_kanten(roh: Any, kanten: set[str], p: list[str]) -> None:
+    if not isinstance(roh, dict):
+        p.append("kanten: kein Objekt")
+        return
+    for kanten_id, eintrag in sorted(roh.items()):
+        if kanten_id not in kanten:
+            p.append(f"kanten: unbekannte Kante {kanten_id}")
+        if not isinstance(eintrag, dict) or not _nicht_leer(eintrag.get("text")):
+            p.append(f"kanten: {kanten_id} braucht einen nicht leeren text")
+        elif set(eintrag) - {"text"}:
+            p.append(f"kanten: {kanten_id} hat unbekannte Felder")
+
+
+def pruefe_entwurf(entwurf: Any, messung: dict[str, Any]) -> list[str]:
+    """Liste aller Probleme (unbekannte Ids, fehlende Texte, falsche Typen); leer, wenn alles
+    passt."""
+    if not isinstance(entwurf, dict):
+        return ["Entwurf ist kein JSON-Objekt"]
+    p: list[str] = []
+    if entwurf.get("schema", SCHEMA_DEUTUNG) != SCHEMA_DEUTUNG:
+        p.append(f"schema {entwurf.get('schema')!r} wird nicht unterstützt")
+    for schluessel in sorted(set(entwurf) - _ENTWURF_SCHLUESSEL):
+        p.append(f"unbekannter Schlüssel {schluessel!r}")
+    knoten = {k["id"] for k in messung["knoten"]}
+    _pruefe_beschreibungen(entwurf.get("beschreibungen", {}), knoten, p)
+    _pruefe_bereiche(entwurf.get("bereiche", []), knoten, p)
+    _pruefe_einschaetzungen(
+        entwurf.get("einschaetzungen", []), {b["id"] for b in messung["befunde"]}, p
+    )
+    _pruefe_kanten(entwurf.get("kanten", {}), {k["id"] for k in messung["kanten"]}, p)
+    entfernen = entwurf.get("entfernen", [])
+    if not isinstance(entfernen, list) or not all(isinstance(i, str) for i in entfernen):
+        p.append("entfernen: keine Liste von Ids")
+    return p
+
+
+def fuehre_zusammen(
+    bestand: dict[str, Any] | None, entwurf: dict[str, Any], messung: dict[str, Any]
+) -> dict[str, Any]:
+    """Neue ``deutung.json``: Bestand plus Entwurf, Hashes aus der Messung, sortiert.
+
+    Einträge des Entwurfs ersetzen gleichnamige (Beschreibung und Kantentext je Id, Bereich je
+    ``id``, Einschätzung je ``befund``); ``entfernen`` streicht Einträge mit diesen Ids. Alles
+    andere bleibt unverändert, auch Bestandseinträge mit toten Verweisen.
+    """
+    hashes = {k["id"]: k.get("hash") for k in messung["knoten"]}
+    bestand = bestand or {}
+    weg = set(entwurf.get("entfernen", []))
+
+    roh = bestand.get("beschreibungen")
+    beschreibungen = {
+        k: v for k, v in (roh if isinstance(roh, dict) else {}).items() if k not in weg
+    }
+    for knoten_id, eintrag in (entwurf.get("beschreibungen") or {}).items():
+        beschreibungen[knoten_id] = {"hash": hashes[knoten_id], "text": eintrag["text"]}
+
+    bereiche = {
+        b["id"]: b
+        for b in bestand.get("bereiche") or []
+        if isinstance(b, dict) and isinstance(b.get("id"), str) and b["id"] not in weg
+    }
+    for b in entwurf.get("bereiche") or []:
+        bereiche[b["id"]] = {
+            "beschreibung": b["beschreibung"],
+            "id": b["id"],
+            "knoten": sorted(set(b["knoten"])),
+            "name": b["name"],
+        }
+
+    einschaetzungen = {
+        e["befund"]: e
+        for e in bestand.get("einschaetzungen") or []
+        if isinstance(e, dict) and isinstance(e.get("befund"), str) and e["befund"] not in weg
+    }
+    for e in entwurf.get("einschaetzungen") or []:
+        einschaetzungen[e["befund"]] = {
+            f: e[f] for f in sorted(_FELDER_EINSCHAETZUNG) if e.get(f) is not None
+        }
+
+    roh = bestand.get("kanten")
+    kanten = {k: v for k, v in (roh if isinstance(roh, dict) else {}).items() if k not in weg}
+    for kanten_id, eintrag in (entwurf.get("kanten") or {}).items():
+        kanten[kanten_id] = {"text": eintrag["text"]}
+
+    return {
+        "bereiche": [bereiche[i] for i in sorted(bereiche)],
+        "beschreibungen": dict(sorted(beschreibungen.items())),
+        "einschaetzungen": [einschaetzungen[i] for i in sorted(einschaetzungen)],
+        "kanten": dict(sorted(kanten.items())),
+        "schema": SCHEMA_DEUTUNG,
+    }
+
+
+def uebernimm(
+    entwurf: Any, bestand: dict[str, Any] | None, messung: dict[str, Any]
+) -> dict[str, Any]:
+    """Prüft den Entwurf und führt ihn mit dem Bestand zusammen; ``EntwurfFehler`` bei
+    Problemen, dann wird nichts geschrieben."""
+    probleme = pruefe_entwurf(entwurf, messung)
+    if probleme:
+        raise EntwurfFehler(probleme)
+    return fuehre_zusammen(bestand, entwurf, messung)

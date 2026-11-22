@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "beschreibungen": {
+    "modul::kern": { "text": "Fachlicher Kern: Punkte, Striche und Werkzeuge ohne Bezug zur Plattform." },
+    "paket::kern/beispiel.kern.zyklus": { "text": "Drei Klassen, die sich der Reihe nach erzeugen und so einen Kreis bilden." },
+    "datei:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt": { "text": "Sammelt die Punkte eines Strichs und verschiebt einzelne Punkte." }
+  },
+  "bereiche": [
+    {
+      "id": "bereich:zeichnen",
+      "name": "Zeichnen",
+      "beschreibung": "Alles, was einen Strich aus Punkten aufbaut.",
+      "knoten": ["paket::kern/beispiel.kern", "paket::kern/beispiel.kern.zyklus"]
+    }
+  ],
+  "einschaetzungen": [
+    {
+      "befund": "befund:zyklus:datei:produktiv:f45327fbce97",
+      "prioritaet": 1,
+      "titel": "Kreis Anfang → Mitte → Ende",
+      "begruendung": "Die drei Dateien lassen sich nur gemeinsam ändern; der Kreis schließt sich über Ende.zurueck().",
+      "vorschlag": "Die Trennstelle mit Gewicht 1 lösen: Ende gibt keinen neuen Anfang mehr zurück."
+    },
+    {
+      "befund": "befund:unaufgeloest:kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt",
+      "titel": "Ein Testimport ohne Ziel",
+      "begruendung": "Betrifft nur einen Test; nachrangig."
+    }
+  ],
+  "kanten": {
+    "kante:nutzt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt:produktiv": {
+      "text": "Günstigste Stelle, um den Kreis zu lösen."
+    }
+  }
+}
