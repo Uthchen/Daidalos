@@ -24,7 +24,7 @@ Stand 2026-11-22. Branch `auftrag/a06-skill` von `main` (`8f4ed2a`), nicht nach 
 - `skills/daidalos/SKILL.md` mit Ablauf in neun Schritten, festen Regeln und Fragen über `daidalos pfad`; `skills/daidalos/vorlagen/entwurf-beispiel.json` (passt zu `mini_modulgraph`).
 - Plugin: `.claude-plugin/plugin.json` und `.claude-plugin/marketplace.json` (Plugin an der Repo-Wurzel, `source: "./"`), geprüft gegen die aktuelle Doku (Pflichtfelder `name`, `owner`, `plugins`; Plugin nur `name`).
 - `claude plugin validate .`: bestanden mit zwei Warnungen (`CLAUDE.md` an der Plugin-Wurzel wird nicht als Kontext geladen – gewollt, sie gehört zum Repo; kein Icon).
-- **Installation in einem anderen Repo ausprobiert** mit Claude Code 2.1.330 und eigenem `CLAUDE_CONFIG_DIR` (damit Manus Einstellungen unberührt bleiben): `claude plugin marketplace add E:/Repositories/Daidalos` und `claude plugin install daidalos@daidalos` in einem leeren Git-Repo → installiert, aktiviert, Skill `daidalos:daidalos` vorhanden. Der Weg über GitHub (`Uthchen/Daidalos`) geht erst, wenn der Branch auf `main` liegt.
+- **Installation in einem anderen Repo ausprobiert** mit Claude Code 2.1.330 und eigenem `CLAUDE_CONFIG_DIR` (damit Manus Einstellungen unberührt bleiben): `claude plugin marketplace add E:/Repositories/Daidalos` und `claude plugin install daidalos@daidalos` in einem leeren Git-Repo → installiert, aktiviert, Skill `daidalos:daidalos` vorhanden. Nach dem Push ebenso direkt von GitHub: `claude plugin marketplace add Uthchen/Daidalos#auftrag/a06-skill` und `claude plugin install daidalos@daidalos` → installiert, `skills/daidalos/SKILL.md` und `vorlagen/` im Plugin-Cache. Ohne `#…` gilt nach dem Merge `main`.
 - Wheel geprüft: Karte und Bibliotheken sind enthalten, `uv tool install git+…` liefert also ein lauffähiges `daidalos`.
 
 ### Teil 3 – Tests
@@ -74,6 +74,6 @@ Bildschirmfotos: `lokal/A06-seitenleiste.png` (Paket mit Beschreibung), `lokal/A
 
 ## Nächste sinnvolle Schritte
 
-- Nach dem Merge den Weg über GitHub ausprobieren: `/plugin marketplace add Uthchen/Daidalos`, `/plugin install daidalos@daidalos`, `uv tool install git+https://github.com/Uthchen/Daidalos`.
+- Nach dem Merge `uv tool install git+https://github.com/Uthchen/Daidalos` und den Skill in Sketchorus selbst laufen lassen (eigener Schritt nach Manus Freigabe).
 - Die priorisierten Kreise in Sketchorus sind fast alle billig zu lösen (Trennstelle mit Gewicht 1); ein kleiner Auftrag dort könnte sie anhand von `lokal/sketchorus/deutung.json` auflösen.
 - „Named in“ aus Floorplan (Namen in Skripten und Strings) ins Arbeitsblatt aufnehmen; bei Sketchorus verbindet es Auswerteskripte mit Kotlin-Formaten.
