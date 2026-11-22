@@ -18,6 +18,8 @@ def test_standard_ausgabepfad(mini_kopie: Path, capsys: pytest.CaptureFixture[st
     assert daten["schema"] == 1
     stdout = capsys.readouterr().out
     assert "Dateien:   12 (davon fremd: 1)" in stdout
+    assert "Module:    2 (Gradle-Kanten: 1)" in stdout
+    assert "Zyklen:    datei 0/0" in stdout
     assert "Laufzeit:" in stdout
 
 
@@ -35,7 +37,8 @@ def test_ausgabe_und_konfiguration_ausserhalb(mini_kopie: Path, tmp_path: Path) 
     ausgabe = tmp_path / "aus" / "x.json"
     argumente = ["scan", str(mini_kopie), "--konfiguration", str(konfig), "--ausgabe", str(ausgabe)]
     assert main(argumente) == 0
-    pfade = [k["pfad"] for k in json.loads(ausgabe.read_text(encoding="utf-8"))["knoten"]]
+    knoten = json.loads(ausgabe.read_text(encoding="utf-8"))["knoten"]
+    pfade = [k["pfad"] for k in knoten if k["art"] == "datei"]
     assert not any(p.startswith("app/") for p in pfade)
     # Die daidalos.toml im Ziel gilt dann nicht: entwurf/ ist wieder dabei.
     assert "entwurf/Alt.kt" in pfade

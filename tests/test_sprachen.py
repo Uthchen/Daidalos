@@ -34,6 +34,8 @@ from daidalos.sprachen import erkenne_sprache
         ("x.cmake", "cmake"),
         ("gradle.properties", "properties"),
         ("notiz.txt", "text"),
+        ("schema.sql", "sql"),
+        ("gradle.lockfile", "unbekannt"),
         ("Makefile", "unbekannt"),
         (".gitignore", "unbekannt"),
         ("a.xyz", "unbekannt"),

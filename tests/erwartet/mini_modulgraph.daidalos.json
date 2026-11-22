@@ -1,0 +1,1728 @@
+{
+  "befunde": [
+    {
+      "beleg": {
+        "funktion": "beispiel.nativ.Insel.fehlt",
+        "seite": "kotlin",
+        "zeile": 6
+      },
+      "id": "befund:jni-ohne-gegenstueck:nativ/src/main/kotlin/beispiel/nativ/Insel.kt:beispiel.nativ.Insel.fehlt",
+      "knoten": [
+        "datei:nativ/src/main/kotlin/beispiel/nativ/Insel.kt"
+      ],
+      "quelle": "daidalos",
+      "regel": "jni-ohne-gegenstueck",
+      "schwere": "hinweis"
+    },
+    {
+      "beleg": {
+        "importe": [
+          {
+            "import": "beispiel.kern.Gibtsnicht",
+            "zeile": 3
+          }
+        ]
+      },
+      "id": "befund:unaufgeloest:kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt",
+      "knoten": [
+        "datei:kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt"
+      ],
+      "quelle": "daidalos",
+      "regel": "unaufgeloest",
+      "schwere": "hinweis"
+    },
+    {
+      "beleg": {
+        "ebene": "datei",
+        "einstiege": [
+          {
+            "knoten": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt",
+            "quellen": [
+              "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt"
+            ]
+          }
+        ],
+        "kanten": [
+          "kante:nutzt:datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt:produktiv",
+          "kante:nutzt:datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt:produktiv"
+        ],
+        "knoten": [
+          "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt",
+          "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt"
+        ],
+        "rolle": "mit-tests",
+        "trennstelle": "kante:nutzt:datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt:produktiv",
+        "unsicher": false
+      },
+      "id": "befund:zyklus:datei:mit-tests:c55399e18586",
+      "knoten": [
+        "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt",
+        "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt"
+      ],
+      "quelle": "daidalos",
+      "regel": "zyklus",
+      "schwere": "warnung"
+    },
+    {
+      "beleg": {
+        "ebene": "datei",
+        "einstiege": [
+          {
+            "knoten": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt",
+            "quellen": [
+              "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt"
+            ]
+          }
+        ],
+        "kanten": [
+          "kante:nutzt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt:produktiv",
+          "kante:nutzt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt:produktiv",
+          "kante:nutzt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt:produktiv"
+        ],
+        "knoten": [
+          "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt",
+          "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt",
+          "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt"
+        ],
+        "rolle": "mit-tests",
+        "trennstelle": "kante:nutzt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt:produktiv",
+        "unsicher": false
+      },
+      "id": "befund:zyklus:datei:mit-tests:f45327fbce97",
+      "knoten": [
+        "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt",
+        "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt",
+        "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt"
+      ],
+      "quelle": "daidalos",
+      "regel": "zyklus",
+      "schwere": "warnung"
+    },
+    {
+      "beleg": {
+        "ebene": "datei",
+        "einstiege": [
+          {
+            "knoten": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt",
+            "quellen": [
+              "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt"
+            ]
+          }
+        ],
+        "kanten": [
+          "kante:nutzt:datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt:produktiv",
+          "kante:nutzt:datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt:produktiv"
+        ],
+        "knoten": [
+          "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt",
+          "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt"
+        ],
+        "rolle": "produktiv",
+        "trennstelle": "kante:nutzt:datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt:produktiv",
+        "unsicher": false
+      },
+      "id": "befund:zyklus:datei:produktiv:c55399e18586",
+      "knoten": [
+        "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt",
+        "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt"
+      ],
+      "quelle": "daidalos",
+      "regel": "zyklus",
+      "schwere": "warnung"
+    },
+    {
+      "beleg": {
+        "ebene": "datei",
+        "einstiege": [
+          {
+            "knoten": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt",
+            "quellen": [
+              "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt"
+            ]
+          }
+        ],
+        "kanten": [
+          "kante:nutzt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt:produktiv",
+          "kante:nutzt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt:produktiv",
+          "kante:nutzt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt:produktiv"
+        ],
+        "knoten": [
+          "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt",
+          "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt",
+          "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt"
+        ],
+        "rolle": "produktiv",
+        "trennstelle": "kante:nutzt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt:produktiv",
+        "unsicher": false
+      },
+      "id": "befund:zyklus:datei:produktiv:f45327fbce97",
+      "knoten": [
+        "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt",
+        "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt",
+        "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt"
+      ],
+      "quelle": "daidalos",
+      "regel": "zyklus",
+      "schwere": "warnung"
+    },
+    {
+      "beleg": {
+        "ebene": "paket",
+        "einstiege": [
+          {
+            "knoten": "paket::kern-labor/beispiel.kern.labor.protokoll",
+            "quellen": [
+              "paket::anwendung/beispiel.anwendung"
+            ]
+          }
+        ],
+        "kanten": [
+          "kante:nutzt:paket::kern-labor/beispiel.kern.labor.messung->paket::kern-labor/beispiel.kern.labor.protokoll:produktiv",
+          "kante:nutzt:paket::kern-labor/beispiel.kern.labor.protokoll->paket::kern-labor/beispiel.kern.labor.messung:produktiv"
+        ],
+        "knoten": [
+          "paket::kern-labor/beispiel.kern.labor.messung",
+          "paket::kern-labor/beispiel.kern.labor.protokoll"
+        ],
+        "rolle": "mit-tests",
+        "trennstelle": "kante:nutzt:paket::kern-labor/beispiel.kern.labor.protokoll->paket::kern-labor/beispiel.kern.labor.messung:produktiv",
+        "unsicher": false
+      },
+      "id": "befund:zyklus:paket:mit-tests:99e6584ba329",
+      "knoten": [
+        "paket::kern-labor/beispiel.kern.labor.messung",
+        "paket::kern-labor/beispiel.kern.labor.protokoll"
+      ],
+      "quelle": "daidalos",
+      "regel": "zyklus",
+      "schwere": "warnung"
+    },
+    {
+      "beleg": {
+        "ebene": "paket",
+        "einstiege": [],
+        "kanten": [
+          "kante:nutzt:paket::kern-labor/beispiel.kern.labor.messung->paket::kern-labor/beispiel.kern.labor.protokoll:produktiv",
+          "kante:nutzt:paket::kern-labor/beispiel.kern.labor.protokoll->paket::kern-labor/beispiel.kern.labor.messung:produktiv"
+        ],
+        "knoten": [
+          "paket::kern-labor/beispiel.kern.labor.messung",
+          "paket::kern-labor/beispiel.kern.labor.protokoll"
+        ],
+        "rolle": "produktiv",
+        "trennstelle": "kante:nutzt:paket::kern-labor/beispiel.kern.labor.protokoll->paket::kern-labor/beispiel.kern.labor.messung:produktiv",
+        "unsicher": false
+      },
+      "id": "befund:zyklus:paket:produktiv:99e6584ba329",
+      "knoten": [
+        "paket::kern-labor/beispiel.kern.labor.messung",
+        "paket::kern-labor/beispiel.kern.labor.protokoll"
+      ],
+      "quelle": "daidalos",
+      "regel": "zyklus",
+      "schwere": "warnung"
+    }
+  ],
+  "daidalos": "0.1.0",
+  "kanten": [
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "symbol": "beispiel.anwendung.fremd.Bibliothek",
+          "zeile": 3
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt->datei:anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt:produktiv",
+      "nach": "datei:anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "symbol": "beispiel.kern.Strich",
+          "zeile": 4
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt:produktiv",
+      "nach": "datei:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "symbol": "beispiel.nativ.Insel",
+          "zeile": 5
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt->datei:nativ/src/main/kotlin/beispiel/nativ/Insel.kt:produktiv",
+      "nach": "datei:nativ/src/main/kotlin/beispiel/nativ/Insel.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "symbol": "beispiel.anwendung.Start",
+          "zeile": 3
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt->datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt:produktiv",
+      "nach": "datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "gleiches-paket",
+          "sicher": true,
+          "symbol": "beispiel.anwendung.Start",
+          "zeile": 6
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:anwendung/src/test/kotlin/beispiel/anwendung/StartTest.kt->datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt:test",
+      "nach": "datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt",
+      "rolle": "test",
+      "sicher": true,
+      "von": "datei:anwendung/src/test/kotlin/beispiel/anwendung/StartTest.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "symbol": "beispiel.kern.labor.protokoll.Journal",
+          "zeile": 3
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:anwendung/src/test/kotlin/beispiel/anwendung/StartTest.kt->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Journal.kt:test",
+      "nach": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Journal.kt",
+      "rolle": "test",
+      "sicher": true,
+      "von": "datei:anwendung/src/test/kotlin/beispiel/anwendung/StartTest.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "gleiches-paket",
+          "sicher": true,
+          "symbol": "beispiel.kern.labor.messung.Messung",
+          "zeile": 12
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt:produktiv",
+      "nach": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "symbol": "beispiel.kern.Punkt",
+          "zeile": 4
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt:produktiv",
+      "nach": "datei:kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "symbol": "beispiel.kern.Hilfen.kennung",
+          "zeile": 3
+        },
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "symbol": "beispiel.kern.abstand",
+          "zeile": 5
+        }
+      ],
+      "gewicht": 2,
+      "id": "kante:nutzt:datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt:produktiv",
+      "nach": "datei:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "symbol": "beispiel.kern.zyklus.Anfang",
+          "zeile": 6
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt:produktiv",
+      "nach": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "symbol": "beispiel.kern.labor.protokoll.Eintrag",
+          "zeile": 3
+        },
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "symbol": "beispiel.kern.labor.protokoll.EintragsArt",
+          "zeile": 4
+        }
+      ],
+      "gewicht": 2,
+      "id": "kante:nutzt:datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt:produktiv",
+      "nach": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "symbol": "beispiel.kern.labor.protokoll.Journal",
+          "zeile": 5
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Journal.kt:produktiv",
+      "nach": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Journal.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "symbol": "beispiel.kern.labor.messung.Messung",
+          "zeile": 3
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt:produktiv",
+      "nach": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "gleiches-paket",
+          "sicher": false,
+          "symbol": "beispiel.kern.labor.messung.auswerten",
+          "zeile": 7
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt:test",
+      "nach": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt",
+      "rolle": "test",
+      "sicher": false,
+      "von": "datei:kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "voll-qualifiziert",
+          "sicher": true,
+          "symbol": "beispiel.kern.Punkt",
+          "zeile": 7
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt:test",
+      "nach": "datei:kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt",
+      "rolle": "test",
+      "sicher": true,
+      "von": "datei:kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "gleiches-paket",
+          "sicher": true,
+          "symbol": "beispiel.kern.Punkt",
+          "zeile": 5
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt:produktiv",
+      "nach": "datei:kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "gleiches-paket",
+          "sicher": false,
+          "symbol": "beispiel.kern.verschoben",
+          "zeile": 7
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt:produktiv",
+      "nach": "datei:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt",
+      "rolle": "produktiv",
+      "sicher": false,
+      "von": "datei:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "gleiches-paket",
+          "sicher": true,
+          "symbol": "beispiel.kern.Punkt",
+          "zeile": 3
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt:produktiv",
+      "nach": "datei:kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "gleiches-paket",
+          "sicher": true,
+          "symbol": "beispiel.kern.zyklus.Mitte",
+          "zeile": 6
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt:produktiv",
+      "nach": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "gleiches-paket",
+          "sicher": true,
+          "symbol": "beispiel.kern.zyklus.AnfangsArt",
+          "zeile": 6
+        },
+        {
+          "herkunft": "gleiches-paket",
+          "sicher": true,
+          "symbol": "beispiel.kern.zyklus.Anfang",
+          "zeile": 8
+        }
+      ],
+      "gewicht": 2,
+      "id": "kante:nutzt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt:produktiv",
+      "nach": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "gleiches-paket",
+          "sicher": true,
+          "symbol": "beispiel.kern.zyklus.ENDE_GRENZE",
+          "zeile": 4
+        },
+        {
+          "herkunft": "gleiches-paket",
+          "sicher": true,
+          "symbol": "beispiel.kern.zyklus.Ende",
+          "zeile": 6
+        }
+      ],
+      "gewicht": 2,
+      "id": "kante:nutzt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt:produktiv",
+      "nach": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt"
+    },
+    {
+      "art": "jni",
+      "beleg": [
+        {
+          "funktion": "beispiel.nativ.Insel.rechne_schnell",
+          "zeile_c": 5,
+          "zeile_kotlin": 4
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:jni:datei:nativ/src/main/kotlin/beispiel/nativ/Insel.kt->datei:nativ/src/main/cpp/insel_jni.c:produktiv",
+      "nach": "datei:nativ/src/main/cpp/insel_jni.c",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:nativ/src/main/kotlin/beispiel/nativ/Insel.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::anwendung->datei:anwendung/build.gradle.kts",
+      "nach": "datei:anwendung/build.gradle.kts",
+      "von": "modul::anwendung"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::anwendung->datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt",
+      "nach": "datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt",
+      "von": "modul::anwendung"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::anwendung->datei:anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt",
+      "nach": "datei:anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt",
+      "von": "modul::anwendung"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::anwendung->datei:anwendung/src/test/kotlin/beispiel/anwendung/StartTest.kt",
+      "nach": "datei:anwendung/src/test/kotlin/beispiel/anwendung/StartTest.kt",
+      "von": "modul::anwendung"
+    },
+    {
+      "art": "gradle-impl",
+      "beleg": [
+        {
+          "bedingt": false,
+          "datei": "anwendung/build.gradle.kts",
+          "konfiguration": "implementation",
+          "quellsatz": null,
+          "zeile": 6
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:gradle-impl:modul::anwendung->modul::kern",
+      "nach": "modul::kern",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "modul::anwendung"
+    },
+    {
+      "art": "nutzt",
+      "dateikanten": 1,
+      "gewicht": 1,
+      "id": "kante:nutzt:modul::anwendung->modul::kern:produktiv",
+      "nach": "modul::kern",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "modul::anwendung"
+    },
+    {
+      "art": "gradle-impl",
+      "beleg": [
+        {
+          "bedingt": true,
+          "datei": "anwendung/build.gradle.kts",
+          "konfiguration": "implementation",
+          "quellsatz": null,
+          "zeile": 10
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:gradle-impl:modul::anwendung->modul::kern-labor",
+      "nach": "modul::kern-labor",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "modul::anwendung"
+    },
+    {
+      "art": "gradle-test",
+      "beleg": [
+        {
+          "bedingt": false,
+          "datei": "anwendung/build.gradle.kts",
+          "konfiguration": "testImplementation",
+          "quellsatz": null,
+          "zeile": 8
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:gradle-test:modul::anwendung->modul::kern-labor",
+      "nach": "modul::kern-labor",
+      "rolle": "test",
+      "sicher": true,
+      "von": "modul::anwendung"
+    },
+    {
+      "art": "nutzt",
+      "dateikanten": 1,
+      "gewicht": 1,
+      "id": "kante:nutzt:modul::anwendung->modul::kern-labor:test",
+      "nach": "modul::kern-labor",
+      "rolle": "test",
+      "sicher": true,
+      "von": "modul::anwendung"
+    },
+    {
+      "art": "gradle-impl",
+      "beleg": [
+        {
+          "bedingt": false,
+          "datei": "anwendung/build.gradle.kts",
+          "konfiguration": "implementation",
+          "quellsatz": null,
+          "zeile": 7
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:gradle-impl:modul::anwendung->modul::nativ",
+      "nach": "modul::nativ",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "modul::anwendung"
+    },
+    {
+      "art": "nutzt",
+      "dateikanten": 1,
+      "gewicht": 1,
+      "id": "kante:nutzt:modul::anwendung->modul::nativ:produktiv",
+      "nach": "modul::nativ",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "modul::anwendung"
+    },
+    {
+      "art": "gradle-plugin",
+      "beleg": [
+        {
+          "bedingt": false,
+          "datei": "build.gradle.kts",
+          "konfiguration": "detektPlugins",
+          "quelle": "wurzel",
+          "quellsatz": null,
+          "zeile": 7
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:gradle-plugin:modul::anwendung->modul::regeln",
+      "nach": "modul::regeln",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "modul::anwendung"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::anwendung->paket::anwendung/beispiel.anwendung",
+      "nach": "paket::anwendung/beispiel.anwendung",
+      "von": "modul::anwendung"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::anwendung->paket::anwendung/beispiel.anwendung.fremd",
+      "nach": "paket::anwendung/beispiel.anwendung.fremd",
+      "von": "modul::anwendung"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern->datei:kern/build.gradle.kts",
+      "nach": "datei:kern/build.gradle.kts",
+      "von": "modul::kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern->datei:kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt",
+      "von": "modul::kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern->datei:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt",
+      "von": "modul::kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern->datei:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt",
+      "von": "modul::kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt",
+      "von": "modul::kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt",
+      "von": "modul::kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt",
+      "von": "modul::kern"
+    },
+    {
+      "art": "gradle-plugin",
+      "beleg": [
+        {
+          "bedingt": false,
+          "datei": "build.gradle.kts",
+          "konfiguration": "detektPlugins",
+          "quelle": "wurzel",
+          "quellsatz": null,
+          "zeile": 7
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:gradle-plugin:modul::kern->modul::regeln",
+      "nach": "modul::regeln",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "modul::kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern->paket::kern/beispiel.kern",
+      "nach": "paket::kern/beispiel.kern",
+      "von": "modul::kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern->paket::kern/beispiel.kern.zyklus",
+      "nach": "paket::kern/beispiel.kern.zyklus",
+      "von": "modul::kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern-labor->datei:kern-labor/build.gradle.kts",
+      "nach": "datei:kern-labor/build.gradle.kts",
+      "von": "modul::kern-labor"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern-labor->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt",
+      "nach": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt",
+      "von": "modul::kern-labor"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern-labor->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt",
+      "nach": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt",
+      "von": "modul::kern-labor"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern-labor->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt",
+      "nach": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt",
+      "von": "modul::kern-labor"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern-labor->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Journal.kt",
+      "nach": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Journal.kt",
+      "von": "modul::kern-labor"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern-labor->datei:kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt",
+      "nach": "datei:kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt",
+      "von": "modul::kern-labor"
+    },
+    {
+      "art": "gradle-api",
+      "beleg": [
+        {
+          "bedingt": false,
+          "datei": "kern-labor/build.gradle.kts",
+          "konfiguration": "api",
+          "quellsatz": "commonMain",
+          "zeile": 10
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:gradle-api:modul::kern-labor->modul::kern",
+      "nach": "modul::kern",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "modul::kern-labor"
+    },
+    {
+      "art": "nutzt",
+      "dateikanten": 3,
+      "gewicht": 4,
+      "id": "kante:nutzt:modul::kern-labor->modul::kern:produktiv",
+      "nach": "modul::kern",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "modul::kern-labor"
+    },
+    {
+      "art": "nutzt",
+      "dateikanten": 1,
+      "gewicht": 1,
+      "id": "kante:nutzt:modul::kern-labor->modul::kern:test",
+      "nach": "modul::kern",
+      "rolle": "test",
+      "sicher": true,
+      "von": "modul::kern-labor"
+    },
+    {
+      "art": "gradle-plugin",
+      "beleg": [
+        {
+          "bedingt": false,
+          "datei": "build.gradle.kts",
+          "konfiguration": "detektPlugins",
+          "quelle": "wurzel",
+          "quellsatz": null,
+          "zeile": 7
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:gradle-plugin:modul::kern-labor->modul::regeln",
+      "nach": "modul::regeln",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "modul::kern-labor"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern-labor->paket::kern-labor/beispiel.kern.labor.messung",
+      "nach": "paket::kern-labor/beispiel.kern.labor.messung",
+      "von": "modul::kern-labor"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern-labor->paket::kern-labor/beispiel.kern.labor.protokoll",
+      "nach": "paket::kern-labor/beispiel.kern.labor.protokoll",
+      "von": "modul::kern-labor"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::nativ->datei:nativ/build.gradle.kts",
+      "nach": "datei:nativ/build.gradle.kts",
+      "von": "modul::nativ"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::nativ->datei:nativ/src/main/cpp/insel_jni.c",
+      "nach": "datei:nativ/src/main/cpp/insel_jni.c",
+      "von": "modul::nativ"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::nativ->datei:nativ/src/main/kotlin/beispiel/nativ/Insel.kt",
+      "nach": "datei:nativ/src/main/kotlin/beispiel/nativ/Insel.kt",
+      "von": "modul::nativ"
+    },
+    {
+      "art": "gradle-impl",
+      "beleg": [
+        {
+          "bedingt": false,
+          "datei": "nativ/build.gradle.kts",
+          "konfiguration": "implementation",
+          "quellsatz": null,
+          "zeile": 6
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:gradle-impl:modul::nativ->modul::kern",
+      "nach": "modul::kern",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "modul::nativ"
+    },
+    {
+      "art": "gradle-plugin",
+      "beleg": [
+        {
+          "bedingt": false,
+          "datei": "build.gradle.kts",
+          "konfiguration": "detektPlugins",
+          "quelle": "wurzel",
+          "quellsatz": null,
+          "zeile": 7
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:gradle-plugin:modul::nativ->modul::regeln",
+      "nach": "modul::regeln",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "modul::nativ"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::nativ->paket::nativ/beispiel.nativ",
+      "nach": "paket::nativ/beispiel.nativ",
+      "von": "modul::nativ"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::regeln->datei:regeln/build.gradle.kts",
+      "nach": "datei:regeln/build.gradle.kts",
+      "von": "modul::regeln"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::regeln->datei:regeln/src/main/kotlin/beispiel/regeln/Regeln.kt",
+      "nach": "datei:regeln/src/main/kotlin/beispiel/regeln/Regeln.kt",
+      "von": "modul::regeln"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::regeln->paket::regeln/beispiel.regeln",
+      "nach": "paket::regeln/beispiel.regeln",
+      "von": "modul::regeln"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:ordner:.->datei:README.md",
+      "nach": "datei:README.md",
+      "von": "ordner:."
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:ordner:.->datei:build.gradle.kts",
+      "nach": "datei:build.gradle.kts",
+      "von": "ordner:."
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:ordner:.->datei:daidalos.toml",
+      "nach": "datei:daidalos.toml",
+      "von": "ordner:."
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:ordner:.->datei:settings.gradle.kts",
+      "nach": "datei:settings.gradle.kts",
+      "von": "ordner:."
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:ordner:werkzeug->datei:werkzeug/Pruefung.kt",
+      "nach": "datei:werkzeug/Pruefung.kt",
+      "von": "ordner:werkzeug"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:ordner:werkzeug->paket:ordner:werkzeug/werkzeug",
+      "nach": "paket:ordner:werkzeug/werkzeug",
+      "von": "ordner:werkzeug"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::anwendung/beispiel.anwendung->datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt",
+      "nach": "datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt",
+      "von": "paket::anwendung/beispiel.anwendung"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::anwendung/beispiel.anwendung->datei:anwendung/src/test/kotlin/beispiel/anwendung/StartTest.kt",
+      "nach": "datei:anwendung/src/test/kotlin/beispiel/anwendung/StartTest.kt",
+      "von": "paket::anwendung/beispiel.anwendung"
+    },
+    {
+      "art": "nutzt",
+      "dateikanten": 1,
+      "gewicht": 1,
+      "id": "kante:nutzt:paket::anwendung/beispiel.anwendung->paket::anwendung/beispiel.anwendung.fremd:produktiv",
+      "nach": "paket::anwendung/beispiel.anwendung.fremd",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "paket::anwendung/beispiel.anwendung"
+    },
+    {
+      "art": "nutzt",
+      "dateikanten": 1,
+      "gewicht": 1,
+      "id": "kante:nutzt:paket::anwendung/beispiel.anwendung->paket::kern-labor/beispiel.kern.labor.protokoll:test",
+      "nach": "paket::kern-labor/beispiel.kern.labor.protokoll",
+      "rolle": "test",
+      "sicher": true,
+      "von": "paket::anwendung/beispiel.anwendung"
+    },
+    {
+      "art": "nutzt",
+      "dateikanten": 1,
+      "gewicht": 1,
+      "id": "kante:nutzt:paket::anwendung/beispiel.anwendung->paket::kern/beispiel.kern:produktiv",
+      "nach": "paket::kern/beispiel.kern",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "paket::anwendung/beispiel.anwendung"
+    },
+    {
+      "art": "nutzt",
+      "dateikanten": 1,
+      "gewicht": 1,
+      "id": "kante:nutzt:paket::anwendung/beispiel.anwendung->paket::nativ/beispiel.nativ:produktiv",
+      "nach": "paket::nativ/beispiel.nativ",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "paket::anwendung/beispiel.anwendung"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::anwendung/beispiel.anwendung.fremd->datei:anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt",
+      "nach": "datei:anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt",
+      "von": "paket::anwendung/beispiel.anwendung.fremd"
+    },
+    {
+      "art": "nutzt",
+      "dateikanten": 1,
+      "gewicht": 1,
+      "id": "kante:nutzt:paket::anwendung/beispiel.anwendung.fremd->paket::anwendung/beispiel.anwendung:produktiv",
+      "nach": "paket::anwendung/beispiel.anwendung",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "paket::anwendung/beispiel.anwendung.fremd"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::kern-labor/beispiel.kern.labor.messung->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt",
+      "nach": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt",
+      "von": "paket::kern-labor/beispiel.kern.labor.messung"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::kern-labor/beispiel.kern.labor.messung->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt",
+      "nach": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt",
+      "von": "paket::kern-labor/beispiel.kern.labor.messung"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::kern-labor/beispiel.kern.labor.messung->datei:kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt",
+      "nach": "datei:kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt",
+      "von": "paket::kern-labor/beispiel.kern.labor.messung"
+    },
+    {
+      "art": "nutzt",
+      "dateikanten": 2,
+      "gewicht": 3,
+      "id": "kante:nutzt:paket::kern-labor/beispiel.kern.labor.messung->paket::kern-labor/beispiel.kern.labor.protokoll:produktiv",
+      "nach": "paket::kern-labor/beispiel.kern.labor.protokoll",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "paket::kern-labor/beispiel.kern.labor.messung"
+    },
+    {
+      "art": "nutzt",
+      "dateikanten": 2,
+      "gewicht": 3,
+      "id": "kante:nutzt:paket::kern-labor/beispiel.kern.labor.messung->paket::kern/beispiel.kern:produktiv",
+      "nach": "paket::kern/beispiel.kern",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "paket::kern-labor/beispiel.kern.labor.messung"
+    },
+    {
+      "art": "nutzt",
+      "dateikanten": 1,
+      "gewicht": 1,
+      "id": "kante:nutzt:paket::kern-labor/beispiel.kern.labor.messung->paket::kern/beispiel.kern:test",
+      "nach": "paket::kern/beispiel.kern",
+      "rolle": "test",
+      "sicher": true,
+      "von": "paket::kern-labor/beispiel.kern.labor.messung"
+    },
+    {
+      "art": "nutzt",
+      "dateikanten": 1,
+      "gewicht": 1,
+      "id": "kante:nutzt:paket::kern-labor/beispiel.kern.labor.messung->paket::kern/beispiel.kern.zyklus:produktiv",
+      "nach": "paket::kern/beispiel.kern.zyklus",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "paket::kern-labor/beispiel.kern.labor.messung"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::kern-labor/beispiel.kern.labor.protokoll->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt",
+      "nach": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt",
+      "von": "paket::kern-labor/beispiel.kern.labor.protokoll"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::kern-labor/beispiel.kern.labor.protokoll->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Journal.kt",
+      "nach": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Journal.kt",
+      "von": "paket::kern-labor/beispiel.kern.labor.protokoll"
+    },
+    {
+      "art": "nutzt",
+      "dateikanten": 1,
+      "gewicht": 1,
+      "id": "kante:nutzt:paket::kern-labor/beispiel.kern.labor.protokoll->paket::kern-labor/beispiel.kern.labor.messung:produktiv",
+      "nach": "paket::kern-labor/beispiel.kern.labor.messung",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "paket::kern-labor/beispiel.kern.labor.protokoll"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::kern/beispiel.kern->datei:kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt",
+      "von": "paket::kern/beispiel.kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::kern/beispiel.kern->datei:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt",
+      "von": "paket::kern/beispiel.kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::kern/beispiel.kern->datei:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt",
+      "von": "paket::kern/beispiel.kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::kern/beispiel.kern.zyklus->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt",
+      "von": "paket::kern/beispiel.kern.zyklus"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::kern/beispiel.kern.zyklus->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt",
+      "von": "paket::kern/beispiel.kern.zyklus"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::kern/beispiel.kern.zyklus->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt",
+      "von": "paket::kern/beispiel.kern.zyklus"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::nativ/beispiel.nativ->datei:nativ/src/main/kotlin/beispiel/nativ/Insel.kt",
+      "nach": "datei:nativ/src/main/kotlin/beispiel/nativ/Insel.kt",
+      "von": "paket::nativ/beispiel.nativ"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::regeln/beispiel.regeln->datei:regeln/src/main/kotlin/beispiel/regeln/Regeln.kt",
+      "nach": "datei:regeln/src/main/kotlin/beispiel/regeln/Regeln.kt",
+      "von": "paket::regeln/beispiel.regeln"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket:ordner:werkzeug/werkzeug->datei:werkzeug/Pruefung.kt",
+      "nach": "datei:werkzeug/Pruefung.kt",
+      "von": "paket:ordner:werkzeug/werkzeug"
+    }
+  ],
+  "knoten": [
+    {
+      "art": "datei",
+      "bytes": 134,
+      "hash": "sha256:e6aa307fd6b8f545138f572aec4abf0e7caf9ef63af0ca9bc8634318e965b21c",
+      "id": "datei:README.md",
+      "ordner": "ordner:.",
+      "pfad": "README.md",
+      "rolle": "produktiv",
+      "sprache": "markdown",
+      "zeilen": 4
+    },
+    {
+      "art": "datei",
+      "bytes": 271,
+      "hash": "sha256:9e5e08381beea39f74d94a58e185270858f590f9c8f940b54b8923c9e74299ea",
+      "id": "datei:anwendung/build.gradle.kts",
+      "modul": "modul::anwendung",
+      "pfad": "anwendung/build.gradle.kts",
+      "rolle": "produktiv",
+      "sprache": "gradle-kotlin",
+      "zeilen": 12
+    },
+    {
+      "art": "datei",
+      "bytes": 257,
+      "hash": "sha256:d4ce78a89358102df5764073691057f6aa707a82b99658e74c3086d6826806a6",
+      "id": "datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt",
+      "modul": "modul::anwendung",
+      "paket": "paket::anwendung/beispiel.anwendung",
+      "pfad": "anwendung/src/main/kotlin/beispiel/anwendung/Start.kt",
+      "quellsatz": "main",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 11
+    },
+    {
+      "art": "datei",
+      "bytes": 197,
+      "fremd": true,
+      "hash": "sha256:8f8454b0976785ed84a3117aab9103a606ae81e15fb66dd7667cda045632407b",
+      "id": "datei:anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt",
+      "modul": "modul::anwendung",
+      "paket": "paket::anwendung/beispiel.anwendung.fremd",
+      "pfad": "anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt",
+      "quellsatz": "main",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 8
+    },
+    {
+      "art": "datei",
+      "bytes": 170,
+      "hash": "sha256:fbe6cb8915a623072c14193bc97c8d9cb8bff199c14e4e2b85278fe5403d251b",
+      "id": "datei:anwendung/src/test/kotlin/beispiel/anwendung/StartTest.kt",
+      "modul": "modul::anwendung",
+      "paket": "paket::anwendung/beispiel.anwendung",
+      "pfad": "anwendung/src/test/kotlin/beispiel/anwendung/StartTest.kt",
+      "quellsatz": "test",
+      "rolle": "test",
+      "sprache": "kotlin",
+      "zeilen": 7
+    },
+    {
+      "art": "datei",
+      "bytes": 172,
+      "hash": "sha256:d28ccc26867d2df6191350acf01c56607fc16df280e30f4b2cbc9c39b87d582c",
+      "id": "datei:build.gradle.kts",
+      "ordner": "ordner:.",
+      "pfad": "build.gradle.kts",
+      "rolle": "produktiv",
+      "sprache": "gradle-kotlin",
+      "zeilen": 8
+    },
+    {
+      "art": "datei",
+      "bytes": 60,
+      "hash": "sha256:8d0ca7c811be2c4eb3afb1016cc82be20e127c2363fa797a5bf745f3f833eb7d",
+      "id": "datei:daidalos.toml",
+      "ordner": "ordner:.",
+      "pfad": "daidalos.toml",
+      "rolle": "produktiv",
+      "sprache": "toml",
+      "zeilen": 5
+    },
+    {
+      "art": "datei",
+      "bytes": 270,
+      "hash": "sha256:1fb95931010fcc24efe764e26fd633780f090f933fbae823c4bbb50ee8f34154",
+      "id": "datei:kern-labor/build.gradle.kts",
+      "modul": "modul::kern-labor",
+      "pfad": "kern-labor/build.gradle.kts",
+      "rolle": "produktiv",
+      "sprache": "gradle-kotlin",
+      "zeilen": 16
+    },
+    {
+      "art": "datei",
+      "bytes": 307,
+      "hash": "sha256:6c14b2c5ee8fade9cc1ae05034236eea322282bc6921c5bcf871eeabb4078810",
+      "id": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt",
+      "modul": "modul::kern-labor",
+      "paket": "paket::kern-labor/beispiel.kern.labor.messung",
+      "pfad": "kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt",
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 12
+    },
+    {
+      "art": "datei",
+      "bytes": 285,
+      "hash": "sha256:24662785873949f85296981c085f6cd755e5780ad5edf3a562a4ef4f43544b64",
+      "id": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt",
+      "modul": "modul::kern-labor",
+      "paket": "paket::kern-labor/beispiel.kern.labor.messung",
+      "pfad": "kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt",
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 11
+    },
+    {
+      "art": "datei",
+      "bytes": 180,
+      "hash": "sha256:47d74efd83a00e816e5db10e72a277fdb7357e7908cbd32b2906c074f17b6b26",
+      "id": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt",
+      "modul": "modul::kern-labor",
+      "paket": "paket::kern-labor/beispiel.kern.labor.protokoll",
+      "pfad": "kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt",
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 9
+    },
+    {
+      "art": "datei",
+      "bytes": 119,
+      "hash": "sha256:6ede18da4019981394e175ac7f5c8a36bc3cbf10303a72024629f04dff4b43c7",
+      "id": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Journal.kt",
+      "modul": "modul::kern-labor",
+      "paket": "paket::kern-labor/beispiel.kern.labor.protokoll",
+      "pfad": "kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Journal.kt",
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 5
+    },
+    {
+      "art": "datei",
+      "bytes": 242,
+      "hash": "sha256:33bb9f583ebebf5fd86d164f9dd7b6d17a51297c536aefd72c793b36990ce739",
+      "id": "datei:kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt",
+      "modul": "modul::kern-labor",
+      "paket": "paket::kern-labor/beispiel.kern.labor.messung",
+      "pfad": "kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt",
+      "quellsatz": "commonTest",
+      "rolle": "test",
+      "sprache": "kotlin",
+      "zeilen": 8
+    },
+    {
+      "art": "datei",
+      "bytes": 79,
+      "hash": "sha256:8925b0a20ee2e3e2c6fba8b60201f0f4e9c1905e34af68ab58eb6a5373f52bc3",
+      "id": "datei:kern/build.gradle.kts",
+      "modul": "modul::kern",
+      "pfad": "kern/build.gradle.kts",
+      "rolle": "produktiv",
+      "sprache": "gradle-kotlin",
+      "zeilen": 7
+    },
+    {
+      "art": "datei",
+      "bytes": 64,
+      "hash": "sha256:5ef9e7a2256bdd7cfacd9f2d152fa57bb74b92151740e4653939328c78b8866f",
+      "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt",
+      "modul": "modul::kern",
+      "paket": "paket::kern/beispiel.kern",
+      "pfad": "kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt",
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 3
+    },
+    {
+      "art": "datei",
+      "bytes": 198,
+      "hash": "sha256:23e31125c50adf4bd8fc16a324019fd858ed14d43181824e163889f26c1772b7",
+      "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt",
+      "modul": "modul::kern",
+      "paket": "paket::kern/beispiel.kern",
+      "pfad": "kern/src/commonMain/kotlin/beispiel/kern/Strich.kt",
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 8
+    },
+    {
+      "art": "datei",
+      "bytes": 220,
+      "hash": "sha256:7f17304976b80e241c292d2dd37045637e06a549e881c0c3f2218c9fa5d069b4",
+      "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt",
+      "modul": "modul::kern",
+      "paket": "paket::kern/beispiel.kern",
+      "pfad": "kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt",
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 11
+    },
+    {
+      "art": "datei",
+      "bytes": 113,
+      "hash": "sha256:66f78acdae44132b2ec79eba6abacc3b242fad8df23504e651028e768bcfec93",
+      "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt",
+      "modul": "modul::kern",
+      "paket": "paket::kern/beispiel.kern.zyklus",
+      "pfad": "kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt",
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 7
+    },
+    {
+      "art": "datei",
+      "bytes": 154,
+      "hash": "sha256:1e2fb5301acb1fbdc7ce241ea57462690b0b1b43138ecc54fb49c37706d0b39c",
+      "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt",
+      "modul": "modul::kern",
+      "paket": "paket::kern/beispiel.kern.zyklus",
+      "pfad": "kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt",
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 9
+    },
+    {
+      "art": "datei",
+      "bytes": 108,
+      "hash": "sha256:3ef923f62a3d2d603455ff4b6574de75eeba3a6d1a36f70e764f8f77b7f5a2e5",
+      "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt",
+      "modul": "modul::kern",
+      "paket": "paket::kern/beispiel.kern.zyklus",
+      "pfad": "kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt",
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 7
+    },
+    {
+      "art": "datei",
+      "bytes": 97,
+      "hash": "sha256:6cc07367c21dc4d888ab825827445e6e2085385e3c83c6f90e81f9306732e2f3",
+      "id": "datei:nativ/build.gradle.kts",
+      "modul": "modul::nativ",
+      "pfad": "nativ/build.gradle.kts",
+      "rolle": "produktiv",
+      "sprache": "gradle-kotlin",
+      "zeilen": 7
+    },
+    {
+      "art": "datei",
+      "bytes": 206,
+      "hash": "sha256:b474eadadcb582b509643e56082c8e549c70d895ed8cd90354fa7398091a4f62",
+      "id": "datei:nativ/src/main/cpp/insel_jni.c",
+      "modul": "modul::nativ",
+      "pfad": "nativ/src/main/cpp/insel_jni.c",
+      "quellsatz": "main",
+      "rolle": "produktiv",
+      "sprache": "c",
+      "zeilen": 7
+    },
+    {
+      "art": "datei",
+      "bytes": 117,
+      "hash": "sha256:ae052e055da192b5a4e2f970c8db6efcd030419096e1eba412050609abd789ed",
+      "id": "datei:nativ/src/main/kotlin/beispiel/nativ/Insel.kt",
+      "modul": "modul::nativ",
+      "paket": "paket::nativ/beispiel.nativ",
+      "pfad": "nativ/src/main/kotlin/beispiel/nativ/Insel.kt",
+      "quellsatz": "main",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 7
+    },
+    {
+      "art": "datei",
+      "bytes": 30,
+      "hash": "sha256:8affd4e517a905cfc7bc43575c3ab65bc5a558ec8c10568573554489681c6ce6",
+      "id": "datei:regeln/build.gradle.kts",
+      "modul": "modul::regeln",
+      "pfad": "regeln/build.gradle.kts",
+      "rolle": "produktiv",
+      "sprache": "gradle-kotlin",
+      "zeilen": 3
+    },
+    {
+      "art": "datei",
+      "bytes": 38,
+      "hash": "sha256:e18aac8dcf06e6ae994d18e86e9f54714814ca4fb637d79883687284ad7c6490",
+      "id": "datei:regeln/src/main/kotlin/beispiel/regeln/Regeln.kt",
+      "modul": "modul::regeln",
+      "paket": "paket::regeln/beispiel.regeln",
+      "pfad": "regeln/src/main/kotlin/beispiel/regeln/Regeln.kt",
+      "quellsatz": "main",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 3
+    },
+    {
+      "art": "datei",
+      "bytes": 108,
+      "hash": "sha256:866233704892a39eaeb6c6f27f9a3558541c487b884b91b180136ac4812cec65",
+      "id": "datei:settings.gradle.kts",
+      "ordner": "ordner:.",
+      "pfad": "settings.gradle.kts",
+      "rolle": "produktiv",
+      "sprache": "gradle-kotlin",
+      "zeilen": 4
+    },
+    {
+      "art": "datei",
+      "bytes": 40,
+      "hash": "sha256:b4b7dedfe474b11eb5a6b294e783cc5cb3f046f0f00209282c7e5f3b6dfefd62",
+      "id": "datei:werkzeug/Pruefung.kt",
+      "ordner": "ordner:werkzeug",
+      "paket": "paket:ordner:werkzeug/werkzeug",
+      "pfad": "werkzeug/Pruefung.kt",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 3
+    },
+    {
+      "art": "modul",
+      "gradle_pfad": ":anwendung",
+      "id": "modul::anwendung",
+      "pfad": "anwendung",
+      "plugins": [
+        "com.android.application"
+      ]
+    },
+    {
+      "art": "modul",
+      "gradle_pfad": ":kern",
+      "id": "modul::kern",
+      "pfad": "kern",
+      "plugins": [
+        "kotlin.multiplatform"
+      ]
+    },
+    {
+      "art": "modul",
+      "gradle_pfad": ":kern-labor",
+      "id": "modul::kern-labor",
+      "pfad": "kern-labor",
+      "plugins": [
+        "kotlin.multiplatform"
+      ]
+    },
+    {
+      "art": "modul",
+      "gradle_pfad": ":nativ",
+      "id": "modul::nativ",
+      "pfad": "nativ",
+      "plugins": [
+        "com.android.library"
+      ]
+    },
+    {
+      "art": "modul",
+      "gradle_pfad": ":regeln",
+      "id": "modul::regeln",
+      "pfad": "regeln",
+      "plugins": [
+        "org.jetbrains.kotlin.jvm"
+      ]
+    },
+    {
+      "art": "ordner",
+      "id": "ordner:.",
+      "pfad": "."
+    },
+    {
+      "art": "ordner",
+      "id": "ordner:werkzeug",
+      "pfad": "werkzeug"
+    },
+    {
+      "art": "paket",
+      "id": "paket::anwendung/beispiel.anwendung",
+      "modul": "modul::anwendung",
+      "name": "beispiel.anwendung"
+    },
+    {
+      "art": "paket",
+      "fremd": true,
+      "id": "paket::anwendung/beispiel.anwendung.fremd",
+      "modul": "modul::anwendung",
+      "name": "beispiel.anwendung.fremd"
+    },
+    {
+      "art": "paket",
+      "id": "paket::kern-labor/beispiel.kern.labor.messung",
+      "modul": "modul::kern-labor",
+      "name": "beispiel.kern.labor.messung"
+    },
+    {
+      "art": "paket",
+      "id": "paket::kern-labor/beispiel.kern.labor.protokoll",
+      "modul": "modul::kern-labor",
+      "name": "beispiel.kern.labor.protokoll"
+    },
+    {
+      "art": "paket",
+      "id": "paket::kern/beispiel.kern",
+      "modul": "modul::kern",
+      "name": "beispiel.kern"
+    },
+    {
+      "art": "paket",
+      "id": "paket::kern/beispiel.kern.zyklus",
+      "modul": "modul::kern",
+      "name": "beispiel.kern.zyklus"
+    },
+    {
+      "art": "paket",
+      "id": "paket::nativ/beispiel.nativ",
+      "modul": "modul::nativ",
+      "name": "beispiel.nativ"
+    },
+    {
+      "art": "paket",
+      "id": "paket::regeln/beispiel.regeln",
+      "modul": "modul::regeln",
+      "name": "beispiel.regeln"
+    },
+    {
+      "art": "paket",
+      "id": "paket:ordner:werkzeug/werkzeug",
+      "name": "werkzeug",
+      "ordner": "ordner:werkzeug"
+    }
+  ],
+  "schema": 1,
+  "ziel": {
+    "git_aenderungen": null,
+    "git_commit": null,
+    "name": "Modulgraph"
+  }
+}

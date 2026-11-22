@@ -1,14 +1,214 @@
 {
   "befunde": [],
   "daidalos": "0.1.0",
-  "kanten": [],
+  "kanten": [
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "symbol": "de.beispiel.zeichnen.Punkt",
+          "zeile": 3
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt->datei:core/src/main/kotlin/de/beispiel/zeichnen/Punkt.kt:produktiv",
+      "nach": "datei:core/src/main/kotlin/de/beispiel/zeichnen/Punkt.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "symbol": "de.beispiel.zeichnen.Strich",
+          "zeile": 4
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt->datei:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt:produktiv",
+      "nach": "datei:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "gleiches-paket",
+          "sicher": true,
+          "symbol": "de.beispiel.zeichnen.Punkt",
+          "zeile": 4
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt->datei:core/src/main/kotlin/de/beispiel/zeichnen/Punkt.kt:produktiv",
+      "nach": "datei:core/src/main/kotlin/de/beispiel/zeichnen/Punkt.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::app->datei:app/build.gradle.kts",
+      "nach": "datei:app/build.gradle.kts",
+      "von": "modul::app"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::app->datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt",
+      "nach": "datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt",
+      "von": "modul::app"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::app->datei:app/src/main/kotlin/de/beispiel/app/Leiste-crlf.kt",
+      "nach": "datei:app/src/main/kotlin/de/beispiel/app/Leiste-crlf.kt",
+      "von": "modul::app"
+    },
+    {
+      "art": "gradle-impl",
+      "beleg": [
+        {
+          "bedingt": false,
+          "datei": "app/build.gradle.kts",
+          "konfiguration": "implementation",
+          "quellsatz": null,
+          "zeile": 6
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:gradle-impl:modul::app->modul::core",
+      "nach": "modul::core",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "modul::app"
+    },
+    {
+      "art": "nutzt",
+      "dateikanten": 2,
+      "gewicht": 2,
+      "id": "kante:nutzt:modul::app->modul::core:produktiv",
+      "nach": "modul::core",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "modul::app"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::app->paket::app/de.beispiel.app",
+      "nach": "paket::app/de.beispiel.app",
+      "von": "modul::app"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::core->datei:core/build.gradle.kts",
+      "nach": "datei:core/build.gradle.kts",
+      "von": "modul::core"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::core->datei:core/src/main/cpp/fremd/mini.c",
+      "nach": "datei:core/src/main/cpp/fremd/mini.c",
+      "von": "modul::core"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::core->datei:core/src/main/kotlin/de/beispiel/zeichnen/Punkt.kt",
+      "nach": "datei:core/src/main/kotlin/de/beispiel/zeichnen/Punkt.kt",
+      "von": "modul::core"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::core->datei:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt",
+      "nach": "datei:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt",
+      "von": "modul::core"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::core->paket::core/de.beispiel.zeichnen",
+      "nach": "paket::core/de.beispiel.zeichnen",
+      "von": "modul::core"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:ordner:.->datei:.gitignore",
+      "nach": "datei:.gitignore",
+      "von": "ordner:."
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:ordner:.->datei:README.md",
+      "nach": "datei:README.md",
+      "von": "ordner:."
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:ordner:.->datei:daidalos.toml",
+      "nach": "datei:daidalos.toml",
+      "von": "ordner:."
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:ordner:.->datei:settings.gradle.kts",
+      "nach": "datei:settings.gradle.kts",
+      "von": "ordner:."
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:ordner:daten->datei:daten/logo.bin",
+      "nach": "datei:daten/logo.bin",
+      "von": "ordner:daten"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::app/de.beispiel.app->datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt",
+      "nach": "datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt",
+      "von": "paket::app/de.beispiel.app"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::app/de.beispiel.app->datei:app/src/main/kotlin/de/beispiel/app/Leiste-crlf.kt",
+      "nach": "datei:app/src/main/kotlin/de/beispiel/app/Leiste-crlf.kt",
+      "von": "paket::app/de.beispiel.app"
+    },
+    {
+      "art": "nutzt",
+      "dateikanten": 2,
+      "gewicht": 2,
+      "id": "kante:nutzt:paket::app/de.beispiel.app->paket::core/de.beispiel.zeichnen:produktiv",
+      "nach": "paket::core/de.beispiel.zeichnen",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "paket::app/de.beispiel.app"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::core/de.beispiel.zeichnen->datei:core/src/main/kotlin/de/beispiel/zeichnen/Punkt.kt",
+      "nach": "datei:core/src/main/kotlin/de/beispiel/zeichnen/Punkt.kt",
+      "von": "paket::core/de.beispiel.zeichnen"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::core/de.beispiel.zeichnen->datei:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt",
+      "nach": "datei:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt",
+      "von": "paket::core/de.beispiel.zeichnen"
+    }
+  ],
   "knoten": [
     {
       "art": "datei",
       "bytes": 6,
       "hash": "sha256:318d9a16533732a69cda7bb7b174ee392fdd15be3d72a114cd8f2d51f3eab510",
       "id": "datei:.gitignore",
+      "ordner": "ordner:.",
       "pfad": ".gitignore",
+      "rolle": "produktiv",
       "sprache": "unbekannt",
       "zeilen": 1
     },
@@ -17,7 +217,9 @@
       "bytes": 64,
       "hash": "sha256:d9de48a103bb41940439ffd6a93e047e544f89b9c1094ba1133f51c1920351f5",
       "id": "datei:README.md",
+      "ordner": "ordner:.",
       "pfad": "README.md",
+      "rolle": "produktiv",
       "sprache": "markdown",
       "zeilen": 3
     },
@@ -26,7 +228,9 @@
       "bytes": 85,
       "hash": "sha256:30910c9358a999cf47193c4ee8888e3c487a449a2cad5d6de76c2b1c31cc3853",
       "id": "datei:app/build.gradle.kts",
+      "modul": "modul::app",
       "pfad": "app/build.gradle.kts",
+      "rolle": "produktiv",
       "sprache": "gradle-kotlin",
       "zeilen": 7
     },
@@ -35,7 +239,11 @@
       "bytes": 202,
       "hash": "sha256:21b3a725e4a017ace961133974734f49a48b74cd0a3d36e301f0faa1ebb06ecd",
       "id": "datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt",
+      "modul": "modul::app",
+      "paket": "paket::app/de.beispiel.app",
       "pfad": "app/src/main/kotlin/de/beispiel/app/Haupt.kt",
+      "quellsatz": "main",
+      "rolle": "produktiv",
       "sprache": "kotlin",
       "zeilen": 10
     },
@@ -44,7 +252,11 @@
       "bytes": 67,
       "hash": "sha256:5d5dee1e960a03f4269c1ef30dc2185d6e438f6752ecf99ee5e014ef35f05207",
       "id": "datei:app/src/main/kotlin/de/beispiel/app/Leiste-crlf.kt",
+      "modul": "modul::app",
+      "paket": "paket::app/de.beispiel.app",
       "pfad": "app/src/main/kotlin/de/beispiel/app/Leiste-crlf.kt",
+      "quellsatz": "main",
+      "rolle": "produktiv",
       "sprache": "kotlin",
       "zeilen": 5
     },
@@ -53,7 +265,9 @@
       "bytes": 30,
       "hash": "sha256:8affd4e517a905cfc7bc43575c3ab65bc5a558ec8c10568573554489681c6ce6",
       "id": "datei:core/build.gradle.kts",
+      "modul": "modul::core",
       "pfad": "core/build.gradle.kts",
+      "rolle": "produktiv",
       "sprache": "gradle-kotlin",
       "zeilen": 3
     },
@@ -63,7 +277,10 @@
       "fremd": true,
       "hash": "sha256:17e0aa39e6e0726c8a58a8bb8e1ba276e83e132543cf72d671c2d3613a57c514",
       "id": "datei:core/src/main/cpp/fremd/mini.c",
+      "modul": "modul::core",
       "pfad": "core/src/main/cpp/fremd/mini.c",
+      "quellsatz": "main",
+      "rolle": "produktiv",
       "sprache": "c",
       "zeilen": 2
     },
@@ -72,7 +289,11 @@
       "bytes": 75,
       "hash": "sha256:69afec09ba4ba129fac3dec89bf7ba4b4d30863deb65a24ae08abc919985a930",
       "id": "datei:core/src/main/kotlin/de/beispiel/zeichnen/Punkt.kt",
+      "modul": "modul::core",
+      "paket": "paket::core/de.beispiel.zeichnen",
       "pfad": "core/src/main/kotlin/de/beispiel/zeichnen/Punkt.kt",
+      "quellsatz": "main",
+      "rolle": "produktiv",
       "sprache": "kotlin",
       "zeilen": 3
     },
@@ -81,7 +302,11 @@
       "bytes": 200,
       "hash": "sha256:a4ef0c17fe2abe04686d6fa0fc0ea6f48e3096ffe90ff6c8bffd5d5598ff6a75",
       "id": "datei:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt",
+      "modul": "modul::core",
+      "paket": "paket::core/de.beispiel.zeichnen",
       "pfad": "core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt",
+      "quellsatz": "main",
+      "rolle": "produktiv",
       "sprache": "kotlin",
       "zeilen": 11
     },
@@ -90,7 +315,9 @@
       "bytes": 71,
       "hash": "sha256:31298265a669097bd944575f98f2989b49706b57066b0c97748a931ca59f90e9",
       "id": "datei:daidalos.toml",
+      "ordner": "ordner:.",
       "pfad": "daidalos.toml",
+      "rolle": "produktiv",
       "sprache": "toml",
       "zeilen": 3
     },
@@ -99,7 +326,9 @@
       "bytes": 10,
       "hash": "sha256:c81d09f04358354f883e99a44112117d16a28e02d8538e579a5cae0d343d461a",
       "id": "datei:daten/logo.bin",
+      "ordner": "ordner:daten",
       "pfad": "daten/logo.bin",
+      "rolle": "produktiv",
       "sprache": "binaer"
     },
     {
@@ -107,9 +336,51 @@
       "bytes": 60,
       "hash": "sha256:6f31b262121cd37d0b3e745a41b47748e6f5f3da5cf1d1402346c98375e0b272",
       "id": "datei:settings.gradle.kts",
+      "ordner": "ordner:.",
       "pfad": "settings.gradle.kts",
+      "rolle": "produktiv",
       "sprache": "gradle-kotlin",
       "zeilen": 4
+    },
+    {
+      "art": "modul",
+      "gradle_pfad": ":app",
+      "id": "modul::app",
+      "pfad": "app",
+      "plugins": [
+        "org.jetbrains.kotlin.jvm"
+      ]
+    },
+    {
+      "art": "modul",
+      "gradle_pfad": ":core",
+      "id": "modul::core",
+      "pfad": "core",
+      "plugins": [
+        "org.jetbrains.kotlin.jvm"
+      ]
+    },
+    {
+      "art": "ordner",
+      "id": "ordner:.",
+      "pfad": "."
+    },
+    {
+      "art": "ordner",
+      "id": "ordner:daten",
+      "pfad": "daten"
+    },
+    {
+      "art": "paket",
+      "id": "paket::app/de.beispiel.app",
+      "modul": "modul::app",
+      "name": "de.beispiel.app"
+    },
+    {
+      "art": "paket",
+      "id": "paket::core/de.beispiel.zeichnen",
+      "modul": "modul::core",
+      "name": "de.beispiel.zeichnen"
     }
   ],
   "schema": 1,

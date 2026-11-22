@@ -85,3 +85,15 @@ def test_falscher_typ_ist_fehler(tmp_path: Path, text: str, schluessel: str) -> 
 def test_kaputtes_toml_ist_fehler(tmp_path: Path) -> None:
     with pytest.raises(KonfigurationsFehler, match="kein gültiges TOML"):
         lade_konfiguration(_schreibe(tmp_path, "[scan\n"))
+
+
+def test_projektname(tmp_path: Path) -> None:
+    konfiguration = lade_konfiguration(_schreibe(tmp_path, '[projekt]\nname = "Beispiel"\n'))
+    assert konfiguration.projekt.name == "Beispiel"
+    assert lade_konfiguration(tmp_path / "fehlt.toml").projekt.name is None
+
+
+@pytest.mark.parametrize("wert", ["1", '""'])
+def test_projektname_falsch(tmp_path: Path, wert: str) -> None:
+    with pytest.raises(KonfigurationsFehler, match=r"\[projekt\]\.name"):
+        lade_konfiguration(_schreibe(tmp_path, f"[projekt]\nname = {wert}\n"))
