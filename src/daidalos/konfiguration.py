@@ -11,6 +11,8 @@ from typing import Any
 
 DATEINAME = "daidalos.toml"
 STANDARD_EDITOR_BEFEHL = "code -g {datei}:{zeile}"
+# Vorlage für „Im Editor öffnen“ in karte.html; {pfad} und {zeile} setzt die Karte ein.
+STANDARD_EDITOR_LINK = "vscode://file/{pfad}:{zeile}"
 
 # Gelten immer, zusätzlich zu .gitignore und [scan].ausschliessen.
 EINGEBAUTE_AUSSCHLUESSE: tuple[str, ...] = (
@@ -48,6 +50,7 @@ class ScanKonfiguration:
 @dataclass(frozen=True)
 class EditorKonfiguration:
     befehl: str = STANDARD_EDITOR_BEFEHL
+    link: str = STANDARD_EDITOR_LINK
 
 
 @dataclass(frozen=True)
@@ -72,7 +75,7 @@ def warne_stderr(text: str) -> None:
 _BEKANNT: dict[str, frozenset[str]] = {
     "projekt": frozenset({"name"}),
     "scan": frozenset({"ausschliessen", "fremd"}),
-    "editor": frozenset({"befehl"}),
+    "editor": frozenset({"befehl", "link"}),
 }
 
 
@@ -109,6 +112,9 @@ def lade_konfiguration(
     projekt = daten.get("projekt", {})
     scan = daten.get("scan", {})
     editor = daten.get("editor", {})
+    link = _text(pfad, editor, "editor", "link", STANDARD_EDITOR_LINK)
+    if "{pfad}" not in link:
+        warne(f"{pfad}: [editor].link enthält kein {{pfad}}")
     name = projekt.get("name")
     if name is not None and (not isinstance(name, str) or not name.strip()):
         raise KonfigurationsFehler(
@@ -122,6 +128,7 @@ def lade_konfiguration(
         ),
         editor=EditorKonfiguration(
             befehl=_text(pfad, editor, "editor", "befehl", STANDARD_EDITOR_BEFEHL),
+            link=link,
         ),
         quelle=pfad,
     )

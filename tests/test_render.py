@@ -12,7 +12,7 @@ import pytest
 from conftest import BEISPIELE, ERWARTET
 from daidalos.cli import main
 from daidalos.deutung import gleiche_ab
-from daidalos.render import baue_karte, einbett_json
+from daidalos.render import baue_karte, einbett_json, wurzel_relativ
 
 BEISPIEL_NAMEN = ["mini_gradle", "mini_modulgraph"]
 
@@ -110,8 +110,8 @@ def test_maskierung_von_script_ende() -> None:
 
 def test_bibliotheken_in_fester_anzahl_von_script_tags(tmp_path: Path) -> None:
     html = (rendere("mini_modulgraph", tmp_path) / "karte.html").read_text(encoding="utf-8")
-    # 2 Datenblöcke, 3 Bibliotheken, 1 Kartenskript.
-    assert html.count("</script>") == 6
+    # 3 Datenblöcke, 3 Bibliotheken, 1 Kartenskript.
+    assert html.count("</script>") == 7
 
 
 def _messung() -> dict:
@@ -183,3 +183,54 @@ def test_standardpfade(tmp_path: Path) -> None:
     assert main(["render", str(tmp_path)]) == 0
     assert (ordner / "karte.html").is_file()
     assert (ordner / "KARTE.md").is_file()
+
+
+def test_editor_link_standard_und_wurzel(tmp_path: Path) -> None:
+    html = (rendere("mini_modulgraph", tmp_path) / "karte.html").read_text(encoding="utf-8")
+    einstellungen = json.loads(eingebettet(html, "daidalos-einstellungen"))
+    # Ausgabe außerhalb des Zielrepos: keine Wurzel, also kein Editor-Link.
+    assert einstellungen == {"editor_link": "vscode://file/{pfad}:{zeile}", "wurzel": None}
+
+
+def test_editor_link_aus_konfiguration_und_standardordner(tmp_path: Path) -> None:
+    ordner = tmp_path / "docs" / "daidalos"
+    ordner.mkdir(parents=True)
+    (ordner / "daidalos.json").write_bytes((ERWARTET / "mini_gradle.daidalos.json").read_bytes())
+    (tmp_path / "daidalos.toml").write_text(
+        '[editor]\nlink = "idea://open?file={pfad}&line={zeile}"\n', encoding="utf-8"
+    )
+    assert main(["render", str(tmp_path)]) == 0
+    html = (ordner / "karte.html").read_text(encoding="utf-8")
+    einstellungen = json.loads(eingebettet(html, "daidalos-einstellungen"))
+    assert einstellungen == {
+        "editor_link": "idea://open?file={pfad}&line={zeile}",
+        "wurzel": "../..",
+    }
+    assert str(tmp_path) not in html
+
+
+def test_editor_link_ueber_option_konfiguration(tmp_path: Path) -> None:
+    toml = tmp_path / "andere.toml"
+    toml.write_text('[editor]\nlink = "subl://{pfad}:{zeile}"\n', encoding="utf-8")
+    argumente = [
+        "render",
+        str(BEISPIELE / "mini_gradle"),
+        "--daten",
+        str(ERWARTET / "mini_gradle.daidalos.json"),
+        "--ausgabe",
+        str(tmp_path / "aus"),
+        "--konfiguration",
+        str(toml),
+    ]
+    assert main(argumente) == 0
+    html = (tmp_path / "aus" / "karte.html").read_text(encoding="utf-8")
+    assert json.loads(eingebettet(html, "daidalos-einstellungen"))["editor_link"] == (
+        "subl://{pfad}:{zeile}"
+    )
+    assert main([*argumente[:-1], str(tmp_path / "fehlt.toml")]) == 2
+
+
+def test_wurzel_relativ(tmp_path: Path) -> None:
+    assert wurzel_relativ(tmp_path, tmp_path / "docs" / "daidalos") == "../.."
+    assert wurzel_relativ(tmp_path, tmp_path) == "."
+    assert wurzel_relativ(tmp_path / "a", tmp_path / "b") is None

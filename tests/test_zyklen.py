@@ -55,3 +55,25 @@ def test_befunde_stabil_mit_unsicher() -> None:
     assert befund["beleg"]["kanten"] == ["a->b", "b->a"]
     modul = zyklus_befunde("modul", "produktiv", [_k("a", "b"), _k("b", "a")], kantenart="gradle")
     assert modul[0]["id"].startswith("befund:zyklus:modul:gradle:produktiv:")
+
+
+def test_loesende_kanten_alle_treffer_sortiert() -> None:
+    # Ring a→b→c→a mit Abkürzung a→c: Die Abkürzung allein löst nichts, jede Ringkante schon.
+    kanten = [_k("a", "b", 2), _k("b", "c", 1), _k("c", "a", 3), _k("a", "c", 1)]
+    (zyklus,) = finde_zyklen(kanten)
+    assert zyklus.loesende_kanten == ("a->b", "b->c", "c->a")
+    assert zyklus.trennstelle == "b->c"
+
+
+def test_loesende_kanten_leer_ohne_einzelne_trennstelle() -> None:
+    kanten = [_k("a", "b"), _k("b", "a"), _k("a", "c"), _k("c", "a"), _k("b", "c"), _k("c", "b")]
+    (befund,) = zyklus_befunde("datei", "produktiv", kanten)
+    assert befund["beleg"]["loesende_kanten"] == []
+    assert befund["beleg"]["trennstelle"] is None
+
+
+def test_trennstelle_ist_leichteste_loesende_kante() -> None:
+    kanten = [_k("a", "b", 5), _k("b", "a", 2)]
+    (befund,) = zyklus_befunde("datei", "produktiv", kanten)
+    assert befund["beleg"]["loesende_kanten"] == ["a->b", "b->a"]
+    assert befund["beleg"]["trennstelle"] == "b->a"

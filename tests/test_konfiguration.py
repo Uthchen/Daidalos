@@ -6,6 +6,7 @@ import pytest
 
 from daidalos.konfiguration import (
     STANDARD_EDITOR_BEFEHL,
+    STANDARD_EDITOR_LINK,
     Konfiguration,
     KonfigurationsFehler,
     lade_konfiguration,
@@ -97,3 +98,16 @@ def test_projektname(tmp_path: Path) -> None:
 def test_projektname_falsch(tmp_path: Path, wert: str) -> None:
     with pytest.raises(KonfigurationsFehler, match=r"\[projekt\]\.name"):
         lade_konfiguration(_schreibe(tmp_path, f"[projekt]\nname = {wert}\n"))
+
+
+def test_editor_link(tmp_path: Path) -> None:
+    assert lade_konfiguration(tmp_path / "fehlt.toml").editor.link == STANDARD_EDITOR_LINK
+    pfad = _schreibe(tmp_path, '[editor]\nlink = "idea://open?file={pfad}&line={zeile}"\n')
+    assert lade_konfiguration(pfad).editor.link == "idea://open?file={pfad}&line={zeile}"
+    warnungen: list[str] = []
+    lade_konfiguration(
+        _schreibe(tmp_path, '[editor]\nlink = "x://{zeile}"\n'), warne=warnungen.append
+    )
+    assert any("{pfad}" in w for w in warnungen)
+    with pytest.raises(KonfigurationsFehler, match=r"\[editor\]\.link"):
+        lade_konfiguration(_schreibe(tmp_path, "[editor]\nlink = 1\n"))

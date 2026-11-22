@@ -50,6 +50,10 @@
           "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt",
           "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt"
         ],
+        "loesende_kanten": [
+          "kante:nutzt:datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt:produktiv",
+          "kante:nutzt:datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt:produktiv"
+        ],
         "rolle": "produktiv",
         "trennstelle": "kante:nutzt:datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt:produktiv",
         "unsicher": false
@@ -84,6 +88,11 @@
           "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt",
           "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt"
         ],
+        "loesende_kanten": [
+          "kante:nutzt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt:produktiv",
+          "kante:nutzt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt:produktiv",
+          "kante:nutzt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt:produktiv"
+        ],
         "rolle": "produktiv",
         "trennstelle": "kante:nutzt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt:produktiv",
         "unsicher": false
@@ -109,6 +118,10 @@
         "knoten": [
           "paket::kern-labor/beispiel.kern.labor.messung",
           "paket::kern-labor/beispiel.kern.labor.protokoll"
+        ],
+        "loesende_kanten": [
+          "kante:nutzt:paket::kern-labor/beispiel.kern.labor.messung->paket::kern-labor/beispiel.kern.labor.protokoll:produktiv",
+          "kante:nutzt:paket::kern-labor/beispiel.kern.labor.protokoll->paket::kern-labor/beispiel.kern.labor.messung:produktiv"
         ],
         "rolle": "produktiv",
         "trennstelle": "kante:nutzt:paket::kern-labor/beispiel.kern.labor.protokoll->paket::kern-labor/beispiel.kern.labor.messung:produktiv",

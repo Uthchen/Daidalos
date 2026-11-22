@@ -29,6 +29,7 @@ class Zyklus:
     einstiege: tuple[tuple[str, tuple[str, ...]], ...]  # (Mitglied, Quellen)
     trennstelle: str | None
     kleinste_trennmenge: tuple[str, ...] | None
+    loesende_kanten: tuple[str, ...] = ()
 
 
 def _stark_zusammenhaengend(knoten: Iterable[str], kanten: Iterable[GraphKante]) -> bool:
@@ -42,11 +43,21 @@ def _reihenfolge(kante: GraphKante) -> tuple[int, str]:
     return (kante.gewicht, kante.id)
 
 
-def trennstelle(knoten: tuple[str, ...], kanten: tuple[GraphKante, ...]) -> str | None:
-    """Kante mit kleinstem Gewicht, deren Wegfall die Komponente zerfallen lässt."""
-    for kandidat in sorted(kanten, key=_reihenfolge):
+def loesende_kanten(knoten: tuple[str, ...], kanten: tuple[GraphKante, ...]) -> tuple[str, ...]:
+    """Alle Kanten, deren Wegfall allein die Komponente zerfallen lässt, nach Id sortiert."""
+    treffer = []
+    for kandidat in kanten:
         rest = [k for k in kanten if k.id != kandidat.id]
         if not _stark_zusammenhaengend(knoten, rest):
+            treffer.append(kandidat.id)
+    return tuple(sorted(treffer))
+
+
+def trennstelle(knoten: tuple[str, ...], kanten: tuple[GraphKante, ...]) -> str | None:
+    """Lösende Kante mit kleinstem Gewicht (Gleichstand: Id)."""
+    loesend = set(loesende_kanten(knoten, kanten))
+    for kandidat in sorted(kanten, key=_reihenfolge):
+        if kandidat.id in loesend:
             return kandidat.id
     return None
 
@@ -95,9 +106,11 @@ def finde_zyklen(kanten: list[GraphKante], ausgeschlossen: set[str] | None = Non
             if k.nach in komponente and k.von not in komponente:
                 quellen.setdefault(k.nach, set()).add(k.von)
         einstiege = tuple((m, tuple(sorted(quellen[m]))) for m in sorted(quellen))
-        trenn = trennstelle(mitglieder, innen)
+        loesend = loesende_kanten(mitglieder, innen)
+        gewicht = {k.id: k for k in innen}
+        trenn = min(loesend, key=lambda i: _reihenfolge(gewicht[i])) if loesend else None
         menge = None if trenn is not None else kleinste_trennmenge(mitglieder, innen)
-        zyklen.append(Zyklus(mitglieder, innen, einstiege, trenn, menge))
+        zyklen.append(Zyklus(mitglieder, innen, einstiege, trenn, menge, loesend))
     zyklen.sort(key=lambda z: z.knoten)
     return zyklen
 
@@ -129,6 +142,7 @@ def zyklus_befunde(
             ],
             "kanten": [k.id for k in zyklus.kanten],
             "knoten": list(zyklus.knoten),
+            "loesende_kanten": list(zyklus.loesende_kanten),
             "rolle": rolle,
             "trennstelle": zyklus.trennstelle,
             "unsicher": any(not k.sicher for k in zyklus.kanten),

@@ -13,6 +13,7 @@ from typing import Any
 from urllib.parse import quote
 
 from daidalos import __version__
+from daidalos.konfiguration import STANDARD_EDITOR_LINK
 from daidalos.scanner import SCHEMA
 
 Knoten = dict[str, Any]
@@ -95,7 +96,31 @@ def _skripte() -> str:
     return "\n".join(teile)
 
 
-def baue_karte(messung: dict[str, Any], deutung: dict[str, Any] | None) -> str:
+def wurzel_relativ(ziel: Path, ausgabe: Path) -> str | None:
+    """Weg vom Ausgabeordner zurück zur Wurzel des Zielrepos, etwa ``../..``.
+
+    ``None``, wenn der Ausgabeordner nicht im Zielrepo liegt; dann kann die Karte keine Dateien im
+    Editor öffnen. Es entsteht nie ein absoluter Pfad.
+    """
+    try:
+        teile = ausgabe.resolve().relative_to(ziel.resolve()).parts
+    except ValueError:
+        return None
+    return "/".join([".."] * len(teile)) or "."
+
+
+def einstellungen_fuer_karte(editor_link: str, wurzel: str | None) -> dict[str, Any]:
+    """Einstellungen für die Karte; keine Messung, deshalb nicht in ``daidalos.json``."""
+    return {"editor_link": editor_link, "wurzel": wurzel}
+
+
+def baue_karte(
+    messung: dict[str, Any],
+    deutung: dict[str, Any] | None,
+    einstellungen: dict[str, Any] | None = None,
+) -> str:
+    if einstellungen is None:
+        einstellungen = einstellungen_fuer_karte(STANDARD_EDITOR_LINK, None)
     werte = {
         "TITEL": _html_text(f"Karte · {messung['ziel']['name']}"),
         "LIZENZEN": _lizenzen(),
@@ -103,6 +128,7 @@ def baue_karte(messung: dict[str, Any], deutung: dict[str, Any] | None) -> str:
         "BIBLIOTHEKEN": _skripte(),
         "DATEN": einbett_json(messung),
         "DEUTUNG": einbett_json(deutung),
+        "EINSTELLUNGEN": einbett_json(einstellungen),
         "SKRIPT": _paketdatei("karte.js"),
         "VERSION": _html_text(__version__),
     }

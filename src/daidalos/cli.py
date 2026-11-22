@@ -13,14 +13,21 @@ from typing import Any
 from daidalos import __version__
 from daidalos.deutung import DeutungsFehler, gleiche_ab, lies_deutung
 from daidalos.export import schreibe_json, schreibe_text
-from daidalos.konfiguration import DATEINAME, KonfigurationsFehler, lade_konfiguration
+from daidalos.konfiguration import (
+    DATEINAME,
+    Konfiguration,
+    KonfigurationsFehler,
+    lade_konfiguration,
+)
 from daidalos.pfad import EBENEN, PfadFehler, ebene_von, finde_knoten, suche_weg, weg_als_json
 from daidalos.render import (
     RenderFehler,
     anzeigename,
     baue_karte,
     baue_karte_md,
+    einstellungen_fuer_karte,
     lade_messung,
+    wurzel_relativ,
 )
 from daidalos.scanner import scanne, zaehle_sprachen
 
@@ -74,6 +81,11 @@ def _baue_parser() -> argparse.ArgumentParser:
     )
     render.add_argument(
         "--ausgabe", metavar="ORDNER", help="Ausgabeordner (Standard: <ZIEL>/docs/daidalos/)"
+    )
+    render.add_argument(
+        "--konfiguration",
+        metavar="DATEI",
+        help=f"Konfigurationsdatei für [editor] link (Standard: <ZIEL>/{DATEINAME})",
     )
 
     pfad = befehle.add_parser("pfad", help="kürzesten belegten Weg zwischen zwei Knoten zeigen")
@@ -136,19 +148,20 @@ def _strukturzeilen(daten: dict[str, Any]) -> list[str]:
     return zeilen
 
 
+def _lade_konfiguration(ziel: Path, angegeben: str | None) -> Konfiguration:
+    """``--konfiguration`` muss existieren; ohne Angabe gilt ``<ZIEL>/daidalos.toml``, falls da."""
+    if angegeben is not None:
+        return lade_konfiguration(Path(angegeben), muss_existieren=True)
+    return lade_konfiguration(ziel / DATEINAME, muss_existieren=False)
+
+
 def _befehl_scan(argumente: argparse.Namespace) -> int:
     ziel = Path(argumente.ziel)
     if not ziel.is_dir():
         print(f"Fehler: Ziel {ziel} existiert nicht oder ist kein Ordner", file=sys.stderr)
         return EXIT_BEDIENFEHLER
-    if argumente.konfiguration is not None:
-        konfig_pfad = Path(argumente.konfiguration)
-        muss_existieren = True
-    else:
-        konfig_pfad = ziel / DATEINAME
-        muss_existieren = False
     try:
-        konfiguration = lade_konfiguration(konfig_pfad, muss_existieren=muss_existieren)
+        konfiguration = _lade_konfiguration(ziel, argumente.konfiguration)
     except KonfigurationsFehler as fehler:
         print(f"Fehler: {fehler}", file=sys.stderr)
         return EXIT_BEDIENFEHLER
@@ -192,14 +205,18 @@ def _befehl_render(argumente: argparse.Namespace) -> int:
         if not deutung_pfad.is_file():
             deutung_pfad = None
     try:
+        konfiguration = _lade_konfiguration(ziel, argumente.konfiguration)
         messung = lade_messung(daten_pfad)
         deutung = gleiche_ab(lies_deutung(deutung_pfad), messung) if deutung_pfad else None
-    except (RenderFehler, DeutungsFehler) as fehler:
+    except (RenderFehler, DeutungsFehler, KonfigurationsFehler) as fehler:
         print(f"Fehler: {fehler}", file=sys.stderr)
         return EXIT_BEDIENFEHLER
 
     beginn = time.perf_counter()
-    karte = baue_karte(messung, deutung)
+    einstellungen = einstellungen_fuer_karte(
+        konfiguration.editor.link, wurzel_relativ(ziel, ausgabe)
+    )
+    karte = baue_karte(messung, deutung, einstellungen)
     schreibe_text(karte, ausgabe / "karte.html")
     schreibe_text(baue_karte_md(messung, deutung), ausgabe / "KARTE.md")
     dauer = time.perf_counter() - beginn
