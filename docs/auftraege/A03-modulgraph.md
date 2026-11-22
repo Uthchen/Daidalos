@@ -148,7 +148,13 @@ Gegenproben mit den Zahlen aus A01. Ergebnisse nur als Zahlen in den Bericht:
 - **JNI:** 26 Paare erwartet, 0 ungepaarte.
 - Laufzeit.
 
-### 11. Abschluss
+### 11. Kleinigkeiten aus A02
+
+- `.sql` bekommt die Sprache `sql`. Lockfiles bleiben `unbekannt`.
+- Optionaler Schlüssel `[projekt] name` in `daidalos.toml`. Fehlt er, bleibt `ziel.name` der Ordnername. Grund: Die eingefrorene Kopie heißt `sketchorus-kopie`, das Original `Sketchorus`, und beide sollen gleich benannt sein können. In die Probe-Konfiguration `name = "Sketchorus"` eintragen.
+- Verschachtelte `.gitignore` im Durchlauf ohne Git und Groß-/Kleinschreibung der Muster unter Windows bleiben offen (Etappe 10, Feinschliff). Der Git-Modus ist der Normalfall.
+
+### 12. Abschluss
 
 - Branch `auftrag/a03-modulgraph`, pushen, nicht mergen.
 - Bericht `docs/auftraege/A03-bericht.md` (ohne Sketchorus-Inhalte).
