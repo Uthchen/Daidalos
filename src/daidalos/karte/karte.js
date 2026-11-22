@@ -297,18 +297,24 @@
       zustand.ebene === 'modul' && zustand.plugins ? 'pl' : '', zustand.kantenfuehrung,
       zustand.ebene === 'datei' && gross ? [...zustand.offen].sort().join(',') : ''].join('|');
   }
-  const ELK = {
+  // Kantenabstände gegen lange Kabelstränge (A05b, an Sketchorus verglichen). ELK liest Abstände je
+  // Behälter, daher gelten sie für die Wurzel und über nodeLayoutOptions für jeden Behälter.
+  const KANTEN_ABSTAND = {
+    'elk.layered.spacing.edgeEdgeBetweenLayers': 18,
+    'elk.layered.spacing.edgeNodeBetweenLayers': 28,
+    'elk.spacing.edgeEdge': 14
+  };
+  const BEHAELTER_OPTIONEN = Object.assign({ 'elk.padding': '[top=30,left=14,bottom=14,right=14]' }, KANTEN_ABSTAND);
+  const ELK = Object.assign({
     algorithm: 'layered',
     'elk.direction': 'DOWN',
     'elk.hierarchyHandling': 'INCLUDE_CHILDREN',
     'elk.layered.spacing.nodeNodeBetweenLayers': 46,
     'elk.spacing.nodeNode': 22,
-    'elk.layered.spacing.edgeNodeBetweenLayers': 16,
-    'elk.spacing.edgeEdge': 8,
     'elk.layered.considerModelOrder.strategy': 'NODES_AND_EDGES',
     'elk.layered.crossingMinimization.forceNodeModelOrder': false,
     'elk.randomSeed': 1
-  };
+  }, KANTEN_ABSTAND);
 
   // Zeichnet die aktuelle Ebene neu. Liefert ein Promise, das nach dem Layout erfüllt ist.
   let gezeichnet = null;
@@ -348,7 +354,7 @@
         name: 'elk', fit: false, animate: false, nodeDimensionsIncludeLabels: false,
         useElkEdgeGeometry: elk,
         elk: Object.assign({}, ELK, elk ? { 'elk.edgeRouting': 'ORTHOGONAL' } : {}),
-        nodeLayoutOptions: n => n.isParent() ? { 'elk.padding': '[top=30,left=14,bottom=14,right=14]' } : undefined
+        nodeLayoutOptions: n => n.isParent() ? Object.assign({}, BEHAELTER_OPTIONEN) : undefined
       });
       layout.one('layoutstop', () => {
         if (nr === lauf) {
