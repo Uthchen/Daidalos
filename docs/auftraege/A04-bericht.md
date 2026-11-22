@@ -13,10 +13,10 @@ Stand 2026-11-22. Branch `auftrag/a04-erste-karte`, nicht nach `main` gemergt.
 | 5. Karte | Aufbau und Farb-Tokens wie im Prototyp (Kopfzeile, Werkzeugleiste, Fläche, Seitenleiste; Dunkel Standard, Dunkel/Hell/System gemerkt in `localStorage` mit `try/catch`). Ebenen Module/Pakete/Dateien mit ELK-Schichtlayout von oben nach unten, Layout je Zustand einmal berechnet und gemerkt. Filter Rolle, Kantenarten, Zyklen; Fremdcode als Kasten „Fremd · n“ je Modul; bei mehr als 150 Dateien Aus- und Einklappen von Modulen. Zyklus-Befund: Mitglieder und Ring hervorgehoben, Einstiege mit eigener Randfarbe (dazu die eingehenden Kanten), Trennstelle dick mit Beschriftung, Zoom auf den Zyklus. Seitenleiste mit Überblick, Befunden, Bereichen, Knoten- und Befund-Details, „gemessen“ und „gedeutet“ getrennt gekennzeichnet. Sprungadressen `#knoten=`, `#befund=`, `#ebene=`. |
 | 6. `KARTE.md` | Kopf, Überblick, Modultabelle (plus Ordner), Gradle-Abhängigkeiten, Bereiche, Einschätzungen, alle Zyklen je Ebene mit Mitgliedern, Einstiegen und Trennstelle, übrige Befunde gezählt; jeder Knoten und Befund verlinkt in die Karte. |
 | 7. `daidalos pfad` | `pfad.py`: Id oder Suchbegriff (Pfadendung, `:modul`, Modulordner, Paketname), mehrdeutig → Treffer und Exit 2; Breitensuche über `nutzt` (Modulebene zusätzlich Gradle), je Schritt die ersten 3 Belege; `--mit-tests`, `--ebene`, `--json`. |
-| 8. Tests | 178 Tests (1 unter Windows übersprungen wie bisher). Neu: `test_render.py` (Golden `KARTE.md` und Prüfsumme der eingebetteten Daten je Beispiel, Struktur, kein Netz, keine absoluten Pfade, Determinismus, Maskierung, Deutung, Exit-Codes), `test_pfad.py`, Metrik- und Zyklus-Tests in `test_struktur.py`, Browser-Probe `test_browser.py` (Marker `browser`). CI: Chromium nur unter Ubuntu, ein eigener Schritt bricht ab, wenn die Browser-Probe dort übersprungen würde. |
+| 8. Tests | 174 Tests (1 unter Windows übersprungen wie bisher). Neu: `test_render.py` (Golden `KARTE.md` und Prüfsumme der eingebetteten Daten je Beispiel, Struktur, kein Netz, keine absoluten Pfade, Determinismus, Maskierung, Deutung, Exit-Codes), `test_pfad.py`, Metrik- und Zyklus-Tests in `test_struktur.py`, Browser-Probe `test_browser.py` (Marker `browser`). CI: Chromium nur unter Ubuntu, ein eigener Schritt bricht ab, wenn die Browser-Probe dort übersprungen würde. |
 
 Lokal unter Windows: `ruff check`, `ruff format --check`, `pytest` (inklusive Browser-Probe mit
-Chromium) grün.
+Chromium) grün. CI grün unter Ubuntu (mit Browser-Probe, 5 Tests gelaufen) und Windows.
 
 ## Probe an der eingefrorenen Kopie (nur Zahlen)
 
@@ -98,8 +98,6 @@ Bildschirmfotos: `lokal/A04-{modul,paket,datei}-{dunkel,hell}.png` und `lokal/A0
 - Paket- und Dateiebene sind bei Sketchorus im Überblick dicht (161 bzw. 337 Kanten). Der
   abgestufte Fokus aus A05 sollte das deutlich entschärfen; ob zusätzlich Kanten innerhalb eines
   Pakets standardmäßig blasser werden sollen, wäre zu entscheiden.
-- Die CI-Probe unter Ubuntu ist beim Schreiben dieses Berichts gepusht, aber noch nicht
-  abgeschlossen; siehe Antwort.
 
 ## Nächste sinnvolle Schritte
 
