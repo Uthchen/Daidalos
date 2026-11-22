@@ -263,7 +263,7 @@
       const ende = () => {
         if (nr !== lauf) return fertig(false);
         einpassen(cy.elements(), 30);
-        zeiten[schluessel] = Math.round(performance.now() - beginn);
+        if (!gespeichert) zeiten[schluessel] = Math.round(performance.now() - beginn);
         document.getElementById('lade').hidden = true;
         document.documentElement.dataset.zustand = 'bereit';
         fertig(true);
@@ -569,7 +569,9 @@
       const brauche = beleg.ebene === 'modul' ? [beleg.kantenart === 'gradle' ? 'gradle' : 'nutzt'] : beleg.ebene === 'datei' ? ['nutzt', 'jni'] : ['nutzt'];
       brauche.forEach(a => { if (!art[a]) { art[a] = true; neu = true; } });
       if (beleg.ebene === 'datei' && gross) {
-        beleg.knoten.forEach(m => { const g = behaelter(knoten.get(m)); if (!zustand.offen.has(g)) { zustand.offen.add(g); neu = true; } });
+        // Nur die Module des Zyklus ausklappen, damit die Ebene klein und schnell bleibt.
+        const offen = new Set(beleg.knoten.map(m => behaelter(knoten.get(m))));
+        if ([...offen].sort().join() !== [...zustand.offen].sort().join()) { zustand.offen = offen; neu = true; }
       }
       if (neu || !cy.nodes().nonempty()) await zeichne();
       hebeZyklusHervor(b);

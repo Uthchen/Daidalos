@@ -1,7 +1,8 @@
 """Holt die Bibliotheken für ``karte.html`` einmalig nach ``src/daidalos/karte/vendor/``.
 
 Nur für Entwickler, nicht zur Laufzeit. Jede Datei wird gegen eine festgelegte SHA-256-Prüfsumme
-geprüft; passt sie nicht, wird nichts geschrieben. Aufruf: ``uv run python werkzeuge/hole_vendor.py``.
+geprüft; passt sie nicht, wird nichts geschrieben.
+Aufruf: ``uv run python werkzeuge/hole_vendor.py``.
 Mit ``--pruefen`` werden nur die abgelegten Dateien gegen die Prüfsummen geprüft (ohne Netz).
 """
 

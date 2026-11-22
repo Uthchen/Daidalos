@@ -1,0 +1,1046 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Daidalos Vorschau</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: Werkzeugleiste oben, links das Geflecht als Arbeitsfläche, rechts die Seitenleiste mit Befunden und Details. */
+:root {
+  --bg: #f3f5f8; --panel: #ffffff; --fg: #1a2230; --muted: #5a6576; --line: #d5dbe4;
+  --edge: #8793a5; --accent: #1f5f7a; --accent-soft: #dbeaf1;
+  --crit: #c0392b; --crit-soft: #f8e1de; --warn: #b86a12; --warn-soft: #fbecd9;
+  --adr: #6a4ea0; --adr-soft: #ece6f6;
+  --node: #ffffff; --pkg: #eef1f5; --mod: #e4e9f0; --canvas: #ffffff;
+  --o-n1: 0.75; --o-n2: 0.4; --o-blass: 0.14;
+  --font: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  /* Dunkel: kein reines Schwarz und kein reines Weiß, Verschachtelung wird nach innen heller */
+  --bg: #0d1117; --panel: #151b23; --canvas: #10151c; --fg: #dbe2ea; --muted: #9ba7b5; --line: #2c3542;
+  --edge: #7f8b9d; --accent: #6cb4d4; --accent-soft: #183544;
+  --crit: #f07468; --crit-soft: #3b1f1d; --warn: #eda552; --warn-soft: #3a2914;
+  --adr: #b59cf0; --adr-soft: #2a2442;
+  --node: #1f2732; --pkg: #19202a; --mod: #141a22;
+  --o-n1: 0.82; --o-n2: 0.5; --o-blass: 0.22; color-scheme: dark } }
+:root[data-theme="dark"] {
+  /* Dunkel: kein reines Schwarz und kein reines Weiß, Verschachtelung wird nach innen heller */
+  --bg: #0d1117; --panel: #151b23; --canvas: #10151c; --fg: #dbe2ea; --muted: #9ba7b5; --line: #2c3542;
+  --edge: #7f8b9d; --accent: #6cb4d4; --accent-soft: #183544;
+  --crit: #f07468; --crit-soft: #3b1f1d; --warn: #eda552; --warn-soft: #3a2914;
+  --adr: #b59cf0; --adr-soft: #2a2442;
+  --node: #1f2732; --pkg: #19202a; --mod: #141a22;
+  --o-n1: 0.82; --o-n2: 0.5; --o-blass: 0.22; color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 14px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 16px; }
+.wrap { max-width: 1400px; margin: 0 auto; display: grid; gap: 12px; }
+header { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; }
+.thema { margin-left: auto; }
+h1 { font-size: 20px; font-weight: 600; margin: 0; letter-spacing: .01em; }
+h1 span { font-family: var(--mono); font-weight: 500; color: var(--accent); }
+.sub { color: var(--muted); font-size: 13px; }
+.hinweis { font-size: 12px; color: var(--warn); background: var(--warn-soft); padding: 2px 8px; border-radius: 4px; }
+
+.leiste { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; }
+.gruppe { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.gruppe > b { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; margin-right: 2px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.seg button { font: inherit; font-size: 13px; background: transparent; color: var(--fg); border: 0; padding: 5px 12px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--panel); }
+label.chk { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer; white-space: nowrap; }
+label.chk i { width: 14px; height: 0; border-top: 2px solid var(--edge); display: inline-block; }
+label.chk i.dash { border-top-style: dashed; }
+label.chk i.dot { border-top-style: dotted; border-color: var(--adr); }
+label.chk i.org { border-color: var(--warn); }
+label.chk i.red { border-color: var(--crit); }
+input[type="checkbox"] { accent-color: var(--accent); margin: 0; }
+select, .btn { font: inherit; font-size: 13px; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; max-width: 100%; }
+.btn { cursor: pointer; }
+.btn:hover, .seg button:hover:not([aria-pressed="true"]) { background: var(--accent-soft); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.haupt { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 12px; }
+@media (max-width: 900px) { .haupt { grid-template-columns: minmax(0, 1fr); } .flaeche { min-height: 440px; height: 60vh; } }
+.flaeche { position: relative; background: var(--canvas); border: 1px solid var(--line); border-radius: 8px; min-height: 560px; height: 68vh; overflow: hidden; }
+#cy { position: absolute; inset: 0; }
+.legende { position: absolute; left: 10px; bottom: 10px; display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 11.5px; color: var(--muted); background: color-mix(in srgb, var(--panel) 88%, transparent); padding: 6px 10px; border-radius: 6px; max-width: calc(100% - 20px); pointer-events: none; }
+.legende span { display: inline-flex; align-items: center; gap: 5px; }
+.sw { width: 12px; height: 12px; border-radius: 3px; border: 2px solid var(--edge); display: inline-block; }
+.sw.mark { border-color: var(--accent); }
+.sw.unge { border-color: var(--warn); border-style: dashed; }
+.sw.hot { border-color: var(--warn); background: var(--warn-soft); border-width: 3px; }
+.sw.adr { border-color: var(--adr); background: var(--adr-soft); }
+.schloss { position: absolute; top: 10px; right: 10px; z-index: 2; display: inline-flex; align-items: center; gap: 6px; font: inherit; font-size: 12.5px; color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 5px 10px; cursor: pointer; }
+.schloss:hover { background: var(--accent-soft); }
+.schloss svg { width: 14px; height: 14px; }
+.schloss[aria-pressed="false"] { color: var(--accent); border-color: var(--accent); }
+.pfadinfo { position: absolute; top: 10px; left: 10px; right: 150px; font-size: 13px; background: var(--accent-soft); color: var(--fg); padding: 6px 10px; border-radius: 6px; font-family: var(--mono); overflow-wrap: anywhere; }
+
+aside { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: grid; gap: 14px; align-content: start; min-width: 0; max-height: 68vh; overflow: auto; }
+@media (max-width: 900px) { aside { max-height: none; } }
+aside h2 { font-size: 16px; margin: 0; font-weight: 600; text-wrap: balance; overflow-wrap: anywhere; }
+aside h3 { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 6px; font-weight: 600; display: flex; justify-content: space-between; gap: 8px; }
+aside h3 em { font-style: normal; font-family: var(--mono); text-transform: none; letter-spacing: 0; font-weight: 400; }
+.quelle-m em { color: var(--accent); }
+.quelle-d em { color: var(--adr); }
+.pfad { font-family: var(--mono); font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+p { margin: 0; }
+.deut { border-left: 3px solid var(--adr); padding: 2px 0 2px 10px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+td { padding: 3px 0; border-bottom: 1px solid var(--line); }
+td:last-child { text-align: right; font-family: var(--mono); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-family: var(--mono); font-size: 12px; padding: 1px 7px; border-radius: 4px; background: var(--accent-soft); color: var(--accent); }
+.chip.warn { background: var(--warn-soft); color: var(--warn); }
+.chip.crit { background: var(--crit-soft); color: var(--crit); }
+.chip.adr { background: var(--adr-soft); color: var(--adr); }
+ol.befunde { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+ol.befunde li button { all: unset; box-sizing: border-box; width: 100%; cursor: pointer; display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 2px 10px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; }
+ol.befunde li button:hover { background: var(--bg); }
+ol.befunde li button:focus-visible { outline: 2px solid var(--accent); }
+.prio { grid-row: span 3; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 600; font-family: var(--mono); color: var(--panel); background: var(--muted); }
+.prio.crit { background: var(--crit); } .prio.warn { background: var(--warn); } .prio.adr { background: var(--adr); }
+.bt { font-weight: 600; font-size: 13.5px; }
+.bm { font-family: var(--mono); font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.bd { font-size: 12.5px; color: var(--fg); }
+ul.liste { margin: 0; padding-left: 18px; font-size: 13px; display: grid; gap: 2px; }
+ul.liste code, .kette code { font-family: var(--mono); font-size: 12px; }
+.kette { font-size: 12.5px; background: var(--warn-soft); padding: 6px 8px; border-radius: 6px; overflow-wrap: anywhere; }
+a.zur { color: var(--accent); cursor: pointer; font-size: 13px; text-decoration: underline; }
+.leer { color: var(--muted); font-size: 13px; }
+.kopfzeile { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.symbole { display: flex; gap: 6px; flex-shrink: 0; }
+.symbole button, .code-kopf .btn { display: inline-flex; align-items: center; gap: 5px; font: inherit; font-size: 12.5px; color: var(--accent); background: var(--accent-soft); border: 0; border-radius: 6px; padding: 5px 8px; cursor: pointer; }
+.symbole svg, .code-kopf svg, .ed svg { width: 14px; height: 14px; }
+.code-kopf { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.code-kopf h3 { margin: 0; flex: 1; }
+.code { font-family: var(--mono); font-size: 12px; line-height: 1.55; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; overflow-x: auto; padding: 6px 0; }
+.zl { display: grid; grid-template-columns: 34px minmax(0, 1fr) 24px; align-items: start; }
+.zl .nr { color: var(--muted); text-align: right; padding-right: 10px; user-select: none; }
+.zl .tx { white-space: pre-wrap; overflow-wrap: anywhere; padding-right: 6px; }
+.zl.ziel { background: var(--accent-soft); }
+.zl.luecke .nr { text-align: center; }
+.ed { all: unset; cursor: pointer; color: var(--accent); display: grid; place-items: center; width: 22px; height: 20px; border-radius: 4px; }
+.ed:hover, .ed:focus-visible { background: var(--accent-soft); outline: none; }
+.t-kw { color: var(--accent); font-weight: 500; } .t-st { color: var(--warn); } .t-an { color: var(--adr); } .t-ko { color: var(--muted); font-style: italic; }
+.toast { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); max-width: min(420px, calc(100vw - 32px)); display: grid; gap: 4px; background: var(--fg); color: var(--bg); padding: 10px 14px; border-radius: 8px; font-size: 13px; opacity: 0; transform: translateY(8px); transition: opacity .2s, transform .2s; pointer-events: none; z-index: 20; }
+.toast.an { opacity: 1; transform: none; }
+.toast code { font-family: var(--mono); font-size: 12px; overflow-wrap: anywhere; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1><span>daidalos</span> Karte · Skizzenblock</h1>
+    <span class="sub">Kotlin/Android, 3 Gradle-Module, 11 Dateien · Stand 22.11.2026</span>
+    <span class="hinweis">Vorschau mit erfundenem Projekt, alle Zahlen sind Beispielwerte</span>
+    <div class="seg thema" role="group" aria-label="Darstellung">
+      <button id="th-dark" data-thema="dark">Dunkel</button>
+      <button id="th-light" data-thema="light">Hell</button>
+      <button id="th-system" data-thema="system">System</button>
+    </div>
+  </header>
+
+  <div class="leiste">
+    <div class="gruppe"><b>Ebene</b>
+      <div class="seg" role="group" aria-label="Ebene">
+        <button id="eb-modul" data-ebene="modul">Module</button>
+        <button id="eb-paket" data-ebene="paket">Pakete</button>
+        <button id="eb-datei" data-ebene="datei">Dateien</button>
+      </div>
+    </div>
+    <div class="gruppe"><b>Kanten</b>
+      <label class="chk"><input type="checkbox" id="k-import" checked><i></i>Importe</label>
+      <label class="chk"><input type="checkbox" id="k-ruft" checked><i class="org"></i>Aufrufe</label>
+      <label class="chk"><input type="checkbox" id="k-gemeinsam" checked><i class="dash"></i>gemeinsam geändert</label>
+      <label class="chk"><input type="checkbox" id="k-adr" checked><i class="dot"></i>ADR-Verweise</label>
+    </div>
+    <div class="gruppe"><b>Überlagern</b>
+      <label class="chk"><input type="checkbox" id="u-zyklus" checked><i class="red"></i>Zyklen</label>
+      <label class="chk"><input type="checkbox" id="u-kette" checked><i class="org"></i>Markierungs-Kette</label>
+      <label class="chk"><input type="checkbox" id="u-hotspot" checked>Hotspots</label>
+      <label class="chk"><input type="checkbox" id="u-detekt" checked>detekt</label>
+    </div>
+    <div class="gruppe"><b>Warum hängt</b>
+      <select id="von" aria-label="Von"></select><span>an</span><select id="nach" aria-label="Nach"></select>
+      <button class="btn" id="pfad-los">Kette zeigen</button>
+    </div>
+  </div>
+
+  <div class="haupt">
+    <div class="flaeche">
+      <div id="cy" aria-label="Geflecht der Codebase"></div>
+      <button class="schloss" id="schloss" aria-pressed="true" title="Alle Elemente sperren oder entsperren"></button>
+      <div class="pfadinfo" id="pfadinfo" hidden></div>
+      <div class="legende">
+        <span><i class="sw"></i>Datei</span>
+        <span><i class="sw mark"></i>markiert</span>
+        <span><i class="sw unge"></i>unmarkiert, aber erreicht</span>
+        <span><i class="sw hot"></i>Hotspot</span>
+        <span><i class="sw adr"></i>ADR</span>
+        <span>an jeder Datei: Code · VS Code · Schloss</span>
+      </div>
+    </div>
+    <aside id="seite" aria-live="polite"></aside>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/cytoscape@3.28.1/dist/cytoscape.min.js"></script>
+<script>
+// ---------- daidalos.json (nur Gemessenes, vom Programm) ----------
+const FAKTEN = {
+  module: [
+    { id: 'm:app', name: ':app' }, { id: 'm:platform', name: ':platform' }, { id: 'm:core', name: ':core' }
+  ],
+  gradle: [
+    { von: 'm:app', nach: 'm:platform', art: 'implementation' },
+    { von: 'm:app', nach: 'm:core', art: 'implementation' },
+    { von: 'm:platform', nach: 'm:core', art: 'api' }
+  ],
+  pakete: [
+    { id: 'p:app.ui', modul: 'm:app', name: 'app.ui', x: 0, y: 75 },
+    { id: 'p:app.einstellungen', modul: 'm:app', name: 'app.einstellungen', x: 0, y: 330 },
+    { id: 'p:platform.eingabe', modul: 'm:platform', name: 'platform.eingabe', x: 300, y: 40 },
+    { id: 'p:platform.log', modul: 'm:platform', name: 'platform.log', x: 300, y: 200 },
+    { id: 'p:platform.speicher', modul: 'm:platform', name: 'platform.speicher', x: 300, y: 360 },
+    { id: 'p:core.geometrie', modul: 'm:core', name: 'core.geometrie', x: 640, y: 60 },
+    { id: 'p:core.protokoll', modul: 'm:core', name: 'core.protokoll', x: 640, y: 330 }
+  ],
+  dateien: [
+    { id: 'f:MainActivity', paket: 'p:app.ui', name: 'MainActivity.kt', zeilen: 120, komplex: 6, aenderungen: 15, mark: [], x: 0, y: 0 },
+    { id: 'f:ZeichenFlaeche', paket: 'p:app.ui', name: 'ZeichenFlaeche.kt', zeilen: 540, komplex: 31, aenderungen: 42, mark: [], x: 0, y: 150 },
+    { id: 'f:Einstellungen', paket: 'p:app.einstellungen', name: 'Einstellungen.kt', zeilen: 110, komplex: 5, aenderungen: 13, mark: [], x: 0, y: 330 },
+    { id: 'f:StiftEingabe', paket: 'p:platform.eingabe', name: 'StiftEingabe.kt', zeilen: 150, komplex: 8, aenderungen: 17, mark: ['@Strichpfad'], x: 300, y: 40 },
+    { id: 'f:Logger', paket: 'p:platform.log', name: 'Logger.kt', zeilen: 60, komplex: 3, aenderungen: 5, mark: [], x: 300, y: 200 },
+    { id: 'f:DateiSpeicher', paket: 'p:platform.speicher', name: 'DateiSpeicher.kt', zeilen: 210, komplex: 10, aenderungen: 12, mark: [], x: 300, y: 360 },
+    { id: 'f:Strich', paket: 'p:core.geometrie', name: 'Strich.kt', zeilen: 180, komplex: 9, aenderungen: 14, mark: ['@Strichpfad'], x: 590, y: 20 },
+    { id: 'f:Punkt', paket: 'p:core.geometrie', name: 'Punkt.kt', zeilen: 40, komplex: 2, aenderungen: 3, mark: [], x: 730, y: 20 },
+    { id: 'f:Glaettung', paket: 'p:core.geometrie', name: 'Glaettung.kt', zeilen: 220, komplex: 14, aenderungen: 11, mark: ['@Deterministisch'], x: 660, y: 130 },
+    { id: 'f:Verlauf', paket: 'p:core.protokoll', name: 'Verlauf.kt', zeilen: 260, komplex: 12, aenderungen: 19, mark: [], x: 590, y: 330 },
+    { id: 'f:Befehl', paket: 'p:core.protokoll', name: 'Befehl.kt', zeilen: 90, komplex: 4, aenderungen: 8, mark: [], x: 730, y: 330 }
+  ],
+  adrs: [
+    { id: 'a:0002', name: 'ADR-0002', titel: 'Strichpfad ohne Objekterzeugung', status: 'angenommen', x: 450, y: 500 },
+    { id: 'a:0007', name: 'ADR-0007', titel: 'Verlauf als Liste von Befehlen', status: 'angenommen', x: 660, y: 500 }
+  ],
+  kanten: [
+    ['f:MainActivity', 'f:ZeichenFlaeche', 'import'], ['f:MainActivity', 'f:Einstellungen', 'import'], ['f:MainActivity', 'f:DateiSpeicher', 'import'],
+    ['f:ZeichenFlaeche', 'f:StiftEingabe', 'import'], ['f:ZeichenFlaeche', 'f:Strich', 'import'], ['f:ZeichenFlaeche', 'f:Verlauf', 'import'],
+    ['f:Einstellungen', 'f:DateiSpeicher', 'import'],
+    ['f:StiftEingabe', 'f:Strich', 'import'], ['f:StiftEingabe', 'f:Glaettung', 'import'],
+    ['f:DateiSpeicher', 'f:Verlauf', 'import'], ['f:DateiSpeicher', 'f:Logger', 'import'],
+    ['f:Strich', 'f:Punkt', 'import'], ['f:Glaettung', 'f:Punkt', 'import'],
+    ['f:Strich', 'f:Verlauf', 'import'], ['f:Verlauf', 'f:Befehl', 'import'], ['f:Befehl', 'f:Strich', 'import'],
+    ['f:StiftEingabe', 'f:Logger', 'ruft', { kette: 'k1' }],
+    ['f:Strich', 'f:Verlauf', 'ruft', { kette: 'k2' }],
+    ['f:ZeichenFlaeche', 'f:Glaettung', 'gemeinsam', { anzahl: 11 }],
+    ['a:0002', 'f:Strich', 'adr', { sicher: true, beleg: 'Kommentar „(ADR-0002, Puffer vorab)“ in Strich.kt' }],
+    ['a:0002', 'f:StiftEingabe', 'adr', { sicher: true, beleg: 'Kommentar „ADR-0002“ in StiftEingabe.kt' }],
+    ['a:0007', 'f:Verlauf', 'adr', { sicher: false, beleg: 'ADR nennt „core/.../Verlauf.kt“, unscharf aufgelöst' }]
+  ],
+  funktionen: {
+    'f:StiftEingabe': [['beiEreignis', '@Strichpfad'], ['kalibriere', null]],
+    'f:Logger': [['protokolliere', 'erreicht'], ['formatiere', 'erreicht'], ['trace', null]],
+    'f:Strich': [['fuegeHinzu', '@Strichpfad (Datei)'], ['laenge', '@Strichpfad (Datei)']],
+    'f:Verlauf': [['merke', 'erreicht'], ['rueckgaengig', null], ['wiederhole', null]],
+    'f:Glaettung': [['glaette', '@Deterministisch (Datei)'], ['kruemmung', '@Deterministisch (Datei)']]
+  },
+  ketten: {
+    k1: { einstieg: 'StiftEingabe.beiEreignis', mark: '@Strichpfad', schritte: ['StiftEingabe.beiEreignis', 'Logger.protokolliere', 'Logger.formatiere'] },
+    k2: { einstieg: 'Strich.fuegeHinzu', mark: '@Strichpfad', schritte: ['Strich.fuegeHinzu', 'Verlauf.merke'] }
+  },
+  detekt: { stand: '21.11.2026, 18:40', quelle: 'core/build/reports/detekt/commonMainSourceSet.sarif',
+    funde: [{ datei: 'f:Glaettung', regel: 'KeinePlattformFunktionImRechenweg', zeile: 88, text: 'kotlin.math.sin im Rechenweg' }] }
+};
+
+// ---------- deutung.json (vom Skill geschrieben, verweist nur auf ids) ----------
+const DEUTUNG = {
+  'm:core': 'Fachlicher Kern ohne Android-Abhängigkeit: Geometrie der Striche und der Verlauf für Rückgängig.',
+  'm:platform': 'Brücke zum Gerät: Stifteingabe, Dateiablage und Protokollierung.',
+  'm:app': 'Oberfläche und Einstiegspunkt. Setzt die Teile aus core und platform zusammen.',
+  'p:core.geometrie': 'Wie ein Strich aus Punkten entsteht und geglättet wird. Läuft je Stift-Ereignis, daher streng markiert.',
+  'p:core.protokoll': 'Merkt sich jede Änderung als Befehl, damit Rückgängig und Wiederholen funktionieren.',
+  'p:platform.eingabe': 'Nimmt Stift-Ereignisse vom Gerät an und reicht sie an die Geometrie weiter.',
+  'p:platform.log': 'Einfache Protokollierung für Fehlersuche.',
+  'p:platform.speicher': 'Speichert Zeichnungen samt Verlauf als Datei.',
+  'p:app.ui': 'Die Zeichenfläche und die Activity, die sie hält.',
+  'p:app.einstellungen': 'Nutzereinstellungen wie Stiftbreite und Glättungsstärke.',
+  'f:MainActivity.kt': '',
+  'f:MainActivity': 'Startet die App und verdrahtet Zeichenfläche, Einstellungen und Speicher.',
+  'f:ZeichenFlaeche': 'Zeichnet Striche, verarbeitet Gesten und stößt Speichern an. Trägt zu viele Aufgaben auf einmal.',
+  'f:Einstellungen': 'Liest und schreibt Einstellungen über den Dateispeicher.',
+  'f:StiftEingabe': 'Übersetzt Roh-Ereignisse des Stifts in Punkte, je Ereignis und ohne Objekterzeugung.',
+  'f:Logger': 'Schreibt Meldungen ins Systemprotokoll. Formatiert dabei Text und erzeugt Objekte.',
+  'f:DateiSpeicher': 'Serialisiert Zeichnung und Verlauf in eine Datei.',
+  'f:Strich': 'Ein Strich als Folge von Punkten mit vorab angelegten Puffern.',
+  'f:Punkt': 'Wertklasse für Koordinate und Druck.',
+  'f:Glaettung': 'Glättet Strichverläufe bitgleich reproduzierbar.',
+  'f:Verlauf': 'Liste der ausgeführten Befehle mit Rückgängig und Wiederholen.',
+  'f:Befehl': 'Ein einzelner rückgängig machbarer Schritt, etwa „Strich hinzufügen“.',
+  'a:0002': 'Legt fest, dass im Strichpfad keine Objekte entstehen und nichts blockiert.',
+  'a:0007': 'Begründet, warum der Verlauf als Liste von Befehlen geführt wird.',
+  einschaetzungen: [
+    { befund: 'zyklus', prio: 1, titel: 'Zyklus zwischen Geometrie und Protokoll',
+      text: 'Strich kennt Verlauf, Verlauf kennt Befehl, Befehl kennt Strich. Ändert sich eine der drei Dateien, sind die anderen betroffen.',
+      vorschlag: 'Strich soll Verlauf nicht kennen. Den Eintrag in den Verlauf besser in der Zeichenfläche auslösen.' },
+    { befund: 'k1', prio: 2, titel: 'Strichpfad ruft ungeprüften Logger',
+      text: 'StiftEingabe.beiEreignis ist @Strichpfad, ruft aber Logger.protokolliere. detekt prüft den Logger nicht, dort entstehen Strings.',
+      vorschlag: 'Im Strichpfad nur Logger.trace verwenden oder den Aufruf entfernen.' },
+    { befund: 'hotspot', prio: 3, titel: 'ZeichenFlaeche ist der Hotspot',
+      text: 'Am häufigsten geändert und am komplexesten. Hier entstehen wahrscheinlich die meisten neuen Fehler.',
+      vorschlag: 'Gestenerkennung und Speichern in eigene Klassen auslagern.' },
+    { befund: 'k2', prio: 4, titel: 'Strich ruft Verlauf aus dem Strichpfad',
+      text: 'Strich.fuegeHinzu ist über die Datei-Markierung @Strichpfad, Verlauf.merke ist unmarkiert und legt Befehl-Objekte an.',
+      vorschlag: 'Hängt mit Befund 1 zusammen. Wird der Zyklus gelöst, verschwindet auch diese Kette.' },
+    { befund: 'gemeinsam', prio: 5, titel: 'Versteckte Kopplung über die Glättung',
+      text: 'ZeichenFlaeche und Glaettung wurden 11 Mal gemeinsam geändert, obwohl kein Import sie verbindet.',
+      vorschlag: 'Prüfen, ob die Zeichenfläche Annahmen über die Glättung trifft, die in eine Schnittstelle gehören.' },
+    { befund: 'detekt', prio: 6, titel: 'detekt: Plattformfunktion im Rechenweg',
+      text: 'Glaettung.kt Zeile 88 nutzt kotlin.math.sin in @Deterministisch-Code.',
+      vorschlag: 'Durch die eigene deterministische Sinus-Tabelle ersetzen.' }
+  ]
+};
+
+// ---------- Messungen, die das Programm aus den Fakten ableitet ----------
+const datei = Object.fromEntries(FAKTEN.dateien.map(d => [d.id, d]));
+const paket = Object.fromEntries(FAKTEN.pakete.map(p => [p.id, p]));
+const modul = Object.fromEntries(FAKTEN.module.map(m => [m.id, m]));
+const adr = Object.fromEntries(FAKTEN.adrs.map(a => [a.id, a]));
+const modulVon = id => datei[id] ? paket[datei[id].paket].modul : null;
+const imports = FAKTEN.kanten.filter(k => k[2] === 'import');
+
+function tarjan(knoten, kanten) {
+  const idx = {}, low = {}, auf = new Set(), st = [], scc = {}; let n = 0, nr = 0;
+  const nach = {}; knoten.forEach(k => nach[k] = []); kanten.forEach(([a, b]) => nach[a] && nach[a].push(b));
+  function besuche(v) {
+    idx[v] = low[v] = n++; st.push(v); auf.add(v);
+    for (const w of nach[v]) {
+      if (idx[w] === undefined) { besuche(w); low[v] = Math.min(low[v], low[w]); }
+      else if (auf.has(w)) low[v] = Math.min(low[v], idx[w]);
+    }
+    if (low[v] === idx[v]) { const g = []; let w; do { w = st.pop(); auf.delete(w); g.push(w); } while (w !== v); nr++; g.forEach(x => scc[x] = g.length > 1 ? nr : 0); }
+  }
+  knoten.forEach(k => { if (idx[k] === undefined) besuche(k); });
+  return scc;
+}
+const sccDatei = tarjan(FAKTEN.dateien.map(d => d.id), imports);
+const paketKanten = {};
+imports.forEach(([a, b]) => { const pa = datei[a].paket, pb = datei[b].paket; if (pa !== pb) { const k = pa + '>' + pb; paketKanten[k] = (paketKanten[k] || 0) + 1; } });
+const sccPaket = tarjan(FAKTEN.pakete.map(p => p.id), Object.keys(paketKanten).map(k => k.split('>')));
+const modulGewicht = {};
+imports.forEach(([a, b]) => { const ma = modulVon(a), mb = modulVon(b); if (ma !== mb) { const k = ma + '>' + mb; modulGewicht[k] = (modulGewicht[k] || 0) + 1; } });
+FAKTEN.dateien.forEach(d => {
+  d.fanIn = imports.filter(k => k[1] === d.id).length;
+  d.fanOut = imports.filter(k => k[0] === d.id).length;
+  d.hitze = d.aenderungen * d.komplex;
+});
+const HOTSPOT = 500;
+const erreicht = new Set(FAKTEN.kanten.filter(k => k[2] === 'ruft').map(k => k[1]).filter(id => !datei[id].mark.length));
+
+const BEFUNDE = {
+  zyklus: { farbe: 'crit', knoten: FAKTEN.dateien.filter(d => sccDatei[d.id]).map(d => d.id), beleg: 'Strich.kt → Verlauf.kt → Befehl.kt → Strich.kt' },
+  k1: { farbe: 'warn', knoten: ['f:StiftEingabe', 'f:Logger'], beleg: FAKTEN.ketten.k1.schritte.join(' → ') },
+  hotspot: { farbe: 'warn', knoten: FAKTEN.dateien.filter(d => d.hitze > HOTSPOT).map(d => d.id), beleg: 'ZeichenFlaeche.kt: 42 Änderungen in 90 Tagen, Komplexität 31' },
+  k2: { farbe: 'warn', knoten: ['f:Strich', 'f:Verlauf'], beleg: FAKTEN.ketten.k2.schritte.join(' → ') },
+  gemeinsam: { farbe: 'muted', knoten: ['f:ZeichenFlaeche', 'f:Glaettung'], beleg: '11 gemeinsame Commits, 0 Importe' },
+  detekt: { farbe: 'adr', knoten: ['f:Glaettung'], beleg: 'Glaettung.kt:88 · KeinePlattformFunktionImRechenweg' }
+};
+
+// ---------- Kanten im Detail ----------
+// daidalos.json: welche Symbole eine Datei aus der anderen nutzt, mit Zeilen in der nutzenden Datei
+const SYMBOLE = {
+  'f:MainActivity>f:ZeichenFlaeche': [['ZeichenFlaeche', [18, 44]]],
+  'f:MainActivity>f:Einstellungen': [['Einstellungen.laden()', [31]]],
+  'f:MainActivity>f:DateiSpeicher': [['DateiSpeicher', [19]], ['DateiSpeicher.oeffne()', [52, 77]]],
+  'f:ZeichenFlaeche>f:StiftEingabe': [['StiftEingabe', [12]], ['StiftEingabe.beiEreignis()', [88, 141, 206]]],
+  'f:ZeichenFlaeche>f:Strich': [['Strich', [14, 95]], ['Strich.zeichne()', [233, 260, 301, 318]]],
+  'f:ZeichenFlaeche>f:Verlauf': [['Verlauf.rueckgaengig()', [402]], ['Verlauf.wiederhole()', [415, 430]]],
+  'f:Einstellungen>f:DateiSpeicher': [['DateiSpeicher.schreibeWert()', [47, 63]]],
+  'f:StiftEingabe>f:Strich': [['Strich.fuegeHinzu()', [71]]],
+  'f:StiftEingabe>f:Glaettung': [['Glaettung.glaette()', [74]]],
+  'f:DateiSpeicher>f:Verlauf': [['Verlauf.befehle', [102, 118]]],
+  'f:DateiSpeicher>f:Logger': [['Logger.protokolliere()', [40, 66, 131, 188]]],
+  'f:Strich>f:Punkt': [['Punkt', [9, 22, 37, 58, 61, 90, 140]]],
+  'f:Glaettung>f:Punkt': [['Punkt', [11, 45, 46, 120, 151]]],
+  'f:Strich>f:Verlauf': [['Verlauf.merke()', [64]]],
+  'f:Verlauf>f:Befehl': [['Befehl', [8, 33, 57, 91, 140]]],
+  'f:Befehl>f:Strich': [['Strich', [6, 21]]]
+};
+// deutung.json: warum eine Verbindung besteht, nur wo der Skill etwas zu sagen hat
+const KANTEN_DEUTUNG = {
+  'f:Strich>f:Verlauf': 'Diese Verbindung schließt den Zyklus. Ein Strich muss nicht wissen, dass es einen Verlauf gibt. Sie sollte entfallen (Befund 1).',
+  'f:Befehl>f:Strich': 'Gewollt: Ein Befehl beschreibt, welcher Strich hinzukam. Diese Richtung ist die natürliche.',
+  'f:DateiSpeicher>f:Logger': 'Unkritisch, denn Speichern läuft nicht im Strichpfad.',
+  'f:ZeichenFlaeche>f:Verlauf': 'Gehört zur Aufgabe „Rückgängig“ in der Zeichenfläche. Ein Kandidat zum Auslagern, wenn die Datei geteilt wird.',
+  'f:ZeichenFlaeche>f:Strich': 'Die Zeichenfläche zeichnet Striche selbst. Mit vier Aufrufstellen die engste Verbindung der Datei.',
+  'f:StiftEingabe>f:Strich': 'Der eigentliche Strichpfad: jedes Stift-Ereignis landet hier.'
+};
+const GEMEINSAM = { 'f:ZeichenFlaeche|f:Glaettung': 11, 'f:Strich|f:Verlauf': 9, 'f:ZeichenFlaeche|f:Verlauf': 7, 'f:StiftEingabe|f:Strich': 6, 'f:MainActivity|f:Einstellungen': 4, 'f:ZeichenFlaeche|f:Strich': 8 };
+const gemeinsam = (a, b) => GEMEINSAM[a + '|' + b] || GEMEINSAM[b + '|' + a] || 0;
+const anzahlZyklen = s => new Set(Object.values(s).filter(Boolean)).size;
+function loestZyklus(a, b) {
+  const rest = imports.filter(k => !(k[0] === a && k[1] === b));
+  return anzahlZyklen(tarjan(FAKTEN.dateien.map(d => d.id), rest)) < anzahlZyklen(sccDatei);
+}
+
+// ---------- Quelltext (in der echten Karte live über daidalos serve, hier erfundene Ausschnitte) ----------
+const CODE = {
+  'f:MainActivity': [[1, `package skizzenblock.app.ui
+
+import skizzenblock.app.einstellungen.Einstellungen
+import skizzenblock.platform.speicher.DateiSpeicher
+
+class MainActivity : ComponentActivity() {
+    private lateinit var flaeche: ZeichenFlaeche
+
+    override fun onCreate(zustand: Bundle?) {
+        super.onCreate(zustand)
+        val speicher = DateiSpeicher.oeffne(filesDir)
+        val einstellungen = Einstellungen.laden(speicher)
+        flaeche = ZeichenFlaeche(this, einstellungen)
+        setContentView(flaeche)
+    }
+}`]],
+  'f:ZeichenFlaeche': [[84, `    // Gesten: jedes Stift-Ereignis geht an die Eingabe
+    override fun onTouchEvent(e: MotionEvent): Boolean {
+        eingabe.beiEreignis(e.x, e.y, e.pressure)
+        if (e.action == MotionEvent.ACTION_UP) speichereSpaeter()
+        invalidate()
+        return true
+    }`], [228, `    override fun onDraw(c: Canvas) {
+        for (s in striche) {
+            s.zeichne(c, pinsel)
+        }
+    }`], [398, `    fun rueckgaengig() {
+        verlauf.rueckgaengig()
+        invalidate()
+    }`]],
+  'f:Einstellungen': [[1, `package skizzenblock.app.einstellungen
+
+import skizzenblock.platform.speicher.DateiSpeicher
+
+data class Einstellungen(val stiftbreite: Float, val glaettung: Float) {
+    companion object {
+        fun laden(speicher: DateiSpeicher): Einstellungen =
+            Einstellungen(speicher.leseWert("breite", 4f), speicher.leseWert("glaettung", 0.35f))
+    }
+}`]],
+  'f:StiftEingabe': [[1, `package skizzenblock.platform.eingabe
+
+import skizzenblock.core.geometrie.Glaettung
+import skizzenblock.core.geometrie.Punkt
+import skizzenblock.core.geometrie.Strich
+import skizzenblock.platform.log.Logger
+
+// ADR-0002: kein Objekt im Ereignis-Pfad, der Punkt wird wiederverwendet
+class StiftEingabe(private val strich: Strich) {
+    private val punkt = Punkt.leer()
+
+    @Strichpfad
+    fun beiEreignis(x: Float, y: Float, druck: Float) {
+        punkt.setze(x, y, druck)
+        Glaettung.glaette(punkt)
+        Logger.protokolliere("Punkt $x/$y")
+        strich.fuegeHinzu(punkt)
+    }
+
+    fun kalibriere(versatz: Float) {
+        punkt.setze(punkt.x + versatz, punkt.y + versatz, punkt.druck)
+    }
+}`]],
+  'f:Logger': [[1, `package skizzenblock.platform.log
+
+import android.util.Log
+
+object Logger {
+    fun protokolliere(text: String) {
+        Log.d("Skizzenblock", formatiere(text))
+    }
+
+    fun formatiere(text: String): String = "[" + System.nanoTime() + "] " + text
+
+    fun trace(marke: String) = android.os.Trace.beginSection(marke)
+}`]],
+  'f:DateiSpeicher': [[1, `package skizzenblock.platform.speicher
+
+import skizzenblock.core.protokoll.Verlauf
+import skizzenblock.platform.log.Logger
+
+class DateiSpeicher private constructor(private val ordner: File) {
+    fun speichere(verlauf: Verlauf) {
+        Logger.protokolliere("Speichere " + verlauf.befehle.size + " Befehle")
+        File(ordner, "zeichnung.bin").writeBytes(serialisiere(verlauf.befehle))
+    }
+
+    fun leseWert(name: String, standard: Float): Float = werte[name] ?: standard
+
+    companion object {
+        fun oeffne(ordner: File) = DateiSpeicher(ordner)
+    }
+}`]],
+  'f:Strich': [[1, `@file:Strichpfad
+package skizzenblock.core.geometrie
+
+import skizzenblock.core.protokoll.Verlauf
+
+// Puffer werden einmal vorab angelegt (ADR-0002, Puffer vorab)
+class Strich(kapazitaet: Int, private val verlauf: Verlauf) {
+    private val xs = FloatArray(kapazitaet)
+    private val ys = FloatArray(kapazitaet)
+    private var anzahl = 0
+
+    fun fuegeHinzu(p: Punkt) {
+        xs[anzahl] = p.x
+        ys[anzahl] = p.y
+        anzahl++
+        verlauf.merke(this)
+    }
+
+    fun laenge(): Int = anzahl
+}`]],
+  'f:Punkt': [[1, `package skizzenblock.core.geometrie
+
+class Punkt(var x: Float, var y: Float, var druck: Float) {
+    fun setze(x: Float, y: Float, druck: Float) {
+        this.x = x; this.y = y; this.druck = druck
+    }
+
+    companion object {
+        fun leer() = Punkt(0f, 0f, 0f)
+    }
+}`]],
+  'f:Glaettung': [[1, `@file:Deterministisch
+package skizzenblock.core.geometrie
+
+import kotlin.math.sin`], [84, `object Glaettung {
+    private const val STAERKE = 0.35f
+
+    fun glaette(p: Punkt) {
+        val w = 1f - STAERKE * sin(p.druck)
+        p.x *= w
+        p.y *= w
+    }
+
+    fun kruemmung(a: Punkt, b: Punkt, c: Punkt): Float =
+        (b.x - a.x) * (c.y - b.y) - (b.y - a.y) * (c.x - b.x)
+}`]],
+  'f:Verlauf': [[1, `package skizzenblock.core.protokoll
+
+import skizzenblock.core.geometrie.Strich
+
+// siehe core/.../Verlauf.kt in ADR-0007
+class Verlauf {
+    val befehle = ArrayList<Befehl>()
+    private var position = 0
+
+    fun merke(strich: Strich) {
+        befehle.add(Befehl.StrichHinzu(strich))
+        position = befehle.size
+    }
+
+    fun rueckgaengig() { if (position > 0) position-- }
+
+    fun wiederhole() { if (position < befehle.size) position++ }
+}`]],
+  'f:Befehl': [[1, `package skizzenblock.core.protokoll
+
+import skizzenblock.core.geometrie.Strich
+
+sealed interface Befehl {
+    data class StrichHinzu(val strich: Strich) : Befehl
+    data object AllesLoeschen : Befehl
+}`]]
+};
+const pfadVon = id => { const d = datei[id], p = paket[d.paket]; return p.modul.slice(2) + '/src/main/kotlin/skizzenblock/' + p.name.replace('.', '/') + '/' + d.name; };
+const KW = /\b(package|import|class|object|interface|sealed|data|fun|val|var|private|override|companion|return|if|for|in|const|lateinit|constructor|super|this)\b/g;
+function farbe(zeile) {
+  const k = zeile.indexOf('//');
+  let code = k >= 0 ? zeile.slice(0, k) : zeile, kom = k >= 0 ? zeile.slice(k) : '';
+  const teile = code.split(/("(?:[^"\\]|\\.)*")/);
+  code = teile.map((t, i) => i % 2 ? `<span class="t-st">${esc(t)}</span>` : esc(t).replace(KW, '<span class="t-kw">$1</span>').replace(/(@[\w:]+)/g, '<span class="t-an">$1</span>')).join('');
+  return code + (kom ? `<span class="t-ko">${esc(kom)}</span>` : '');
+}
+const toast = document.createElement('div'); toast.className = 'toast'; toast.setAttribute('role', 'status'); document.body.appendChild(toast);
+let toastZeit;
+function imEditor(id, zeile) {
+  const ziel = pfadVon(id) + ':' + (zeile || 1);
+  toast.innerHTML = `<b>Im Editor öffnen</b><code>code -g ${esc(ziel)}</code><span>In der echten Karte öffnet VS Code jetzt diese Zeile. Die Vorschau zeigt nur den Befehl.</span>`;
+  toast.classList.add('an'); clearTimeout(toastZeit); toastZeit = setTimeout(() => toast.classList.remove('an'), 4500);
+}
+const ersteFun = id => { for (const [start, txt] of CODE[id] || []) { const i = txt.split('\n').findIndex(z => /\bfun\s/.test(z)); if (i >= 0) return start + i; } return 1; };
+function codeAnsicht(id, zeile) {
+  const d = datei[id];
+  const teile = (CODE[id] || []).map(([start, txt]) => txt.split('\n').map((z, i) => {
+    const nr = start + i, fm = z.match(/\bfun\s+(\w+)/);
+    return `<div class="zl${nr === zeile ? ' ziel' : ''}" data-nr="${nr}"><span class="nr">${nr}</span><span class="tx">${farbe(z) || ' '}</span>${fm ? `<button class="ed" data-zeile="${nr}" title="${esc(fm[1])} in VS Code öffnen" aria-label="${esc(fm[1])} in VS Code öffnen">${SVG_EDITOR}</button>` : '<span></span>'}</div>`;
+  }).join('')).join('<div class="zl luecke"><span class="nr">⋮</span><span></span><span></span></div>');
+  seite.innerHTML = `<a class="zur" id="zurueck">← ${esc(d.name)}</a>
+    <div><h2>${esc(d.name)}</h2><p class="pfad">${esc(pfadVon(id))}</p></div>
+    <div class="code-kopf"><h3 class="quelle-m">Quelltext <em>live</em></h3><button class="btn" id="ganz-editor">${SVG_EDITOR} In VS Code öffnen</button></div>
+    <div class="code">${teile}</div>
+    <p class="leer">Das Symbol neben einer Funktion öffnet VS Code genau in ihrer Zeile.</p>`;
+  seite.querySelector('#zurueck').addEventListener('click', () => details(id));
+  seite.querySelector('#ganz-editor').addEventListener('click', () => imEditor(id, ersteFun(id)));
+  seite.querySelectorAll('.ed').forEach(b => b.addEventListener('click', () => imEditor(id, +b.dataset.zeile)));
+  const z = seite.querySelector('.zl.ziel'); if (z) z.scrollIntoView({ block: 'center' });
+}
+
+// ---------- Elemente je Ebene ----------
+let ebene = 'datei';
+const an = id => document.getElementById(id).checked;
+
+function dateiLabel(d) {
+  const z = [d.name];
+  if (d.mark.length) z.push(d.mark.join(' '));
+  if (an('u-detekt')) { const f = FAKTEN.detekt.funde.filter(x => x.datei === d.id).length; if (f) z.push('detekt: ' + f + ' Fund'); }
+  return z.join('\n');
+}
+function groesse(d) {
+  const z = dateiLabel(d).split('\n');
+  const breit = Math.max(Math.max(...z.map(s => s.length)) * 7 + 26, 112);
+  const hot = an('u-hotspot') && d.hitze > HOTSPOT;
+  return { w: hot ? breit + 24 : breit, h: 32 + 15 * z.length + (hot ? 16 : 0) };
+}
+
+function elemente() {
+  const els = [];
+  if (ebene === 'modul') {
+    FAKTEN.module.forEach((m, i) => {
+      const n = FAKTEN.dateien.filter(d => modulVon(d.id) === m.id).length;
+      els.push({ data: { id: m.id, label: m.name + '\n' + n + ' Dateien', typ: 'modul', einzeln: 1 }, position: { x: [0, 320, 660][i], y: 200 } });
+    });
+    FAKTEN.gradle.forEach((g, i) => {
+      const w = modulGewicht[g.von + '>' + g.nach] || 0;
+      els.push({ data: { id: 'g' + i, source: g.von, target: g.nach, art: 'gradle', label: g.art + ' · ' + w + ' Importe', breite: 1.5 + w * 0.8 } });
+    });
+  } else {
+    FAKTEN.module.forEach(m => els.push({ data: { id: m.id, label: m.name, typ: 'modul' } }));
+    if (ebene === 'paket') {
+      FAKTEN.pakete.forEach(p => els.push({ data: { id: p.id, parent: p.modul, label: p.name, typ: 'paketblatt' }, position: { x: p.x, y: p.y } }));
+      Object.entries(paketKanten).forEach(([k, n], i) => {
+        const [a, b] = k.split('>');
+        const zyk = sccPaket[a] && sccPaket[a] === sccPaket[b];
+        els.push({ data: { id: 'pk' + i, source: a, target: b, art: 'import', label: n > 1 ? n + ' Importe' : '', breite: 1 + n * 0.7 }, classes: zyk ? 'zyk' : '' });
+      });
+    } else {
+      FAKTEN.pakete.forEach(p => els.push({ data: { id: p.id, parent: p.modul, label: p.name, typ: 'paket' } }));
+      FAKTEN.dateien.forEach(d => {
+        const g = groesse(d);
+        const cls = [];
+        if (d.mark.length) cls.push('markiert');
+        if (erreicht.has(d.id)) cls.push('erreicht');
+        if (d.hitze > HOTSPOT) cls.push('hot');
+        els.push({ data: { id: d.id, parent: d.paket, label: dateiLabel(d), typ: 'datei', w: g.w, h: g.h }, position: { x: d.x, y: d.y }, classes: cls.join(' ') });
+      });
+      FAKTEN.adrs.forEach(a => els.push({ data: { id: a.id, label: a.name + '\n' + a.titel, typ: 'adr' }, position: { x: a.x, y: a.y } }));
+      FAKTEN.kanten.forEach(([a, b, art, x], i) => {
+        const zyk = art === 'import' && sccDatei[a] && sccDatei[a] === sccDatei[b];
+        let label = '';
+        if (art === 'gemeinsam') label = x.anzahl + '× gemeinsam geändert';
+        if (art === 'ruft') label = 'ruft';
+        if (art === 'adr' && !x.sicher) label = 'unscharf';
+        els.push({ data: { id: 'k' + i, ki: i, source: a, target: b, art, label, breite: 1.4, kette: x && x.kette }, classes: zyk ? 'zyk' : '' });
+      });
+    }
+  }
+  return els;
+}
+
+// ---------- Darstellung ----------
+const tok = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const SCHLOSS_ZU = c => `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='3' y='7' width='10' height='8' rx='1.5' fill='${c}'/><path d='M5.2 7V5.2a2.8 2.8 0 0 1 5.6 0V7' fill='none' stroke='${c}' stroke-width='1.6'/></svg>`;
+const SCHLOSS_AUF = c => `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='3' y='7' width='10' height='8' rx='1.5' fill='${c}'/><path d='M5.2 7V4.6a2.8 2.8 0 0 1 5.5-.8' fill='none' stroke='${c}' stroke-width='1.6'/></svg>`;
+const SYMBOL_CODE = c => `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M5.5 4L1.5 8l4 4M10.5 4l4 4-4 4' fill='none' stroke='${c}' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>`;
+const SYMBOL_EDITOR = c => `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M9 2.5h4.5V7M13.5 2.5L7.5 8.5M12 9.5v3.5a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3.5' fill='none' stroke='${c}' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/></svg>`;
+const SVG_CODE = SYMBOL_CODE('currentColor'), SVG_EDITOR = SYMBOL_EDITOR('currentColor');
+const bild = svg => 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+function stil() {
+  const f = 'IBM Plex Sans, system-ui, sans-serif';
+  return [
+    { selector: 'node', style: { 'font-family': f, color: tok('--fg'), 'text-wrap': 'wrap', 'font-size': 11, 'text-valign': 'center', 'text-halign': 'center',
+      'background-image': bild(SCHLOSS_ZU(tok('--muted'))), 'background-fit': 'none', 'background-width': 13, 'background-height': 13, 'background-position-x': '100%', 'background-position-y': '0%', 'background-offset-x': -5, 'background-offset-y': 5, 'background-clip': 'none', 'background-image-opacity': 0.7 } },
+    { selector: 'node.offen', style: { 'background-image': bild(SCHLOSS_AUF(tok('--accent'))), 'background-image-opacity': 1 } },
+    { selector: 'node[typ="datei"]', style: { shape: 'round-rectangle', width: 'data(w)', height: 'data(h)', 'background-color': tok('--node'), 'border-width': 1, 'border-color': tok('--edge'), label: 'data(label)', 'line-height': 1.35, 'text-margin-y': 7,
+      'background-image': [bild(SYMBOL_CODE(tok('--accent'))), bild(SYMBOL_EDITOR(tok('--accent'))), bild(SCHLOSS_ZU(tok('--muted')))],
+      'background-fit': ['none', 'none', 'none'], 'background-clip': ['none', 'none', 'none'], 'background-width': [13, 13, 13], 'background-height': [13, 13, 13],
+      'background-position-x': ['100%', '100%', '100%'], 'background-position-y': ['0%', '0%', '0%'], 'background-offset-x': [-41, -23, -5], 'background-offset-y': [5, 5, 5], 'background-image-opacity': [0.85, 0.85, 0.7] } },
+    { selector: 'node[typ="datei"].offen', style: { 'background-image': [bild(SYMBOL_CODE(tok('--accent'))), bild(SYMBOL_EDITOR(tok('--accent'))), bild(SCHLOSS_AUF(tok('--accent')))], 'background-image-opacity': [0.85, 0.85, 1] } },
+    { selector: 'node[typ="paket"]', style: { shape: 'round-rectangle', 'background-color': tok('--pkg'), 'border-width': 1, 'border-color': tok('--line'), label: 'data(label)', 'text-valign': 'top', 'text-margin-y': -4, color: tok('--muted'), 'font-family': 'IBM Plex Mono, monospace', 'font-size': 10.5, padding: 14 } },
+    { selector: 'node[typ="paketblatt"]', style: { shape: 'round-rectangle', width: 150, height: 44, 'background-color': tok('--node'), 'border-width': 1, 'border-color': tok('--edge'), label: 'data(label)', 'font-family': 'IBM Plex Mono, monospace', 'font-size': 11 } },
+    { selector: 'node[typ="modul"]', style: { shape: 'round-rectangle', 'background-color': tok('--mod'), 'border-width': 1.5, 'border-color': tok('--edge'), label: 'data(label)', 'text-valign': 'top', 'text-margin-y': -6, 'font-size': 13, 'font-weight': 600, padding: 18 } },
+    { selector: 'node[typ="modul"][einzeln]', style: { width: 150, height: 70, 'text-valign': 'center', 'text-margin-y': 0, 'background-color': tok('--node'), 'line-height': 1.5 } },
+    { selector: 'node[typ="adr"]', style: { shape: 'cut-rectangle', width: 210, height: 46, 'background-color': tok('--adr-soft'), 'border-width': 1.5, 'border-color': tok('--adr'), label: 'data(label)', 'font-size': 10.5, color: tok('--fg') } },
+    { selector: 'node.markiert', style: { 'border-color': tok('--accent'), 'border-width': 2 } },
+    { selector: '.kette-an node.erreicht', style: { 'border-color': tok('--warn'), 'border-style': 'dashed', 'border-width': 2.5 } },
+    { selector: 'edge', style: { 'curve-style': 'bezier', width: 'data(breite)', 'line-color': tok('--edge'), 'target-arrow-color': tok('--edge'), 'target-arrow-shape': 'triangle', 'arrow-scale': 0.9, label: 'data(label)', 'font-size': 10, color: tok('--muted'), 'font-family': f, 'text-background-color': tok('--panel'), 'text-background-opacity': 0.9, 'text-background-padding': 2, 'text-rotation': 'autorotate' } },
+    { selector: 'edge[art="gradle"]', style: { 'font-size': 11 } },
+    { selector: 'edge[art="ruft"]', style: { 'line-color': tok('--edge'), 'target-arrow-color': tok('--edge'), 'line-style': 'solid', 'curve-style': 'unbundled-bezier', 'control-point-distances': [-30], 'control-point-weights': [0.5] } },
+    { selector: 'edge[art="gemeinsam"]', style: { 'line-style': 'dashed', 'target-arrow-shape': 'none', 'line-color': tok('--muted'), 'curve-style': 'unbundled-bezier', 'control-point-distances': [60], 'control-point-weights': [0.5] } },
+    { selector: 'edge[art="adr"]', style: { 'line-style': 'dotted', 'line-color': tok('--adr'), 'target-arrow-color': tok('--adr'), width: 1.6 } },
+    { selector: '.zyk-an edge.zyk', style: { 'line-color': tok('--crit'), 'target-arrow-color': tok('--crit'), width: 2.6 } },
+    { selector: '.kette-an edge[art="ruft"]', style: { 'line-color': tok('--warn'), 'target-arrow-color': tok('--warn'), width: 2.6, color: tok('--warn') } },
+    { selector: '.hot-an node.hot', style: { 'border-color': tok('--warn'), 'border-width': 3.5, 'background-color': tok('--warn-soft'), 'font-weight': 600 } },
+    { selector: '.aus', style: { display: 'none' } },
+    { selector: '.blass', style: { opacity: parseFloat(tok('--o-blass')) } },
+    { selector: '.n1', style: { opacity: parseFloat(tok('--o-n1')) } },
+    { selector: '.n2', style: { opacity: parseFloat(tok('--o-n2')) } },
+    { selector: 'node.hl', style: { 'overlay-color': tok('--accent'), 'overlay-opacity': 0.14, 'overlay-padding': 6 } },
+    { selector: 'edge.hl', style: { 'line-color': tok('--accent'), 'target-arrow-color': tok('--accent'), width: 3 } },
+    { selector: 'node:selected', style: { 'border-color': tok('--accent'), 'border-width': 3 } },
+    { selector: 'edge.fluss', style: { 'line-style': 'dashed', 'line-dash-pattern': [8, 6] } },
+    { selector: 'edge.fluss2', style: { 'line-style': 'dashed', 'line-dash-pattern': [5, 6], width: 1.8, opacity: 0.7 } },
+    { selector: 'edge.raus', style: { 'line-color': tok('--accent'), 'target-arrow-color': tok('--accent') } },
+    { selector: 'edge.rein', style: { 'line-color': tok('--fg'), 'target-arrow-color': tok('--fg') } },
+    { selector: 'edge.einstieg', style: { 'line-color': tok('--accent'), 'target-arrow-color': tok('--accent'), width: 2, opacity: 0.9, label: 'Einstieg', color: tok('--accent') } },
+    { selector: 'edge.schnitt', style: { label: 'hier trennen: löst den Zyklus', color: tok('--crit'), 'font-weight': 600 } },
+    { selector: 'edge:selected', style: { 'line-color': tok('--accent'), 'target-arrow-color': tok('--accent'), width: 4, color: tok('--fg') } }
+  ];
+}
+
+const cy = cytoscape({ container: document.getElementById('cy'), style: stil(), elements: [], wheelSensitivity: 0.25, minZoom: 0.3, maxZoom: 1.6, boxSelectionEnabled: false, autoungrabify: false });
+const wurzel = document.getElementById('cy');
+
+// Sperre: standardmäßig ist alles gesperrt, einzelne Elemente lassen sich über ihr Schloss lösen
+let alleOffen = false; const offen = new Set();
+const SVG_ZU = SCHLOSS_ZU('currentColor'), SVG_AUF = SCHLOSS_AUF('currentColor');
+function sperren() {
+  cy.nodes().forEach(n => { const o = alleOffen || offen.has(n.id()); o ? n.unlock() : n.lock(); n.toggleClass('offen', o); });
+  const b = document.getElementById('schloss');
+  const text = alleOffen ? 'Alle entsperrt' : offen.size ? offen.size + ' entsperrt' : 'Alle gesperrt';
+  b.innerHTML = (alleOffen || offen.size ? SVG_AUF : SVG_ZU) + text;
+  b.setAttribute('aria-pressed', String(!(alleOffen || offen.size)));
+  b.title = alleOffen || offen.size ? 'Alle Elemente sperren' : 'Alle Elemente zum Verschieben entsperren';
+}
+document.getElementById('schloss').addEventListener('click', () => { alleOffen = !(alleOffen || offen.size); offen.clear(); sperren(); });
+function symbolGetroffen(n, pos) {
+  const bb = n.boundingBox({ includeLabels: false, includeOverlays: false });
+  if (pos.y < bb.y1 - 2 || pos.y > bb.y1 + 21 || pos.x > bb.x2 + 2) return null;
+  const ab = bb.x2 - pos.x;
+  if (ab <= 21) return 'schloss';
+  if (n.data('typ') !== 'datei') return null;
+  if (ab <= 39) return 'editor';
+  if (ab <= 57) return 'code';
+  return null;
+}
+function zeichne() {
+  cy.elements().remove();
+  cy.add(elemente());
+  cy.layout({ name: 'preset', fit: true, padding: 36 }).run();
+  sperren();
+  filter();
+  document.querySelectorAll('.leiste .seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.ebene === ebene)));
+}
+function filter() {
+  ['import', 'ruft', 'gemeinsam', 'adr'].forEach(a => cy.edges('[art="' + a + '"]').toggleClass('aus', !an('k-' + a)));
+  cy.nodes('[typ="adr"]').toggleClass('aus', !an('k-adr'));
+  cy.style(stilMitSchaltern());
+}
+function stilMitSchaltern() {
+  // Überlagerungen schalten Regeln ein oder aus
+  return stil().filter(r => {
+    if (r.selector.startsWith('.zyk-an')) return an('u-zyklus');
+    if (r.selector.startsWith('.kette-an')) return an('u-kette');
+    if (r.selector.startsWith('.hot-an')) return an('u-hotspot');
+    return true;
+  }).map(r => ({ selector: r.selector.replace(/^\.(zyk|kette|hot)-an /, ''), style: r.style }));
+}
+
+// ---------- Seitenleiste ----------
+const seite = document.getElementById('seite');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const nameVon = id => (datei[id] || paket[id] || modul[id] || adr[id] || {}).name || id;
+
+function uebersicht() {
+  const items = DEUTUNG.einschaetzungen.map(e => {
+    const b = BEFUNDE[e.befund];
+    return `<li><button data-befund="${e.befund}"><span class="prio ${b.farbe}">${e.prio}</span><span class="bt">${esc(e.titel)}</span><span class="bm">${esc(b.beleg)}</span><span class="bd">${esc(e.vorschlag)}</span></button></li>`;
+  }).join('');
+  seite.innerHTML = `
+    <div><h2>Was zuerst?</h2><p class="leer">Klick auf einen Befund hebt ihn im Geflecht hervor, Klick auf einen Knoten oder Pfeil zeigt Details.</p></div>
+    <div><h3 class="quelle-d">Befunde, gewichtet <em>deutung.json</em></h3><ol class="befunde">${items}</ol></div>
+    <div><h3 class="quelle-m">Auf einen Blick <em>daidalos.json</em></h3>
+      <table>
+        <tr><td>Module · Pakete · Dateien</td><td>3 · 7 · 11</td></tr>
+        <tr><td>Zyklen (Datei / Paket / Modul)</td><td>1 / 1 / 0</td></tr>
+        <tr><td>Markierte Dateien</td><td>3</td></tr>
+        <tr><td>Ungeprüfte Ketten</td><td>2</td></tr>
+        <tr><td>ADR-Verweise (sicher / unscharf)</td><td>2 / 1</td></tr>
+        <tr><td>detekt-Bericht</td><td>${FAKTEN.detekt.stand}</td></tr>
+      </table></div>`;
+  seite.querySelectorAll('[data-befund]').forEach(b => b.addEventListener('click', () => zeigeBefund(b.dataset.befund)));
+}
+
+function verbindungen(id) {
+  const raus = FAKTEN.kanten.filter(k => k[0] === id), rein = FAKTEN.kanten.filter(k => k[1] === id);
+  const fmt = (k, r) => { const ziel = r ? k[1] : k[0]; return `<li><a class="zur" data-knoten="${ziel}" title="Zu ${esc(nameVon(ziel))} springen">${esc(nameVon(ziel))}</a> <span class="leer">${k[2] === 'import' ? '' : k[2] === 'gemeinsam' ? 'gemeinsam geändert' : k[2] === 'adr' ? 'ADR-Verweis' : k[2]}</span></li>`; };
+  return `<div><h3 class="quelle-m">Nutzt <em>${raus.length}</em></h3>${raus.length ? '<ul class="liste">' + raus.map(k => fmt(k, true)).join('') + '</ul>' : '<p class="leer">nichts</p>'}</div>
+          <div><h3 class="quelle-m">Wird genutzt von <em>${rein.length}</em></h3>${rein.length ? '<ul class="liste">' + rein.map(k => fmt(k, false)).join('') + '</ul>' : '<p class="leer">niemandem</p>'}</div>`;
+}
+function befundeZu(id) {
+  const l = DEUTUNG.einschaetzungen.filter(e => BEFUNDE[e.befund].knoten.includes(id));
+  if (!l.length) return '';
+  return `<div><h3 class="quelle-d">Befunde <em>deutung.json</em></h3><div class="chips">${l.map(e => `<a class="zur chip ${BEFUNDE[e.befund].farbe === 'muted' ? '' : BEFUNDE[e.befund].farbe}" data-befund="${e.befund}">${e.prio}. ${esc(e.titel)}</a>`).join('')}</div></div>`;
+}
+function details(id) {
+  const zurueck = '<a class="zur" id="zurueck">← Übersicht</a>';
+  let html = '';
+  if (datei[id]) {
+    const d = datei[id], p = paket[d.paket];
+    const fk = FAKTEN.funktionen[id];
+    const det = FAKTEN.detekt.funde.filter(f => f.datei === id);
+    const adrs = FAKTEN.kanten.filter(k => k[2] === 'adr' && k[1] === id);
+    html = `${zurueck}
+      <div><div class="kopfzeile"><h2>${esc(d.name)}</h2><div class="symbole"><button id="zeige-code" title="Code in Daidalos anzeigen">${SVG_CODE}Code</button><button id="oeffne-editor" title="In VS Code öffnen">${SVG_EDITOR}VS Code</button></div></div><p class="pfad">${esc(pfadVon(id))}</p>
+      ${d.mark.length ? '<div class="chips" style="margin-top:6px">' + d.mark.map(m => `<span class="chip">${m}</span>`).join('') + '</div>' : ''}</div>
+      <div><h3 class="quelle-d">Beschreibung <em>deutung.json</em></h3><p class="deut">${esc(DEUTUNG[id] || '')}</p></div>
+      ${verbindungen(id)}
+      <div><h3 class="quelle-m">Messwerte <em>daidalos.json</em></h3><table>
+        <tr><td>Zeilen</td><td>${d.zeilen}</td></tr><tr><td>höchste Komplexität einer Funktion</td><td>${d.komplex}</td></tr>
+        <tr><td>Änderungen in 90 Tagen</td><td>${d.aenderungen}</td></tr><tr><td>Fan-in · Fan-out</td><td>${d.fanIn} · ${d.fanOut}</td></tr>
+        <tr><td>Hotspot-Wert (Änderungen × Komplexität)</td><td>${d.hitze}</td></tr></table></div>
+      ${fk ? `<div><h3 class="quelle-m">Funktionen <em>daidalos.json</em></h3><ul class="liste">${fk.map(([n, m]) => `<li><code>${n}</code> ${m === 'erreicht' ? '<span class="chip warn">unmarkiert, aus Strichpfad erreicht</span>' : m ? '<span class="chip">' + m + '</span>' : ''}</li>`).join('')}</ul></div>` : ''}
+      ${det.length ? `<div><h3 class="quelle-m">detekt <em>${FAKTEN.detekt.stand}</em></h3>${det.map(f => `<p class="kette"><code>${f.regel}</code><br>Zeile ${f.zeile}: ${esc(f.text)}</p>`).join('')}</div>` : ''}
+      ${adrs.length ? `<div><h3 class="quelle-m">Entscheidungen <em>daidalos.json</em></h3><ul class="liste">${adrs.map(k => `<li><code>${adr[k[0]].name}</code> ${esc(adr[k[0]].titel)} <span class="leer">${k[3].sicher ? 'sicher' : 'unscharf'}</span></li>`).join('')}</ul></div>` : ''}
+      ${befundeZu(id)}`;
+  } else if (paket[id] || modul[id]) {
+    const istM = !!modul[id];
+    const fs = FAKTEN.dateien.filter(d => istM ? modulVon(d.id) === id : d.paket === id);
+    let extra = '';
+    if (istM) {
+      const ca = FAKTEN.gradle.filter(g => g.nach === id).length, ce = FAKTEN.gradle.filter(g => g.von === id).length;
+      extra = `<tr><td>abhängige Module (Ca) · genutzte (Ce)</td><td>${ca} · ${ce}</td></tr><tr><td>Instabilität Ce / (Ca + Ce)</td><td>${(ce / ((ca + ce) || 1)).toFixed(2)}</td></tr>`;
+    }
+    html = `${zurueck}
+      <div><h2>${esc(nameVon(id))}</h2><p class="pfad">${istM ? 'Gradle-Modul' : 'Paket in ' + esc(modul[paket[id].modul].name)}</p></div>
+      <div><h3 class="quelle-d">Beschreibung <em>deutung.json</em></h3><p class="deut">${esc(DEUTUNG[id] || '')}</p></div>
+      <div><h3 class="quelle-m">Messwerte <em>daidalos.json</em></h3><table>
+        <tr><td>Dateien · Zeilen</td><td>${fs.length} · ${fs.reduce((s, d) => s + d.zeilen, 0)}</td></tr>${extra}
+        <tr><td>in einem Zyklus</td><td>${fs.filter(d => sccDatei[d.id]).length} Dateien</td></tr></table></div>
+      <div><h3 class="quelle-m">Dateien</h3><ul class="liste">${fs.map(d => `<li><a class="zur" data-knoten="${d.id}">${esc(d.name)}</a></li>`).join('')}</ul></div>`;
+  } else if (adr[id]) {
+    const a = adr[id], ks = FAKTEN.kanten.filter(k => k[0] === id);
+    html = `${zurueck}
+      <div><h2>${a.name} · ${esc(a.titel)}</h2><p class="pfad">docs/adr/${a.name.toLowerCase()}.md · ${a.status}</p></div>
+      <div><h3 class="quelle-d">Kurzfassung <em>deutung.json</em></h3><p class="deut">${esc(DEUTUNG[id])}</p></div>
+      <div><h3 class="quelle-m">Verknüpfter Code <em>daidalos.json</em></h3><ul class="liste">${ks.map(k => `<li><a class="zur" data-knoten="${k[1]}">${esc(nameVon(k[1]))}</a> <span class="leer">${k[3].sicher ? 'sicher' : 'unscharf'}: ${esc(k[3].beleg)}</span></li>`).join('')}</ul></div>`;
+  }
+  seite.innerHTML = html;
+  seite.querySelector('#zurueck').addEventListener('click', () => { leeren(); uebersicht(); });
+  const zc = seite.querySelector('#zeige-code'); if (zc) zc.addEventListener('click', () => codeAnsicht(id));
+  const oe = seite.querySelector('#oeffne-editor'); if (oe) oe.addEventListener('click', () => imEditor(id, ersteFun(id)));
+  seite.querySelectorAll('[data-befund]').forEach(b => b.addEventListener('click', () => zeigeBefund(b.dataset.befund)));
+  seite.querySelectorAll('[data-knoten]').forEach(b => b.addEventListener('click', () => { setzeEbene('datei'); waehle(b.dataset.knoten); }));
+}
+
+// ---------- Hervorheben ----------
+const pfadinfo = document.getElementById('pfadinfo');
+// Fluss-Animation: Striche wandern in Pfeilrichtung, nur auf hervorgehobenen Kanten
+let flussKanten = cy.collection(), flussKanten2 = cy.collection(), flussLauf = 0, flussVersatz = 0, flussZuletzt = 0;
+const ruhig = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+function flussStart(ek, ek2) {
+  flussKanten = ek.filter(e => e.data('art') !== 'gemeinsam' && e.data('art') !== 'adr');
+  flussKanten.addClass('fluss');
+  flussKanten2 = ek2 || cy.collection();
+  flussKanten2.addClass('fluss2');
+  if (ruhig() || flussLauf) return;
+  const schritt = t => {
+    if (!flussKanten.length && !flussKanten2.length) { flussLauf = 0; return; }
+    if (t - flussZuletzt > 33) { flussVersatz = (flussVersatz - 1.2) % 1400; flussKanten.style('line-dash-offset', flussVersatz); flussKanten2.style('line-dash-offset', flussVersatz * 0.6); flussZuletzt = t; }
+    flussLauf = requestAnimationFrame(schritt);
+  };
+  flussLauf = requestAnimationFrame(schritt);
+}
+function flussStopp() { flussKanten.removeClass('fluss').removeStyle('line-dash-offset'); flussKanten2.removeClass('fluss2').removeStyle('line-dash-offset'); flussKanten = cy.collection(); flussKanten2 = cy.collection(); if (flussLauf) cancelAnimationFrame(flussLauf); flussLauf = 0; }
+function leeren() { flussStopp(); cy.elements().removeClass('blass hl einstieg schnitt n1 n2 rein raus'); cy.elements().unselect(); pfadinfo.hidden = true; }
+function heraus(knotenIds, kanten) {
+  leeren();
+  const nk = cy.collection(knotenIds.map(i => cy.getElementById(i)).filter(e => e.length));
+  const vorfahren = nk.ancestors();
+  const ek = kanten || nk.edgesWith(nk);
+  cy.elements().not(nk).not(vorfahren).not(ek).addClass('blass');
+  nk.addClass('hl'); ek.addClass('hl');
+  flussStart(ek);
+  cy.stop(true, true);
+  cy.animate({ fit: { eles: nk.union(ek), padding: 70 }, duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 300 });
+}
+function zeigeBefund(b) {
+  setzeEbene('datei');
+  const B = BEFUNDE[b];
+  let ek;
+  if (b === 'k1' || b === 'k2') ek = cy.edges('[art="ruft"]').filter(e => e.data('kette') === b);
+  if (b === 'gemeinsam') ek = cy.edges('[art="gemeinsam"]');
+  if (b === 'zyklus') ek = cy.edges('.zyk');
+  heraus(B.knoten, ek);
+  if (b === 'zyklus') {
+    const ring = new Set(B.knoten);
+    const rein = cy.edges('[art="import"]').filter(e => !ring.has(e.source().id()) && ring.has(e.target().id()) && !e.hasClass('aus'));
+    rein.removeClass('blass').addClass('einstieg'); rein.sources().removeClass('blass'); rein.sources().ancestors().removeClass('blass');
+    const stellenVon = e => (SYMBOLE[e.source().id() + '>' + e.target().id()] || []).reduce((n, y) => n + y[1].length, 0);
+    const moeglich = ek.filter(e => loestZyklus(e.source().id(), e.target().id())).sort((x, y) => stellenVon(x) - stellenVon(y));
+    const schnitt = moeglich.slice(0, 1);
+    schnitt.addClass('schnitt');
+    cy.stop(true, true); cy.fit(ek.union(rein).connectedNodes(), 90);
+    pfadinfo.textContent = 'Kreislauf: ' + B.beleg + ' · Einstieg von ' + [...new Set(rein.sources().map(n => nameVon(n.id())))].join(', ') + ' · am günstigsten trennen bei ' + schnitt.map(e => nameVon(e.source().id()) + ' → ' + nameVon(e.target().id()) + ' (' + stellenVon(e) + ' Stelle)').join(', ');
+    pfadinfo.hidden = false;
+  }
+  if (b === 'k1' || b === 'k2') { pfadinfo.textContent = FAKTEN.ketten[b].mark + ': ' + B.beleg; pfadinfo.hidden = false; }
+}
+// Fokus: gewählte Datei voll, direkte Nachbarn gut sichtbar, zwei Schritte entfernt halb, der Rest blass
+function fokus(id) {
+  leeren();
+  const n = cy.getElementById(id); if (!n.length) return;
+  const sichtbar = e => !e.hasClass('aus');
+  const e1 = n.connectedEdges().filter(sichtbar);
+  const n1 = e1.connectedNodes().not(n);
+  const e2 = n1.connectedEdges().filter(sichtbar).not(e1);
+  const n2 = e2.connectedNodes().not(n).not(n1);
+  const nah = n.union(n1).union(n2);
+  cy.elements().not(nah).not(nah.ancestors()).not(e1).not(e2).addClass('blass');
+  n1.addClass('n1'); n2.addClass('n2'); e2.addClass('n2');
+  n.addClass('hl'); e1.addClass('hl');
+  // Zweite Stufe nur dort, wo sie eine Kette durch die gewählte Datei fortsetzt:
+  // aufwärts, wer die Nutzer nutzt; abwärts, worauf die Abhängigkeiten bauen
+  const fliesst = e => (e.data('art') === 'import' || e.data('art') === 'ruft') && sichtbar(e);
+  const rein1 = e1.filter(e => fliesst(e) && e.target().same(n)), raus1 = e1.filter(e => fliesst(e) && e.source().same(n));
+  const rein2 = rein1.sources().incomers('edge').filter(e => fliesst(e) && !e.source().same(n)).not(e1);
+  const raus2 = raus1.targets().outgoers('edge').filter(e => fliesst(e) && !e.target().same(n)).not(e1);
+  rein1.union(rein2).addClass('rein'); raus1.union(raus2).addClass('raus');
+  rein2.union(raus2).removeClass('n2');
+  flussStart(e1, rein2.union(raus2));
+  if (n.data('typ') === 'datei') {
+    pfadinfo.innerHTML = `<span style="color:var(--fg)">■</span> wer ${esc(nameVon(id))} nutzt: ${rein1.length} direkt, ${rein2.length} eine Stufe weiter · <span style="color:var(--accent)">■</span> worauf sie baut: ${raus1.length} direkt, ${raus2.length} eine Stufe weiter`;
+    pfadinfo.hidden = false;
+  }
+  n.select();
+  cy.stop(true, true);
+  cy.animate({ fit: { eles: n.union(n1), padding: 60 }, duration: ruhig() ? 0 : 300 });
+}
+function waehle(id) { fokus(id); details(id); }
+
+cy.on('tap', 'node', e => { const n = e.target;
+  const sym = symbolGetroffen(n, e.position);
+  if (sym === 'code') { leeren(); heraus([n.id()], n.connectedEdges(':visible')); n.select(); codeAnsicht(n.id()); return; }
+  if (sym === 'editor') { imEditor(n.id(), ersteFun(n.id())); return; }
+  if (sym === 'schloss') {
+    const o = !(alleOffen || offen.has(n.id()));
+    if (alleOffen && !o) { alleOffen = false; cy.nodes().forEach(m => { if (m.id() !== n.id()) offen.add(m.id()); }); }
+    o ? offen.add(n.id()) : offen.delete(n.id());
+    sperren(); return;
+  }
+  if (ebene !== 'datei' && n.data('typ') !== 'datei') { fokus(n.id()); details(n.id()); return; } waehle(n.id()); });
+cy.on('tap', e => { if (e.target === cy) { leeren(); uebersicht(); } });
+cy.on('tap', 'edge', e => { const k = e.target; heraus([k.source().id(), k.target().id()], k); k.select(); kanteDetails(k); });
+
+function kanteDetails(k) {
+  const art = k.data('art'), a = k.data('source'), b = k.data('target');
+  const kopf = (t, u) => `<div><h2>${t}</h2><p class="pfad">${u}</p></div>`;
+  const pfeil = (x, y, z = '→') => esc(nameVon(x)) + ' ' + z + ' ' + esc(nameVon(y));
+  const liste = ks => '<ul class="liste">' + ks.map(x => `<li><code>${pfeil(x[0], x[1])}</code> <span class="leer">${(SYMBOLE[x[0] + '>' + x[1]] || []).map(s => s[0]).join(', ')}</span></li>`).join('') + '</ul>';
+  let html = '<a class="zur" id="zurueck">← Übersicht</a>';
+  let befundKnoten = [a, b];
+  if (art === 'gradle') {
+    const unter = imports.filter(x => modulVon(x[0]) === a && modulVon(x[1]) === b);
+    html += kopf(pfeil(a, b), 'Gradle-Abhängigkeit · ' + esc(k.data('label').split(' · ')[0]));
+    html += `<div><h3 class="quelle-m">Getragen von <em>${unter.length} Importen</em></h3>${liste(unter)}</div>`;
+    html += `<div><h3 class="quelle-m">Richtung <em>build.gradle.kts</em></h3><p>Erlaubt laut den project(...)-Zeilen. Ein Verstoß fiele schon beim Bauen auf, Daidalos zeigt die Richtung nur.</p></div>`;
+    befundKnoten = [];
+  } else if (ebene === 'paket') {
+    const unter = imports.filter(x => datei[x[0]].paket === a && datei[x[1]].paket === b);
+    const rueck = imports.some(x => datei[x[0]].paket === b && datei[x[1]].paket === a);
+    html += kopf(pfeil(a, b), 'Verbindung zwischen Paketen');
+    html += `<div><h3 class="quelle-m">Messwerte <em>daidalos.json</em></h3><table>
+      <tr><td>Importe</td><td>${unter.length}</td></tr><tr><td>Gegenrichtung vorhanden</td><td>${rueck ? 'ja' : 'nein'}</td></tr>
+      <tr><td>Teil eines Paket-Zyklus</td><td>${k.hasClass('zyk') ? 'ja' : 'nein'}</td></tr></table></div>`;
+    html += `<div><h3 class="quelle-m">Getragen von</h3>${liste(unter)}</div>`;
+    befundKnoten = [];
+  } else {
+    const x = FAKTEN.kanten[k.data('ki')][3] || {};
+    if (art === 'adr') {
+      html += kopf(esc(adr[a].name) + ' → ' + esc(nameVon(b)), 'ADR-Verweis · ' + (x.sicher ? 'sicher erkannt' : 'unscharf aufgelöst'));
+      html += `<div><h3 class="quelle-m">Beleg <em>daidalos.json</em></h3><p>${esc(x.beleg)}</p></div>`;
+      html += `<div><h3 class="quelle-d">Entscheidung <em>deutung.json</em></h3><p class="deut">${esc(adr[a].titel)}. ${esc(DEUTUNG[a])}</p></div>`;
+    } else if (art === 'gemeinsam') {
+      html += kopf(pfeil(a, b, '↔'), 'gemeinsam geändert, ohne Import');
+      html += `<div><h3 class="quelle-m">Messwerte <em>git log, 90 Tage</em></h3><table>
+        <tr><td>gemeinsame Commits</td><td>${x.anzahl}</td></tr><tr><td>Änderungen ${esc(nameVon(a))}</td><td>${datei[a].aenderungen}</td></tr>
+        <tr><td>Änderungen ${esc(nameVon(b))}</td><td>${datei[b].aenderungen}</td></tr><tr><td>Importe zwischen beiden</td><td>0</td></tr></table></div>`;
+      html += `<div><h3 class="quelle-d">Einschätzung <em>deutung.json</em></h3><p class="deut">${esc(DEUTUNG.einschaetzungen.find(e => e.befund === 'gemeinsam').text)}</p></div>`;
+    } else if (art === 'ruft') {
+      const kt = FAKTEN.ketten[x.kette];
+      html += kopf(pfeil(a, b), 'Aufruf aus markiertem Code · ' + kt.mark);
+      html += `<div><h3 class="quelle-m">Aufrufkette <em>daidalos.json</em></h3><p class="kette">${kt.schritte.map((s, j) => `<code>${s}</code>${j === 0 ? ' <span class="chip">' + kt.mark + '</span>' : ' <span class="chip warn">unmarkiert</span>'}`).join('<br>↓<br>')}</p></div>`;
+      const e2 = DEUTUNG.einschaetzungen.find(e => e.befund === x.kette);
+      html += `<div><h3 class="quelle-d">Einschätzung <em>deutung.json</em></h3><p class="deut">${esc(e2.text)} ${esc(e2.vorschlag)}</p></div>`;
+    } else {
+      const sy = SYMBOLE[a + '>' + b] || [];
+      const stellen = sy.reduce((s, y) => s + y[1].length, 0);
+      const pa = datei[a].paket, pb = datei[b].paket, ma = modulVon(a), mb = modulVon(b);
+      let lage = 'im selben Paket';
+      if (ma !== mb) lage = 'über die Modulgrenze, über ' + FAKTEN.gradle.find(g => g.von === ma && g.nach === mb).art;
+      else if (pa !== pb) lage = 'zwischen zwei Paketen';
+      const zyk = !!(sccDatei[a] && sccDatei[a] === sccDatei[b]);
+      const rueck = imports.some(y => y[0] === b && y[1] === a);
+      html += kopf(pfeil(a, b), 'Import · ' + lage);
+      html += `<div><h3 class="quelle-m">Genutzt <em>daidalos.json</em></h3><ul class="liste">${sy.map(y => `<li><code>${esc(y[0])}</code> <span class="leer">Zeile ${y[1].join(', ')}</span></li>`).join('')}</ul></div>`;
+      html += `<div><h3 class="quelle-m">Messwerte <em>daidalos.json</em></h3><table>
+        <tr><td>Stellen in ${esc(nameVon(a))}</td><td>${stellen}</td></tr>
+        <tr><td>Teil eines Zyklus</td><td>${zyk ? 'ja' : 'nein'}</td></tr>
+        ${zyk ? `<tr><td>Wegfall löst den Zyklus</td><td>${loestZyklus(a, b) ? 'ja' : 'nein'}</td></tr>` : ''}
+        ${pa !== pb ? `<tr><td>einzige Verbindung der beiden Pakete</td><td>${(paketKanten[pa + '>' + pb] || 0) === 1 ? 'ja' : 'nein'}</td></tr>` : ''}
+        <tr><td>Gegenrichtung vorhanden</td><td>${rueck ? 'ja' : 'nein'}</td></tr>
+        <tr><td>gemeinsam geändert (90 Tage)</td><td>${gemeinsam(a, b)} Mal</td></tr></table></div>`;
+      if (KANTEN_DEUTUNG[a + '>' + b]) html += `<div><h3 class="quelle-d">Einschätzung <em>deutung.json</em></h3><p class="deut">${esc(KANTEN_DEUTUNG[a + '>' + b])}</p></div>`;
+    }
+  }
+  const bf = befundKnoten.length ? DEUTUNG.einschaetzungen.filter(e => befundKnoten.every(n => BEFUNDE[e.befund].knoten.includes(n))) : [];
+  if (bf.length) html += `<div><h3 class="quelle-d">Befunde <em>deutung.json</em></h3><div class="chips">${bf.map(e => `<a class="zur chip ${BEFUNDE[e.befund].farbe === 'muted' ? '' : BEFUNDE[e.befund].farbe}" data-befund="${e.befund}">${e.prio}. ${esc(e.titel)}</a>`).join('')}</div></div>`;
+  if (ebene === 'datei' && art !== 'adr') html += `<div><h3>Enden</h3><ul class="liste"><li><a class="zur" data-knoten="${a}">${esc(nameVon(a))}</a></li><li><a class="zur" data-knoten="${b}">${esc(nameVon(b))}</a></li></ul></div>`;
+  seite.innerHTML = html;
+  seite.querySelector('#zurueck').addEventListener('click', () => { leeren(); uebersicht(); });
+  seite.querySelectorAll('[data-befund]').forEach(x => x.addEventListener('click', () => zeigeBefund(x.dataset.befund)));
+  seite.querySelectorAll('[data-knoten]').forEach(x => x.addEventListener('click', () => waehle(x.dataset.knoten)));
+}
+
+// ---------- Pfad-Suche ----------
+const vonSel = document.getElementById('von'), nachSel = document.getElementById('nach');
+FAKTEN.dateien.forEach(d => { vonSel.add(new Option(d.name, d.id)); nachSel.add(new Option(d.name, d.id)); });
+vonSel.value = 'f:MainActivity'; nachSel.value = 'f:Punkt';
+document.getElementById('pfad-los').addEventListener('click', () => {
+  setzeEbene('datei');
+  const r = cy.elements('node[typ="datei"], edge[art="import"], edge[art="ruft"]').aStar({ root: '#' + vonSel.value, goal: '#' + nachSel.value, directed: true });
+  if (!r.found) { leeren(); pfadinfo.textContent = nameVon(vonSel.value) + ' hängt nicht an ' + nameVon(nachSel.value) + '.'; pfadinfo.hidden = false; return; }
+  heraus(r.path.nodes().map(n => n.id()), r.path.edges());
+  pfadinfo.textContent = r.path.nodes().map(n => nameVon(n.id())).join(' → ');
+  pfadinfo.hidden = false;
+});
+
+// ---------- Schalter ----------
+function setzeEbene(e) { if (ebene !== e) { ebene = e; zeichne(); } }
+document.querySelectorAll('.leiste .seg button').forEach(b => b.addEventListener('click', () => { ebene = b.dataset.ebene; zeichne(); uebersicht(); }));
+document.querySelectorAll('.leiste input[type="checkbox"]').forEach(c => c.addEventListener('change', () => {
+  if (ebene === 'datei' && (c.id === 'u-detekt' || c.id === 'u-hotspot')) cy.nodes('[typ="datei"]').forEach(n => { const d = datei[n.id()]; const g = groesse(d); n.data({ label: dateiLabel(d), w: g.w, h: g.h }); });
+  filter();
+}));
+const themaNeu = () => cy.style(stilMitSchaltern());
+// Darstellung: Dunkel ist Standard, die Wahl merkt sich der Browser
+function setzeThema(t) {
+  if (t === 'system') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', t);
+  document.querySelectorAll('.thema button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.thema === t)));
+  try { localStorage.setItem('daidalos-thema', t); } catch (e) {}
+}
+let gemerkt = null; try { gemerkt = localStorage.getItem('daidalos-thema'); } catch (e) {}
+document.querySelectorAll('.thema button').forEach(b => b.addEventListener('click', () => setzeThema(b.dataset.thema)));
+setzeThema(gemerkt || 'dark');
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', themaNeu);
+new MutationObserver(themaNeu).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+if (document.fonts) document.fonts.ready.then(themaNeu);
+window.addEventListener('resize', () => cy.resize());
+
+zeichne();
+uebersicht();
+</script>
+
+</body></html>

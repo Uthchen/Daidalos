@@ -1,7 +1,8 @@
 # Datenformat
 
-Stand 2026-11-22 (A04). Diese Datei beschreibt `daidalos.json` (Ausgabe des Programms) und
-`daidalos.toml` (Konfiguration im Zielrepo). Jede Änderung am Format wird hier nachgetragen;
+Stand 2026-11-22 (A04). Diese Datei beschreibt `daidalos.json` (Ausgabe des Programms),
+`deutung.json` (Ausgabe des Skills, vom Programm nur gelesen) und `daidalos.toml` (Konfiguration im
+Zielrepo). Jede Änderung am Format wird hier nachgetragen;
 inkompatible Änderungen erhöhen `schema`.
 
 ## `daidalos.json`, `schema: 1`
@@ -198,8 +199,7 @@ Module, Pakete und Ordner tragen zusätzlich:
 ### Gruppen-Hash
 
 `hash` eines Moduls, Pakets oder Ordners ist `sha256:` + SHA-256 (hex) über die Zeilen
-`<pfad> <hash>` aller seiner Dateien (auch fremde und Test-Dateien), sortiert und mit `
-`
+`<pfad> <hash>` aller seiner Dateien (auch fremde und Test-Dateien), sortiert und mit `\n`
 verbunden, UTF-8. Dateien ohne `hash` (Lesefehler) gehen mit leerem Hash ein. Ändert sich eine
 Datei, kommt hinzu oder fällt weg, ändert sich der Gruppen-Hash. Die Deutung erkennt daran
 veraltete Beschreibungen.
@@ -335,6 +335,72 @@ internem Präfix, die nicht aufgelöst werden konnten.
 Gleicher Stand des Zielrepos ergibt eine byte-gleiche Datei: UTF-8 ohne BOM, Zeilenende LF,
 Einrückung 2, Schlüssel sortiert, abschließender Zeilenumbruch. Keine Zeitstempel, keine absoluten
 Pfade, keine Rechnernamen. Die Laufzeit erscheint nur auf stdout.
+
+## `deutung.json`, `schema: 1`
+
+Ablage: `<zielrepo>/docs/daidalos/deutung.json`. Geschrieben nur vom Skill (ab A06), gelesen von
+`daidalos render`. Enthält nur Gedeutetes und verweist über Ids auf die Messung.
+
+```json
+{
+  "schema": 1,
+  "beschreibungen": {
+    "modul::core": { "text": "Fachlicher Kern ohne Android.", "hash": "sha256:…" }
+  },
+  "bereiche": [
+    { "id": "bereich:zeichen-pipeline", "name": "Zeichen-Pipeline", "beschreibung": "…",
+      "knoten": ["paket::core/de.beispiel.zeichnen"] }
+  ],
+  "einschaetzungen": [
+    { "befund": "befund:zyklus:datei:produktiv:3fa2c81b0d4e", "prioritaet": 1, "titel": "…",
+      "begruendung": "…", "vorschlag": "…" }
+  ],
+  "kanten": {
+    "kante:nutzt:datei:a.kt->datei:b.kt:produktiv": { "text": "Diese Verbindung schließt den Zyklus …" }
+  }
+}
+```
+
+| Feld | Bedeutung |
+| --- | --- |
+| `schema` | Formatversion, derzeit `1`; ein anderer Wert oder ungültiges JSON beendet `render` mit Exit-Code 2 |
+| `beschreibungen` | Knoten-Id → `text` und `hash`. `hash` ist der Hash des Knotens zum Zeitpunkt der Deutung (Datei-Hash bzw. Gruppen-Hash) |
+| `bereiche` | Liste mit `id`, `name`, `beschreibung` und `knoten` (Knoten-Ids). A04 zeigt sie nur als Liste |
+| `einschaetzungen` | je Befund `prioritaet` (ganze Zahl, 1 = zuerst), `titel`, `begruendung`, `vorschlag` |
+| `kanten` | Kanten-Id → `text`; die Karte zeigt die Texte ab A05 |
+
+Alle Felder außer `schema` sind optional.
+
+**Abgleich beim Lesen:**
+
+- Eine Beschreibung gilt als **veraltet**, wenn ihr `hash` nicht gleich dem aktuellen `hash` des
+  Knotens ist (auch wenn er fehlt). Sie wird trotzdem gezeigt, mit dem Vermerk „veraltet“.
+- Verweise auf Knoten-, Befund- oder Kanten-Ids, die es in der Messung nicht gibt, werden
+  übersprungen und als Warnung auf stderr gemeldet. Bereiche bleiben erhalten, nur ihre toten
+  Verweise fallen weg.
+- Unbekannte Schlüssel auf oberster Ebene: Warnung, kein Abbruch.
+- Einschätzungen werden nach `prioritaet` sortiert (ohne Priorität ans Ende, Gleichstand nach
+  Befund-Id), Bereiche nach `name`.
+
+## `karte.html` und `KARTE.md`
+
+`daidalos render` schreibt beide Dateien deterministisch (UTF-8, LF, keine Zeitstempel, keine
+absoluten Pfade).
+
+- `karte.html` ist eine einzige, offline lauffähige Datei: Vorlage, CSS und Skript aus
+  `src/daidalos/karte/`, die Bibliotheken aus `src/daidalos/karte/vendor/` mit ihren Lizenztexten
+  als HTML-Kommentar und zwei Datenblöcke `<script type="application/json">`:
+  `id="daidalos-daten"` (die Messung unverändert, kompakt, Schlüssel sortiert) und
+  `id="daidalos-deutung"` (die abgeglichene Deutung mit `veraltet` je Beschreibung, sonst `null`).
+  In beiden Blöcken ist jedes `<` als `<` geschrieben, damit Inhalte das Script-Tag nicht
+  beenden können. Quelltext wird nicht eingebettet.
+- Auf der Dateiebene der Karte stehen Quellcode-Dateien (`kotlin`, `java`, `c`, `cpp`) und jede
+  Datei mit einer `nutzt`- oder `jni`-Kante. Bei mehr als 150 solcher Dateien sind nur
+  ausgeklappte Module zu sehen.
+- **Sprungadressen:** `karte.html#knoten=<id>`, `#befund=<id>`, `#ebene=modul|paket|datei`; Ids
+  URL-kodiert (`encodeURIComponent`). Die Adresse folgt der Auswahl.
+- `KARTE.md` fasst Module, Gradle-Abhängigkeiten, Bereiche und Befunde zusammen; jede Erwähnung
+  eines Knotens oder Befunds verlinkt auf seine Sprungadresse.
 
 ## `daidalos.toml`, Format v1
 
