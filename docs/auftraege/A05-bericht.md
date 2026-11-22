@@ -23,7 +23,7 @@ Stand 2026-11-22. Branch `auftrag/a05-bedienung`, nicht nach `main` gemergt.
 | Tests | 198 Tests (1 unter Windows übersprungen wie bisher), davon 22 in der Browser-Probe: Sperren/Verschieben/Neuladen/Zurücksetzen/globales Schloss, Gruppe mit gesperrtem Kind, Fokus-Stufen hell und dunkel, Fluss an/aus und Stufe 2, `reduced-motion`, Kantenklick (echter Mausklick), verdichtete und Gradle-Kante, Sprung mit Ebenenwechsel und Zurück, Sprung mit Ausklappen (künstlich großes Projekt), Pfad-Suche für alle Knotenpaare aller Ebenen gegen `pfad.suche_weg` und über die Leiste gegen `daidalos pfad --json`, Editor-Link aus `file://` (Pfad mit Leerzeichen und Umlaut) und ausgegraut ohne `file://`, Weitere Ordner, Plugin-Kanten, blasse Paket-Kanten. Python: `loesende_kanten`, `[editor].link`, Einbettung, `wurzel`. |
 
 Lokal unter Windows: `ruff check`, `ruff format --check`, `pytest` (mit Browser-Probe) grün. CI
-siehe Push.
+grün unter Ubuntu (mit Browser-Probe) und Windows (Lauf 45050665404).
 
 ## Kantenführung (A5)
 
