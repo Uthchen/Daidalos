@@ -319,7 +319,8 @@ Ordner aus lauter Fremdcode) werden vorher entfernt.
 | `knoten` | Mitglieder, sortiert |
 | `kanten` | Ids der Kanten innerhalb der Komponente, sortiert |
 | `einstiege` | `[{ "knoten": …, "quellen": [ … ] }]`: Mitglieder mit eingehender Kante von außerhalb |
-| `trennstelle` | Kante mit dem kleinsten Gewicht (Gleichstand: Id), nach deren Entfernen die Komponente nicht mehr stark zusammenhängt; sonst `null` |
+| `loesende_kanten` | seit A05: Ids aller Kanten der Komponente, deren Wegfall allein sie zerfallen lässt (nicht mehr stark zusammenhängend), nach Id sortiert; leer, wenn keine einzelne Kante genügt |
+| `trennstelle` | die Kante aus `loesende_kanten` mit dem kleinsten Gewicht (Gleichstand: Id); sonst `null` |
 | `kleinste_trennmenge` | nur bei `trennstelle: null` und höchstens 8 Kanten: kleinste Kantenmenge (dann kleinstes Gesamtgewicht, dann Ids) mit derselben Wirkung |
 | `unsicher` | ob eine unsichere Kante beteiligt ist |
 | `enthaelt_produktiv` | nur bei Rolle `mit-tests`: Ids der produktiven Zyklen, die in diesem aufgehen |
@@ -392,13 +393,30 @@ absoluten Pfade).
   als HTML-Kommentar und zwei Datenblöcke `<script type="application/json">`:
   `id="daidalos-daten"` (die Messung unverändert, kompakt, Schlüssel sortiert) und
   `id="daidalos-deutung"` (die abgeglichene Deutung mit `veraltet` je Beschreibung, sonst `null`).
-  In beiden Blöcken ist jedes `<` als `<` geschrieben, damit Inhalte das Script-Tag nicht
-  beenden können. Quelltext wird nicht eingebettet.
-- Auf der Dateiebene der Karte stehen Quellcode-Dateien (`kotlin`, `java`, `c`, `cpp`) und jede
-  Datei mit einer `nutzt`- oder `jni`-Kante. Bei mehr als 150 solcher Dateien sind nur
-  ausgeklappte Module zu sehen.
-- **Sprungadressen:** `karte.html#knoten=<id>`, `#befund=<id>`, `#ebene=modul|paket|datei`; Ids
-  URL-kodiert (`encodeURIComponent`). Die Adresse folgt der Auswahl.
+  Seit A05 ein dritter Block `id="daidalos-einstellungen"` mit Einstellungen, die keine Messung
+  sind: `{ "editor_link": "vscode://file/{pfad}:{zeile}", "wurzel": "../.." }`. `editor_link`
+  stammt aus `[editor].link`; `wurzel` ist der relative Weg vom Ausgabeordner zur Wurzel des
+  Zielrepos (`../..` im Standardordner `docs/daidalos/`), `null`, wenn der Ausgabeordner nicht im
+  Zielrepo liegt. In allen Blöcken ist jedes `<` als `\u003c` geschrieben, damit Inhalte das
+  Script-Tag nicht beenden können. Quelltext wird nicht eingebettet.
+- Auf der Dateiebene der Karte stehen Quellcode-Dateien (`kotlin`, `java`, `c`, `cpp`, ohne
+  Gradle-Skripte `*.gradle.kts`) und jede Datei mit einer `nutzt`- oder `jni`-Kante. Bei mehr als
+  150 solcher Dateien sind nur ausgeklappte Module zu sehen.
+- Auf der Modulebene werden Ordner ohne Dateien der Karte und ohne Kanten zu einem Kasten
+  „Weitere Ordner“ (Id `sammel:ordner`) zusammengefasst; `gradle-plugin`-Kanten sind standardmäßig
+  ausgeblendet (Vermerk „Plugin für n Module“ am Ziel, Schalter „Plugins“).
+- **Sprungadressen:** `karte.html#knoten=<id>`, `#befund=<id>`, `#ebene=modul|paket|datei`,
+  `#ebene=<e>&kante=<id>` (gemessene Kanten-Id oder Id einer verdichteten Kante der Karte) und
+  `#ebene=<e>&von=<id>&nach=<id>` (Pfad-Suche); Ids URL-kodiert (`encodeURIComponent`). Die Adresse
+  folgt der Auswahl, jede neue Auswahl ist ein Eintrag im Browser-Verlauf.
+- **Im Editor öffnen:** Die Karte setzt den Link zur Laufzeit zusammen: Verzeichnis der eigenen
+  `file://`-Adresse plus `wurzel` plus Pfad der Datei. `{pfad}` ist der absolute Pfad mit `/`, ohne
+  führenden Schrägstrich (`E:/Repo/app/A.kt`, unter Linux `home/u/repo/app/A.kt`), jedes Segment
+  URL-kodiert außer dem Laufwerk; `{zeile}` ist die Zeile (Datei-Kasten: 1, Beleg: seine Zeile).
+  Ohne `file://` oder ohne `wurzel` sind die Editor-Symbole ausgegraut.
+- **Gemerkte Positionen** (nur im Browser): `localStorage` unter
+  `daidalos-positionen|<ziel.name>|<ebene>`, Wert `{ "<knoten-id>": [x, y] }` für verschobene
+  Blätter. Unbekannte Ids werden ignoriert; „Anordnung zurücksetzen“ löscht den Eintrag der Ebene.
 - `KARTE.md` fasst Module, Gradle-Abhängigkeiten, Bereiche und Befunde zusammen; jede Erwähnung
   eines Knotens oder Befunds verlinkt auf seine Sprungadresse.
 
@@ -420,6 +438,8 @@ fremd = ["**/src/main/cpp/fremd/"]
 
 [editor]
 befehl = "code -g {datei}:{zeile}"
+# Vorlage für „Im Editor öffnen“ in karte.html
+link = "vscode://file/{pfad}:{zeile}"
 ```
 
 | Schlüssel | Typ | Standard | Bedeutung |
@@ -427,7 +447,8 @@ befehl = "code -g {datei}:{zeile}"
 | `[projekt].name` | nicht leerer Text | Ordnername | Name in `ziel.name` |
 | `[scan].ausschliessen` | Liste von Texten | `[]` | zusätzliche Ausschlüsse |
 | `[scan].fremd` | Liste von Texten | `[]` | Dateien werden erfasst und bekommen `"fremd": true` |
-| `[editor].befehl` | Text | `code -g {datei}:{zeile}` | wird erst später benutzt |
+| `[editor].befehl` | Text | `code -g {datei}:{zeile}` | wird erst später benutzt (`daidalos serve`) |
+| `[editor].link` | Text | `vscode://file/{pfad}:{zeile}` | Editor-Link in `karte.html`; ohne `{pfad}` eine Warnung. `daidalos render` liest ihn (Option `--konfiguration` wie bei `scan`) |
 
 - Unbekannte Abschnitte und Schlüssel: Warnung auf stderr, kein Abbruch.
 - Falsche Typen oder ungültiges TOML: Fehlermeldung mit Dateiname und Schlüssel, Exit-Code 2.

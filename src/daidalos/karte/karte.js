@@ -581,8 +581,9 @@
 
   function hebeKanteHervor(e) {
     const ids = [e.source().id(), e.target().id()];
-    fokus(ids, { titel: name(e.source().data('ref') || ids[0]) + ' und ' + name(e.target().data('ref') || ids[1]), ohneZeile: true });
+    fokus(ids, { titel: name(e.source().data('ref') || ids[0]) + ' und ' + name(e.target().data('ref') || ids[1]), ohneZeile: true, ohneZoom: true });
     e.removeClass('blass n1 n2').addClass('kgewaehlt');
+    passen(e.union(e.connectedNodes()), 80);
     pfadinfo.textContent = name(e.source().data('ref') || ids[0]) + ' → ' + name(e.target().data('ref') || ids[1]) + ' · ' + kurzArt(e.data('art')) + ' · Gewicht ' + e.data('gewicht');
     pfadinfo.hidden = false;
   }
