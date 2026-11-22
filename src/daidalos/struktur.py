@@ -5,6 +5,7 @@ Verbindet Gradle-Adapter, Kotlin-Adapter, Auflöser, JNI und Zyklen-Analyse.
 
 from __future__ import annotations
 
+import hashlib
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
@@ -181,7 +182,10 @@ def baue_struktur(ziel: Path, dateien: list[Knoten], warne: Warner = warne_stder
     befunde.extend(jni_befunde)
 
     paket_kanten = _verdichte(datei_kanten, {d["id"]: d.get("paket") for d in dateien})
-    modul_kanten = _verdichte(datei_kanten, {d["id"]: d.get("modul") for d in dateien})
+    # Ordner stehen auf der Modulebene neben den Modulen.
+    modul_kanten = _verdichte(
+        datei_kanten, {d["id"]: d.get("modul") or d.get("ordner") for d in dateien}
+    )
     kanten.extend(paket_kanten)
     kanten.extend(modul_kanten)
 
@@ -190,6 +194,7 @@ def baue_struktur(ziel: Path, dateien: list[Knoten], warne: Warner = warne_stder
     befunde.extend(
         _zyklen(knoten, dateien, datei_kanten + jni_kanten, paket_kanten, modul_kanten, kanten)
     )
+    _ergaenze_metriken(knoten, dateien, kanten)
 
     kanten.sort(key=lambda k: (k["von"], k["nach"], k["art"], k["id"]))
     knoten.sort(key=lambda k: k["id"])
@@ -240,6 +245,44 @@ def _paket_und_ordner_knoten(dateien: list[Knoten], kotlin: dict[str, KotlinDate
         if mitglieder[knoten_id] and all(d.get("fremd") for d in mitglieder[knoten_id]):
             knoten["fremd"] = True
     return list(ergebnis.values())
+
+
+def gruppen_hash(dateien: list[Knoten]) -> str:
+    """SHA-256 über die sortierten Zeilen ``<pfad> <hash>`` der Dateien einer Gruppe."""
+    zeilen = sorted(f"{d['pfad']} {d.get('hash', '')}" for d in dateien)
+    return "sha256:" + hashlib.sha256("\n".join(zeilen).encode("utf-8")).hexdigest()
+
+
+def kopplung(fan_in: int, fan_out: int) -> dict[str, Any]:
+    gesamt = fan_in + fan_out
+    return {
+        "fan_in": fan_in,
+        "fan_out": fan_out,
+        "instabilitaet": round(fan_out / gesamt, 3) if gesamt else None,
+    }
+
+
+def _ergaenze_metriken(knoten: list[Knoten], dateien: list[Knoten], kanten: list[Kante]) -> None:
+    """Kopplung je Knoten, dazu Zeilen, Dateien und Hash für Module, Pakete und Ordner."""
+    rein: dict[str, set[str]] = defaultdict(set)
+    raus: dict[str, set[str]] = defaultdict(set)
+    for k in kanten:
+        if k["art"] == "nutzt" and k["rolle"] == PRODUKTIV:
+            raus[k["von"]].add(k["nach"])
+            rein[k["nach"]].add(k["von"])
+    mitglieder: dict[str, list[Knoten]] = defaultdict(list)
+    for datei in dateien:
+        for feld in ("modul", "ordner", "paket"):
+            if feld in datei:
+                mitglieder[datei[feld]].append(datei)
+    for k in [*knoten, *dateien]:
+        k["metriken"] = kopplung(len(rein[k["id"]]), len(raus[k["id"]]))
+        if k["art"] == "datei":
+            continue
+        eigene = [d for d in mitglieder[k["id"]] if not d.get("fremd")]
+        k["dateien"] = len(eigene)
+        k["zeilen"] = sum(d.get("zeilen", 0) for d in eigene)
+        k["hash"] = gruppen_hash(mitglieder[k["id"]])
 
 
 # ---------------------------------------------------------------- Kanten
@@ -439,4 +482,31 @@ def _zyklen(
         befunde += zyklus_befunde(
             "modul", rolle, _graph_kanten(gradle_kanten, nur_produktiv), fremd, kantenart="gradle"
         )
-    return befunde
+    return nur_neue_test_zyklen(befunde)
+
+
+def nur_neue_test_zyklen(befunde: list[Befund]) -> list[Befund]:
+    """Zyklen „mit Tests“ nur, wenn ihre Mitgliedermenge nicht schon produktiv vorkommt.
+
+    Ein Test-Zyklus, der produktive Zyklen derselben Ebene enthält, bekommt
+    ``enthaelt_produktiv`` mit deren Ids.
+    """
+
+    def ebene(b: Befund) -> tuple[str, str | None]:
+        return (b["beleg"]["ebene"], b["beleg"].get("kantenart"))
+
+    produktiv = [b for b in befunde if b["beleg"]["rolle"] == PRODUKTIV]
+    ergebnis: list[Befund] = []
+    for b in befunde:
+        if b["beleg"]["rolle"] != ROLLE_MIT_TESTS:
+            ergebnis.append(b)
+            continue
+        menge = set(b["knoten"])
+        gleiche_ebene = [p for p in produktiv if ebene(p) == ebene(b)]
+        if any(set(p["knoten"]) == menge for p in gleiche_ebene):
+            continue
+        enthalten = sorted(p["id"] for p in gleiche_ebene if set(p["knoten"]) <= menge)
+        if enthalten:
+            b["beleg"]["enthaelt_produktiv"] = enthalten
+        ergebnis.append(b)
+    return ergebnis

@@ -50,73 +50,6 @@
           "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt",
           "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt"
         ],
-        "rolle": "mit-tests",
-        "trennstelle": "kante:nutzt:datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt:produktiv",
-        "unsicher": false
-      },
-      "id": "befund:zyklus:datei:mit-tests:c55399e18586",
-      "knoten": [
-        "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt",
-        "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt"
-      ],
-      "quelle": "daidalos",
-      "regel": "zyklus",
-      "schwere": "warnung"
-    },
-    {
-      "beleg": {
-        "ebene": "datei",
-        "einstiege": [
-          {
-            "knoten": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt",
-            "quellen": [
-              "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt"
-            ]
-          }
-        ],
-        "kanten": [
-          "kante:nutzt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt:produktiv",
-          "kante:nutzt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt:produktiv",
-          "kante:nutzt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt:produktiv"
-        ],
-        "knoten": [
-          "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt",
-          "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt",
-          "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt"
-        ],
-        "rolle": "mit-tests",
-        "trennstelle": "kante:nutzt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt:produktiv",
-        "unsicher": false
-      },
-      "id": "befund:zyklus:datei:mit-tests:f45327fbce97",
-      "knoten": [
-        "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt",
-        "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt",
-        "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt"
-      ],
-      "quelle": "daidalos",
-      "regel": "zyklus",
-      "schwere": "warnung"
-    },
-    {
-      "beleg": {
-        "ebene": "datei",
-        "einstiege": [
-          {
-            "knoten": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt",
-            "quellen": [
-              "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt"
-            ]
-          }
-        ],
-        "kanten": [
-          "kante:nutzt:datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt:produktiv",
-          "kante:nutzt:datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt:produktiv"
-        ],
-        "knoten": [
-          "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt",
-          "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt"
-        ],
         "rolle": "produktiv",
         "trennstelle": "kante:nutzt:datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt:produktiv",
         "unsicher": false
@@ -160,38 +93,6 @@
         "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt",
         "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt",
         "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt"
-      ],
-      "quelle": "daidalos",
-      "regel": "zyklus",
-      "schwere": "warnung"
-    },
-    {
-      "beleg": {
-        "ebene": "paket",
-        "einstiege": [
-          {
-            "knoten": "paket::kern-labor/beispiel.kern.labor.protokoll",
-            "quellen": [
-              "paket::anwendung/beispiel.anwendung"
-            ]
-          }
-        ],
-        "kanten": [
-          "kante:nutzt:paket::kern-labor/beispiel.kern.labor.messung->paket::kern-labor/beispiel.kern.labor.protokoll:produktiv",
-          "kante:nutzt:paket::kern-labor/beispiel.kern.labor.protokoll->paket::kern-labor/beispiel.kern.labor.messung:produktiv"
-        ],
-        "knoten": [
-          "paket::kern-labor/beispiel.kern.labor.messung",
-          "paket::kern-labor/beispiel.kern.labor.protokoll"
-        ],
-        "rolle": "mit-tests",
-        "trennstelle": "kante:nutzt:paket::kern-labor/beispiel.kern.labor.protokoll->paket::kern-labor/beispiel.kern.labor.messung:produktiv",
-        "unsicher": false
-      },
-      "id": "befund:zyklus:paket:mit-tests:99e6584ba329",
-      "knoten": [
-        "paket::kern-labor/beispiel.kern.labor.messung",
-        "paket::kern-labor/beispiel.kern.labor.protokoll"
       ],
       "quelle": "daidalos",
       "regel": "zyklus",
@@ -1281,6 +1182,11 @@
       "bytes": 134,
       "hash": "sha256:e6aa307fd6b8f545138f572aec4abf0e7caf9ef63af0ca9bc8634318e965b21c",
       "id": "datei:README.md",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
       "ordner": "ordner:.",
       "pfad": "README.md",
       "rolle": "produktiv",
@@ -1292,6 +1198,11 @@
       "bytes": 271,
       "hash": "sha256:9e5e08381beea39f74d94a58e185270858f590f9c8f940b54b8923c9e74299ea",
       "id": "datei:anwendung/build.gradle.kts",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
       "modul": "modul::anwendung",
       "pfad": "anwendung/build.gradle.kts",
       "rolle": "produktiv",
@@ -1303,6 +1214,11 @@
       "bytes": 257,
       "hash": "sha256:d4ce78a89358102df5764073691057f6aa707a82b99658e74c3086d6826806a6",
       "id": "datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt",
+      "metriken": {
+        "fan_in": 1,
+        "fan_out": 3,
+        "instabilitaet": 0.75
+      },
       "modul": "modul::anwendung",
       "paket": "paket::anwendung/beispiel.anwendung",
       "pfad": "anwendung/src/main/kotlin/beispiel/anwendung/Start.kt",
@@ -1317,6 +1233,11 @@
       "fremd": true,
       "hash": "sha256:8f8454b0976785ed84a3117aab9103a606ae81e15fb66dd7667cda045632407b",
       "id": "datei:anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt",
+      "metriken": {
+        "fan_in": 1,
+        "fan_out": 1,
+        "instabilitaet": 0.5
+      },
       "modul": "modul::anwendung",
       "paket": "paket::anwendung/beispiel.anwendung.fremd",
       "pfad": "anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt",
@@ -1330,6 +1251,11 @@
       "bytes": 170,
       "hash": "sha256:fbe6cb8915a623072c14193bc97c8d9cb8bff199c14e4e2b85278fe5403d251b",
       "id": "datei:anwendung/src/test/kotlin/beispiel/anwendung/StartTest.kt",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
       "modul": "modul::anwendung",
       "paket": "paket::anwendung/beispiel.anwendung",
       "pfad": "anwendung/src/test/kotlin/beispiel/anwendung/StartTest.kt",
@@ -1343,6 +1269,11 @@
       "bytes": 172,
       "hash": "sha256:d28ccc26867d2df6191350acf01c56607fc16df280e30f4b2cbc9c39b87d582c",
       "id": "datei:build.gradle.kts",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
       "ordner": "ordner:.",
       "pfad": "build.gradle.kts",
       "rolle": "produktiv",
@@ -1354,6 +1285,11 @@
       "bytes": 60,
       "hash": "sha256:8d0ca7c811be2c4eb3afb1016cc82be20e127c2363fa797a5bf745f3f833eb7d",
       "id": "datei:daidalos.toml",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
       "ordner": "ordner:.",
       "pfad": "daidalos.toml",
       "rolle": "produktiv",
@@ -1365,6 +1301,11 @@
       "bytes": 270,
       "hash": "sha256:1fb95931010fcc24efe764e26fd633780f090f933fbae823c4bbb50ee8f34154",
       "id": "datei:kern-labor/build.gradle.kts",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
       "modul": "modul::kern-labor",
       "pfad": "kern-labor/build.gradle.kts",
       "rolle": "produktiv",
@@ -1376,6 +1317,11 @@
       "bytes": 307,
       "hash": "sha256:6c14b2c5ee8fade9cc1ae05034236eea322282bc6921c5bcf871eeabb4078810",
       "id": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 4,
+        "instabilitaet": 1.0
+      },
       "modul": "modul::kern-labor",
       "paket": "paket::kern-labor/beispiel.kern.labor.messung",
       "pfad": "kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt",
@@ -1389,6 +1335,11 @@
       "bytes": 285,
       "hash": "sha256:24662785873949f85296981c085f6cd755e5780ad5edf3a562a4ef4f43544b64",
       "id": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt",
+      "metriken": {
+        "fan_in": 2,
+        "fan_out": 2,
+        "instabilitaet": 0.5
+      },
       "modul": "modul::kern-labor",
       "paket": "paket::kern-labor/beispiel.kern.labor.messung",
       "pfad": "kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt",
@@ -1402,6 +1353,11 @@
       "bytes": 180,
       "hash": "sha256:47d74efd83a00e816e5db10e72a277fdb7357e7908cbd32b2906c074f17b6b26",
       "id": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt",
+      "metriken": {
+        "fan_in": 1,
+        "fan_out": 1,
+        "instabilitaet": 0.5
+      },
       "modul": "modul::kern-labor",
       "paket": "paket::kern-labor/beispiel.kern.labor.protokoll",
       "pfad": "kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt",
@@ -1415,6 +1371,11 @@
       "bytes": 119,
       "hash": "sha256:6ede18da4019981394e175ac7f5c8a36bc3cbf10303a72024629f04dff4b43c7",
       "id": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Journal.kt",
+      "metriken": {
+        "fan_in": 1,
+        "fan_out": 0,
+        "instabilitaet": 0.0
+      },
       "modul": "modul::kern-labor",
       "paket": "paket::kern-labor/beispiel.kern.labor.protokoll",
       "pfad": "kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Journal.kt",
@@ -1428,6 +1389,11 @@
       "bytes": 242,
       "hash": "sha256:33bb9f583ebebf5fd86d164f9dd7b6d17a51297c536aefd72c793b36990ce739",
       "id": "datei:kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
       "modul": "modul::kern-labor",
       "paket": "paket::kern-labor/beispiel.kern.labor.messung",
       "pfad": "kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt",
@@ -1441,6 +1407,11 @@
       "bytes": 79,
       "hash": "sha256:8925b0a20ee2e3e2c6fba8b60201f0f4e9c1905e34af68ab58eb6a5373f52bc3",
       "id": "datei:kern/build.gradle.kts",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
       "modul": "modul::kern",
       "pfad": "kern/build.gradle.kts",
       "rolle": "produktiv",
@@ -1452,6 +1423,11 @@
       "bytes": 64,
       "hash": "sha256:5ef9e7a2256bdd7cfacd9f2d152fa57bb74b92151740e4653939328c78b8866f",
       "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt",
+      "metriken": {
+        "fan_in": 3,
+        "fan_out": 0,
+        "instabilitaet": 0.0
+      },
       "modul": "modul::kern",
       "paket": "paket::kern/beispiel.kern",
       "pfad": "kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt",
@@ -1465,6 +1441,11 @@
       "bytes": 198,
       "hash": "sha256:23e31125c50adf4bd8fc16a324019fd858ed14d43181824e163889f26c1772b7",
       "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt",
+      "metriken": {
+        "fan_in": 1,
+        "fan_out": 2,
+        "instabilitaet": 0.667
+      },
       "modul": "modul::kern",
       "paket": "paket::kern/beispiel.kern",
       "pfad": "kern/src/commonMain/kotlin/beispiel/kern/Strich.kt",
@@ -1478,6 +1459,11 @@
       "bytes": 220,
       "hash": "sha256:7f17304976b80e241c292d2dd37045637e06a549e881c0c3f2218c9fa5d069b4",
       "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt",
+      "metriken": {
+        "fan_in": 2,
+        "fan_out": 1,
+        "instabilitaet": 0.333
+      },
       "modul": "modul::kern",
       "paket": "paket::kern/beispiel.kern",
       "pfad": "kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt",
@@ -1491,6 +1477,11 @@
       "bytes": 113,
       "hash": "sha256:66f78acdae44132b2ec79eba6abacc3b242fad8df23504e651028e768bcfec93",
       "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt",
+      "metriken": {
+        "fan_in": 2,
+        "fan_out": 1,
+        "instabilitaet": 0.333
+      },
       "modul": "modul::kern",
       "paket": "paket::kern/beispiel.kern.zyklus",
       "pfad": "kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt",
@@ -1504,6 +1495,11 @@
       "bytes": 154,
       "hash": "sha256:1e2fb5301acb1fbdc7ce241ea57462690b0b1b43138ecc54fb49c37706d0b39c",
       "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt",
+      "metriken": {
+        "fan_in": 1,
+        "fan_out": 1,
+        "instabilitaet": 0.5
+      },
       "modul": "modul::kern",
       "paket": "paket::kern/beispiel.kern.zyklus",
       "pfad": "kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt",
@@ -1517,6 +1513,11 @@
       "bytes": 108,
       "hash": "sha256:3ef923f62a3d2d603455ff4b6574de75eeba3a6d1a36f70e764f8f77b7f5a2e5",
       "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt",
+      "metriken": {
+        "fan_in": 1,
+        "fan_out": 1,
+        "instabilitaet": 0.5
+      },
       "modul": "modul::kern",
       "paket": "paket::kern/beispiel.kern.zyklus",
       "pfad": "kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt",
@@ -1530,6 +1531,11 @@
       "bytes": 97,
       "hash": "sha256:6cc07367c21dc4d888ab825827445e6e2085385e3c83c6f90e81f9306732e2f3",
       "id": "datei:nativ/build.gradle.kts",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
       "modul": "modul::nativ",
       "pfad": "nativ/build.gradle.kts",
       "rolle": "produktiv",
@@ -1541,6 +1547,11 @@
       "bytes": 206,
       "hash": "sha256:b474eadadcb582b509643e56082c8e549c70d895ed8cd90354fa7398091a4f62",
       "id": "datei:nativ/src/main/cpp/insel_jni.c",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
       "modul": "modul::nativ",
       "pfad": "nativ/src/main/cpp/insel_jni.c",
       "quellsatz": "main",
@@ -1553,6 +1564,11 @@
       "bytes": 117,
       "hash": "sha256:ae052e055da192b5a4e2f970c8db6efcd030419096e1eba412050609abd789ed",
       "id": "datei:nativ/src/main/kotlin/beispiel/nativ/Insel.kt",
+      "metriken": {
+        "fan_in": 1,
+        "fan_out": 0,
+        "instabilitaet": 0.0
+      },
       "modul": "modul::nativ",
       "paket": "paket::nativ/beispiel.nativ",
       "pfad": "nativ/src/main/kotlin/beispiel/nativ/Insel.kt",
@@ -1566,6 +1582,11 @@
       "bytes": 30,
       "hash": "sha256:8affd4e517a905cfc7bc43575c3ab65bc5a558ec8c10568573554489681c6ce6",
       "id": "datei:regeln/build.gradle.kts",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
       "modul": "modul::regeln",
       "pfad": "regeln/build.gradle.kts",
       "rolle": "produktiv",
@@ -1577,6 +1598,11 @@
       "bytes": 38,
       "hash": "sha256:e18aac8dcf06e6ae994d18e86e9f54714814ca4fb637d79883687284ad7c6490",
       "id": "datei:regeln/src/main/kotlin/beispiel/regeln/Regeln.kt",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
       "modul": "modul::regeln",
       "paket": "paket::regeln/beispiel.regeln",
       "pfad": "regeln/src/main/kotlin/beispiel/regeln/Regeln.kt",
@@ -1590,6 +1616,11 @@
       "bytes": 108,
       "hash": "sha256:866233704892a39eaeb6c6f27f9a3558541c487b884b91b180136ac4812cec65",
       "id": "datei:settings.gradle.kts",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
       "ordner": "ordner:.",
       "pfad": "settings.gradle.kts",
       "rolle": "produktiv",
@@ -1601,6 +1632,11 @@
       "bytes": 40,
       "hash": "sha256:b4b7dedfe474b11eb5a6b294e783cc5cb3f046f0f00209282c7e5f3b6dfefd62",
       "id": "datei:werkzeug/Pruefung.kt",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
       "ordner": "ordner:werkzeug",
       "paket": "paket:ordner:werkzeug/werkzeug",
       "pfad": "werkzeug/Pruefung.kt",
@@ -1610,113 +1646,241 @@
     },
     {
       "art": "modul",
+      "dateien": 3,
       "gradle_pfad": ":anwendung",
+      "hash": "sha256:0c2047c8d48c6c0b6c0337362978e1fdc4e90f8d7cef660e9c1d4a0baa5e978c",
       "id": "modul::anwendung",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 2,
+        "instabilitaet": 1.0
+      },
       "pfad": "anwendung",
       "plugins": [
         "com.android.application"
-      ]
+      ],
+      "zeilen": 30
     },
     {
       "art": "modul",
+      "dateien": 7,
       "gradle_pfad": ":kern",
+      "hash": "sha256:3fea97ba7468732adff2839c7b46f51bb75dd17f2e5beaa478805a9d19c420e0",
       "id": "modul::kern",
+      "metriken": {
+        "fan_in": 2,
+        "fan_out": 0,
+        "instabilitaet": 0.0
+      },
       "pfad": "kern",
       "plugins": [
         "kotlin.multiplatform"
-      ]
+      ],
+      "zeilen": 52
     },
     {
       "art": "modul",
+      "dateien": 6,
       "gradle_pfad": ":kern-labor",
+      "hash": "sha256:12c9bedaa7edaac053fa25d76c35e825a1a636e3e11fddf0a73b408a155cab0f",
       "id": "modul::kern-labor",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 1,
+        "instabilitaet": 1.0
+      },
       "pfad": "kern-labor",
       "plugins": [
         "kotlin.multiplatform"
-      ]
+      ],
+      "zeilen": 61
     },
     {
       "art": "modul",
+      "dateien": 3,
       "gradle_pfad": ":nativ",
+      "hash": "sha256:05c4fe6f91a503b59e3f1770aeb332930ddef48b386bbaaf39c388e2c9239a0f",
       "id": "modul::nativ",
+      "metriken": {
+        "fan_in": 1,
+        "fan_out": 0,
+        "instabilitaet": 0.0
+      },
       "pfad": "nativ",
       "plugins": [
         "com.android.library"
-      ]
+      ],
+      "zeilen": 21
     },
     {
       "art": "modul",
+      "dateien": 2,
       "gradle_pfad": ":regeln",
+      "hash": "sha256:650454fc17953dd0c4c687d41567b4024699feadd194cfb0e3f8929ed0900204",
       "id": "modul::regeln",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
       "pfad": "regeln",
       "plugins": [
         "org.jetbrains.kotlin.jvm"
-      ]
+      ],
+      "zeilen": 6
     },
     {
       "art": "ordner",
+      "dateien": 4,
+      "hash": "sha256:26bd16a6ca809c868a44b92d89e5bfc7c2431cc3d04a32aa0bf0f02953f913ee",
       "id": "ordner:.",
-      "pfad": "."
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
+      "pfad": ".",
+      "zeilen": 21
     },
     {
       "art": "ordner",
+      "dateien": 1,
+      "hash": "sha256:19c0f11f07f910ebb99c8313f0a3dbd13195847c79330a229295de91b7c9eb4d",
       "id": "ordner:werkzeug",
-      "pfad": "werkzeug"
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
+      "pfad": "werkzeug",
+      "zeilen": 3
     },
     {
       "art": "paket",
+      "dateien": 2,
+      "hash": "sha256:d85afffc8b3c3659112bd085adc59862fa161af5e353e65743b9d0c8e10fb9be",
       "id": "paket::anwendung/beispiel.anwendung",
+      "metriken": {
+        "fan_in": 1,
+        "fan_out": 3,
+        "instabilitaet": 0.75
+      },
       "modul": "modul::anwendung",
-      "name": "beispiel.anwendung"
+      "name": "beispiel.anwendung",
+      "zeilen": 18
     },
     {
       "art": "paket",
+      "dateien": 0,
       "fremd": true,
+      "hash": "sha256:69655cf720f0a1fd04a664e73bbb535341e67a47c89db3d5a8aac551ad473a87",
       "id": "paket::anwendung/beispiel.anwendung.fremd",
+      "metriken": {
+        "fan_in": 1,
+        "fan_out": 1,
+        "instabilitaet": 0.5
+      },
       "modul": "modul::anwendung",
-      "name": "beispiel.anwendung.fremd"
+      "name": "beispiel.anwendung.fremd",
+      "zeilen": 0
     },
     {
       "art": "paket",
+      "dateien": 3,
+      "hash": "sha256:1b3bdffe9a815d66383f6e54cb286e72db381c1e23e57d0f6205e21eff51695e",
       "id": "paket::kern-labor/beispiel.kern.labor.messung",
+      "metriken": {
+        "fan_in": 1,
+        "fan_out": 3,
+        "instabilitaet": 0.75
+      },
       "modul": "modul::kern-labor",
-      "name": "beispiel.kern.labor.messung"
+      "name": "beispiel.kern.labor.messung",
+      "zeilen": 31
     },
     {
       "art": "paket",
+      "dateien": 2,
+      "hash": "sha256:76ca75160f8904be680f8d3fe74f0b55a0715ccaa267f95152549cab0562699a",
       "id": "paket::kern-labor/beispiel.kern.labor.protokoll",
+      "metriken": {
+        "fan_in": 1,
+        "fan_out": 1,
+        "instabilitaet": 0.5
+      },
       "modul": "modul::kern-labor",
-      "name": "beispiel.kern.labor.protokoll"
+      "name": "beispiel.kern.labor.protokoll",
+      "zeilen": 14
     },
     {
       "art": "paket",
+      "dateien": 3,
+      "hash": "sha256:172880342bc540690fbdcc0611bf25b9b0048a96ff9110f6d7db09c33b8eb6c4",
       "id": "paket::kern/beispiel.kern",
+      "metriken": {
+        "fan_in": 2,
+        "fan_out": 0,
+        "instabilitaet": 0.0
+      },
       "modul": "modul::kern",
-      "name": "beispiel.kern"
+      "name": "beispiel.kern",
+      "zeilen": 22
     },
     {
       "art": "paket",
+      "dateien": 3,
+      "hash": "sha256:93b31390ad0c4516cb2aa2833f967c19337dbf181d511edd44feb471742191cc",
       "id": "paket::kern/beispiel.kern.zyklus",
+      "metriken": {
+        "fan_in": 1,
+        "fan_out": 0,
+        "instabilitaet": 0.0
+      },
       "modul": "modul::kern",
-      "name": "beispiel.kern.zyklus"
+      "name": "beispiel.kern.zyklus",
+      "zeilen": 23
     },
     {
       "art": "paket",
+      "dateien": 1,
+      "hash": "sha256:6b3248769c738821f6d8cda4f204c188c85460f1bfdd21d7c87c0790ceb15667",
       "id": "paket::nativ/beispiel.nativ",
+      "metriken": {
+        "fan_in": 1,
+        "fan_out": 0,
+        "instabilitaet": 0.0
+      },
       "modul": "modul::nativ",
-      "name": "beispiel.nativ"
+      "name": "beispiel.nativ",
+      "zeilen": 7
     },
     {
       "art": "paket",
+      "dateien": 1,
+      "hash": "sha256:7c3fb9100c25820e5e2b16fd01ae8806af5949cd228af179d8aef1b27f998da7",
       "id": "paket::regeln/beispiel.regeln",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
       "modul": "modul::regeln",
-      "name": "beispiel.regeln"
+      "name": "beispiel.regeln",
+      "zeilen": 3
     },
     {
       "art": "paket",
+      "dateien": 1,
+      "hash": "sha256:19c0f11f07f910ebb99c8313f0a3dbd13195847c79330a229295de91b7c9eb4d",
       "id": "paket:ordner:werkzeug/werkzeug",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
       "name": "werkzeug",
-      "ordner": "ordner:werkzeug"
+      "ordner": "ordner:werkzeug",
+      "zeilen": 3
     }
   ],
   "schema": 1,

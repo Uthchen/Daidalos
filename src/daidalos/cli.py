@@ -95,7 +95,7 @@ def _strukturzeilen(daten: dict[str, Any]) -> list[str]:
         produktiv = zyklen.get((ebene, "produktiv"), 0)
         mit_tests = zyklen.get((ebene, "mit-tests"), 0)
         teile.append(f"{ebene} {produktiv}/{mit_tests}")
-    zeilen.append(f"Zyklen:    {', '.join(teile)} (produktiv/mit Tests)")
+    zeilen.append(f"Zyklen:    {', '.join(teile)} (produktiv/zusätzlich mit Tests)")
     return zeilen
 
 

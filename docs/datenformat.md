@@ -1,6 +1,6 @@
 # Datenformat
 
-Stand 2026-11-22 (A03). Diese Datei beschreibt `daidalos.json` (Ausgabe des Programms) und
+Stand 2026-11-22 (A04). Diese Datei beschreibt `daidalos.json` (Ausgabe des Programms) und
 `daidalos.toml` (Konfiguration im Zielrepo). Jede Änderung am Format wird hier nachgetragen;
 inkompatible Änderungen erhöhen `schema`.
 
@@ -98,6 +98,7 @@ Zeilenumbruch verbunden.
 | `quellsatz` | Text | aus `<modul>/src/<quellsatz>/…`, z. B. `commonMain`, `jvmTest`, `main`, `testMessung`; fehlt sonst |
 | `rolle` | Text | `test`, wenn der Quellsatz `test` oder `Test` enthält (auch `androidTest`), sonst `produktiv` |
 | `paket` | Text | Id des Pakets; nur bei Kotlin-Dateien (`.kt`) mit `package`-Zeile |
+| `metriken` | Objekt | Kopplung, siehe [Metriken](#metriken) |
 
 **Modul einer Datei:** der Modulordner mit dem längsten passenden Pfadpräfix (verschachtelte
 Module). Paketnamen werden dafür nicht herangezogen.
@@ -147,6 +148,7 @@ Auswertung der `include`-Zeilen, mit Warnung.
 | `pfad` | Modulordner relativ zum Zielrepo (`:a:b` → `a/b`) |
 | `gradle_pfad` | z. B. `:core` |
 | `plugins` | aus dem `plugins { }`-Block, sortiert: `alias(libs.plugins.x.y)` → `x.y`, `id("…")` → die Id, `kotlin("jvm")` → `org.jetbrains.kotlin.jvm` |
+| `metriken`, `zeilen`, `dateien`, `hash` | siehe [Metriken](#metriken) und [Gruppen-Hash](#gruppen-hash) |
 
 ### Paket-Knoten
 
@@ -157,12 +159,50 @@ Auswertung der `include`-Zeilen, mit Warnung.
 | `name` | Paketname, z. B. `de.beispiel.zeichnen` |
 | `modul` | Modul-Id; bei Paketen außerhalb von Modulen stattdessen `ordner` |
 | `fremd` | `true`, wenn alle Dateien des Pakets fremd sind |
+| `metriken`, `zeilen`, `dateien`, `hash` | siehe [Metriken](#metriken) und [Gruppen-Hash](#gruppen-hash) |
 
 ### Ordner-Knoten
 
 Für Dateien außerhalb jedes Moduls: `id` `ordner:<erster Pfadteil>`, Dateien direkt im
-Wurzelordner unter `ordner:.`. Felder `id`, `art` (`"ordner"`), `pfad` (erster Pfadteil oder `.`)
-und `fremd` wie bei Paketen.
+Wurzelordner unter `ordner:.`. Felder `id`, `art` (`"ordner"`), `pfad` (erster Pfadteil oder `.`),
+`fremd` wie bei Paketen sowie `metriken`, `zeilen`, `dateien` und `hash` wie bei Modulen.
+Ordner stehen auf der Modulebene neben den Modulen: Ihre Dateien werden wie Moduldateien zu
+`nutzt`-Kanten der Modulebene verdichtet.
+
+### Metriken
+
+Seit A04 tragen alle Knoten der Arten `modul`, `paket`, `datei` und `ordner` das Feld `metriken`:
+
+```json
+"metriken": { "fan_in": 2, "fan_out": 1, "instabilitaet": 0.333 }
+```
+
+| Feld | Bedeutung |
+| --- | --- |
+| `fan_in` | Zahl der **verschiedenen** Knoten mit einer `nutzt`-Kante der Rolle `produktiv` auf diesen Knoten |
+| `fan_out` | Zahl der verschiedenen Knoten, auf die dieser Knoten eine solche Kante hat |
+| `instabilitaet` | `fan_out / (fan_in + fan_out)`, auf 3 Nachkommastellen gerundet; `null` bei 0/0 |
+
+Gezählt wird auf derselben Ebene: Datei-Kanten für Dateien, Paket-Kanten für Pakete,
+Modul-Kanten (Module und Ordner) für Module und Ordner. Gradle-, `jni`- und Test-Kanten zählen
+nicht mit.
+
+Module, Pakete und Ordner tragen zusätzlich:
+
+| Feld | Bedeutung |
+| --- | --- |
+| `dateien` | Zahl der eigenen, nicht fremden Dateien (Test-Dateien zählen mit) |
+| `zeilen` | Summe der `zeilen` dieser Dateien (Dateien ohne `zeilen` zählen 0) |
+| `hash` | Gruppen-Hash, siehe unten |
+
+### Gruppen-Hash
+
+`hash` eines Moduls, Pakets oder Ordners ist `sha256:` + SHA-256 (hex) über die Zeilen
+`<pfad> <hash>` aller seiner Dateien (auch fremde und Test-Dateien), sortiert und mit `
+`
+verbunden, UTF-8. Dateien ohne `hash` (Lesefehler) gehen mit leerem Hash ein. Ändert sich eine
+Datei, kommt hinzu oder fällt weg, ändert sich der Gruppen-Hash. Die Deutung erkennt daran
+veraltete Beschreibungen.
 
 ### Kanten
 
@@ -170,7 +210,7 @@ und `fremd` wie bei Paketen.
 | --- | --- | --- |
 | `gradle-api`, `gradle-impl`, `gradle-test`, `gradle-compileonly`, `gradle-plugin`, `gradle-sonstige` | modul → modul | Projekt-Abhängigkeit aus den Build-Skripten |
 | `nutzt` | datei → datei | Kotlin-Bezug (Import, gleiches Paket, voll qualifiziert) |
-| `nutzt` | paket → paket, modul → modul | Verdichtung der Datei-Kanten, getrennt nach Rolle |
+| `nutzt` | paket → paket, modul/ordner → modul/ordner | Verdichtung der Datei-Kanten, getrennt nach Rolle |
 | `jni` | datei (Kotlin) → datei (C/C++) | `external fun` zu `Java_…` |
 | `enthaelt` | modul/ordner → paket, paket → datei, modul/ordner → datei | Hierarchie |
 
@@ -261,6 +301,12 @@ Abgleich über die JNI-Namensregel mit den Escapes `_1`, `_2`, `_3`, `_0xxxx`; �
 
 Für Fremdcode werden keine Befunde gemeldet.
 
+**Zyklen „mit Tests“ nur, wenn neu (seit A04):** Ein Zyklus-Befund mit Rolle `mit-tests` entfällt,
+wenn es auf derselben Ebene (und Modulebene: derselben `kantenart`) einen produktiven Zyklus mit
+genau derselben Mitgliedermenge gibt. Enthält ein Test-Zyklus produktive Zyklen (ihre Mitglieder
+sind Teilmengen), bleibt er erhalten und bekommt im Beleg `enthaelt_produktiv` mit deren
+Befund-Ids, sortiert.
+
 **`zyklus`:** starke Zusammenhangskomponenten mit mindestens zwei Knoten, je Ebene `datei`, `paket`,
 `modul` und Rolle `produktiv` (nur produktive Kanten) bzw. `mit-tests` (alle Kanten). Datei- und
 Paketebene: Kanten `nutzt` und `jni`. Modulebene: `nutzt` und Gradle getrennt (`kantenart`
@@ -276,6 +322,7 @@ Ordner aus lauter Fremdcode) werden vorher entfernt.
 | `trennstelle` | Kante mit dem kleinsten Gewicht (Gleichstand: Id), nach deren Entfernen die Komponente nicht mehr stark zusammenhängt; sonst `null` |
 | `kleinste_trennmenge` | nur bei `trennstelle: null` und höchstens 8 Kanten: kleinste Kantenmenge (dann kleinstes Gesamtgewicht, dann Ids) mit derselben Wirkung |
 | `unsicher` | ob eine unsichere Kante beteiligt ist |
+| `enthaelt_produktiv` | nur bei Rolle `mit-tests`: Ids der produktiven Zyklen, die in diesem aufgehen |
 
 **`jni-ohne-gegenstueck`:** `{ "funktion": …, "seite": "kotlin" | "c", "zeile": … }`; `funktion`
 ist bei Kotlin der volle Name `paket.Klasse.methode`, bei C der `Java_…`-Name.

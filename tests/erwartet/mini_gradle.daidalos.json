@@ -206,6 +206,11 @@
       "bytes": 6,
       "hash": "sha256:318d9a16533732a69cda7bb7b174ee392fdd15be3d72a114cd8f2d51f3eab510",
       "id": "datei:.gitignore",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
       "ordner": "ordner:.",
       "pfad": ".gitignore",
       "rolle": "produktiv",
@@ -217,6 +222,11 @@
       "bytes": 64,
       "hash": "sha256:d9de48a103bb41940439ffd6a93e047e544f89b9c1094ba1133f51c1920351f5",
       "id": "datei:README.md",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
       "ordner": "ordner:.",
       "pfad": "README.md",
       "rolle": "produktiv",
@@ -228,6 +238,11 @@
       "bytes": 85,
       "hash": "sha256:30910c9358a999cf47193c4ee8888e3c487a449a2cad5d6de76c2b1c31cc3853",
       "id": "datei:app/build.gradle.kts",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
       "modul": "modul::app",
       "pfad": "app/build.gradle.kts",
       "rolle": "produktiv",
@@ -239,6 +254,11 @@
       "bytes": 202,
       "hash": "sha256:21b3a725e4a017ace961133974734f49a48b74cd0a3d36e301f0faa1ebb06ecd",
       "id": "datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 2,
+        "instabilitaet": 1.0
+      },
       "modul": "modul::app",
       "paket": "paket::app/de.beispiel.app",
       "pfad": "app/src/main/kotlin/de/beispiel/app/Haupt.kt",
@@ -252,6 +272,11 @@
       "bytes": 67,
       "hash": "sha256:5d5dee1e960a03f4269c1ef30dc2185d6e438f6752ecf99ee5e014ef35f05207",
       "id": "datei:app/src/main/kotlin/de/beispiel/app/Leiste-crlf.kt",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
       "modul": "modul::app",
       "paket": "paket::app/de.beispiel.app",
       "pfad": "app/src/main/kotlin/de/beispiel/app/Leiste-crlf.kt",
@@ -265,6 +290,11 @@
       "bytes": 30,
       "hash": "sha256:8affd4e517a905cfc7bc43575c3ab65bc5a558ec8c10568573554489681c6ce6",
       "id": "datei:core/build.gradle.kts",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
       "modul": "modul::core",
       "pfad": "core/build.gradle.kts",
       "rolle": "produktiv",
@@ -277,6 +307,11 @@
       "fremd": true,
       "hash": "sha256:17e0aa39e6e0726c8a58a8bb8e1ba276e83e132543cf72d671c2d3613a57c514",
       "id": "datei:core/src/main/cpp/fremd/mini.c",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
       "modul": "modul::core",
       "pfad": "core/src/main/cpp/fremd/mini.c",
       "quellsatz": "main",
@@ -289,6 +324,11 @@
       "bytes": 75,
       "hash": "sha256:69afec09ba4ba129fac3dec89bf7ba4b4d30863deb65a24ae08abc919985a930",
       "id": "datei:core/src/main/kotlin/de/beispiel/zeichnen/Punkt.kt",
+      "metriken": {
+        "fan_in": 2,
+        "fan_out": 0,
+        "instabilitaet": 0.0
+      },
       "modul": "modul::core",
       "paket": "paket::core/de.beispiel.zeichnen",
       "pfad": "core/src/main/kotlin/de/beispiel/zeichnen/Punkt.kt",
@@ -302,6 +342,11 @@
       "bytes": 200,
       "hash": "sha256:a4ef0c17fe2abe04686d6fa0fc0ea6f48e3096ffe90ff6c8bffd5d5598ff6a75",
       "id": "datei:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt",
+      "metriken": {
+        "fan_in": 1,
+        "fan_out": 1,
+        "instabilitaet": 0.5
+      },
       "modul": "modul::core",
       "paket": "paket::core/de.beispiel.zeichnen",
       "pfad": "core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt",
@@ -315,6 +360,11 @@
       "bytes": 71,
       "hash": "sha256:31298265a669097bd944575f98f2989b49706b57066b0c97748a931ca59f90e9",
       "id": "datei:daidalos.toml",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
       "ordner": "ordner:.",
       "pfad": "daidalos.toml",
       "rolle": "produktiv",
@@ -326,6 +376,11 @@
       "bytes": 10,
       "hash": "sha256:c81d09f04358354f883e99a44112117d16a28e02d8538e579a5cae0d343d461a",
       "id": "datei:daten/logo.bin",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
       "ordner": "ordner:daten",
       "pfad": "daten/logo.bin",
       "rolle": "produktiv",
@@ -336,6 +391,11 @@
       "bytes": 60,
       "hash": "sha256:6f31b262121cd37d0b3e745a41b47748e6f5f3da5cf1d1402346c98375e0b272",
       "id": "datei:settings.gradle.kts",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
       "ordner": "ordner:.",
       "pfad": "settings.gradle.kts",
       "rolle": "produktiv",
@@ -344,43 +404,91 @@
     },
     {
       "art": "modul",
+      "dateien": 3,
       "gradle_pfad": ":app",
+      "hash": "sha256:1447cdc489b42824fe4551312794909243c7b7f627aeecb0c6541e16b607150c",
       "id": "modul::app",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 1,
+        "instabilitaet": 1.0
+      },
       "pfad": "app",
       "plugins": [
         "org.jetbrains.kotlin.jvm"
-      ]
+      ],
+      "zeilen": 22
     },
     {
       "art": "modul",
+      "dateien": 3,
       "gradle_pfad": ":core",
+      "hash": "sha256:447f1ccfedbe16e27c417ff5ed4e9ec6a8b664f0bc3ccb992c02f7dde682442b",
       "id": "modul::core",
+      "metriken": {
+        "fan_in": 1,
+        "fan_out": 0,
+        "instabilitaet": 0.0
+      },
       "pfad": "core",
       "plugins": [
         "org.jetbrains.kotlin.jvm"
-      ]
+      ],
+      "zeilen": 17
     },
     {
       "art": "ordner",
+      "dateien": 4,
+      "hash": "sha256:7aa7eaf9ab429041ee37488e3c9c81b9b174bf821399179b1f3e44026ac54b5a",
       "id": "ordner:.",
-      "pfad": "."
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
+      "pfad": ".",
+      "zeilen": 11
     },
     {
       "art": "ordner",
+      "dateien": 1,
+      "hash": "sha256:cb11d3fced353308b6654b3bb792e63d17814f836e0b3a5ce30b6982f71b02cb",
       "id": "ordner:daten",
-      "pfad": "daten"
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
+      "pfad": "daten",
+      "zeilen": 0
     },
     {
       "art": "paket",
+      "dateien": 2,
+      "hash": "sha256:abc430d9275e0283315ca321b3151b846554d4ab1b6eb2857522c90a66b7a170",
       "id": "paket::app/de.beispiel.app",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 1,
+        "instabilitaet": 1.0
+      },
       "modul": "modul::app",
-      "name": "de.beispiel.app"
+      "name": "de.beispiel.app",
+      "zeilen": 15
     },
     {
       "art": "paket",
+      "dateien": 2,
+      "hash": "sha256:5e94cfcb629a71f8033fa6e644a09c685bebd1a636aaa56d1e733f7daf373398",
       "id": "paket::core/de.beispiel.zeichnen",
+      "metriken": {
+        "fan_in": 1,
+        "fan_out": 0,
+        "instabilitaet": 0.0
+      },
       "modul": "modul::core",
-      "name": "de.beispiel.zeichnen"
+      "name": "de.beispiel.zeichnen",
+      "zeilen": 14
     }
   ],
   "schema": 1,
