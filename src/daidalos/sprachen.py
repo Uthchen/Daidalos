@@ -50,6 +50,7 @@ ENDUNGEN: dict[str, str] = {
     ".gradle": "groovy-gradle",
     ".properties": "properties",
     ".txt": "text",
+    ".sql": "sql",
 }
 
 

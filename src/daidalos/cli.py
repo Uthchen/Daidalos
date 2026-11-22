@@ -7,6 +7,7 @@ import sys
 import time
 from collections.abc import Sequence
 from pathlib import Path
+from typing import Any
 
 from daidalos import __version__
 from daidalos.export import schreibe_json
@@ -57,6 +58,47 @@ def _anzeigepfad(pfad: Path) -> str:
         return str(pfad.resolve())
 
 
+def _strukturzeilen(daten: dict[str, Any]) -> list[str]:
+    """Zusammenfassung des Strukturgraphen für stdout."""
+    knoten = daten["knoten"]
+    kanten = daten["kanten"]
+    befunde = daten["befunde"]
+    module = sum(1 for k in knoten if k["art"] == "modul")
+    pakete = sum(1 for k in knoten if k["art"] == "paket")
+    gradle = sum(1 for k in kanten if k["art"].startswith("gradle-"))
+    datei_kanten = [k for k in kanten if k["art"] == "nutzt" and k["von"].startswith("datei:")]
+    sicher = sum(1 for k in datei_kanten if k["sicher"])
+    jni = sum(k["gewicht"] for k in kanten if k["art"] == "jni")
+    jni_offen = sum(1 for b in befunde if b["regel"] == "jni-ohne-gegenstueck")
+    unaufgeloest = sum(len(b["beleg"]["importe"]) for b in befunde if b["regel"] == "unaufgeloest")
+
+    zyklen: dict[tuple[str, str], int] = {}
+    for b in befunde:
+        if b["regel"] != "zyklus":
+            continue
+        ebene = b["beleg"]["ebene"]
+        if "kantenart" in b["beleg"]:
+            ebene = f"{ebene} ({b['beleg']['kantenart']})"
+        schluessel = (ebene, b["beleg"]["rolle"])
+        zyklen[schluessel] = zyklen.get(schluessel, 0) + 1
+    zeilen = [
+        f"Module:    {module} (Gradle-Kanten: {gradle})",
+        f"Pakete:    {pakete}",
+        f"Kanten:    {len(datei_kanten)} zwischen Dateien "
+        f"(sicher: {sicher}, unsicher: {len(datei_kanten) - sicher}; "
+        f"unaufgelöste Importe: {unaufgeloest})",
+        f"JNI:       {jni} Paare (ohne Gegenstück: {jni_offen})",
+    ]
+    ebenen = ("datei", "paket", "modul (nutzt)", "modul (gradle)")
+    teile = []
+    for ebene in ebenen:
+        produktiv = zyklen.get((ebene, "produktiv"), 0)
+        mit_tests = zyklen.get((ebene, "mit-tests"), 0)
+        teile.append(f"{ebene} {produktiv}/{mit_tests}")
+    zeilen.append(f"Zyklen:    {', '.join(teile)} (produktiv/mit Tests)")
+    return zeilen
+
+
 def _befehl_scan(argumente: argparse.Namespace) -> int:
     ziel = Path(argumente.ziel)
     if not ziel.is_dir():
@@ -81,7 +123,8 @@ def _befehl_scan(argumente: argparse.Namespace) -> int:
     schreibe_json(ergebnis.daten, ausgabe)
     dauer = time.perf_counter() - beginn
 
-    knoten = ergebnis.daten["knoten"]
+    alle_knoten = ergebnis.daten["knoten"]
+    knoten = [k for k in alle_knoten if k["art"] == "datei"]
     zeilen = sum(k.get("zeilen", 0) for k in knoten)
     fremd = sum(1 for k in knoten if k.get("fremd"))
     sprachen = ", ".join(f"{name} {anzahl}" for name, anzahl in zaehle_sprachen(knoten)[:6])
@@ -89,6 +132,8 @@ def _befehl_scan(argumente: argparse.Namespace) -> int:
     print(f"Dateien:   {len(knoten)} (davon fremd: {fremd})")
     print(f"Zeilen:    {zeilen}")
     print(f"Sprachen:  {sprachen or '-'}")
+    for zeile in _strukturzeilen(ergebnis.daten):
+        print(zeile)
     print(f"Quelle:    {modus}")
     print(f"Ausgabe:   {_anzeigepfad(ausgabe)}")
     print(f"Laufzeit:  {dauer:.2f} s")
