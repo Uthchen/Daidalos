@@ -72,7 +72,15 @@ input[type="checkbox"] { accent-color: var(--accent); margin: 0; }
 .sw.test { border-style: dashed; }
 .sw.fremd { border-style: dotted; background: var(--pkg); }
 .sw.einstieg { border-color: var(--warn); border-width: 3px; }
-.pfadinfo { position: absolute; top: 10px; left: 10px; right: 10px; font-size: 13px; background: var(--accent-soft); color: var(--fg); padding: 6px 10px; border-radius: 6px; font-family: var(--mono); overflow-wrap: anywhere; z-index: 2; }
+label.chk i.plugin { border-top-style: dotted; }
+input.suche { font: inherit; font-size: 13px; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; width: 15em; max-width: 100%; }
+.schloss { position: absolute; top: 10px; right: 10px; z-index: 3; display: inline-flex; align-items: center; gap: 6px; font: inherit; font-size: 12.5px; color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 5px 10px; cursor: pointer; }
+.schloss:hover { background: var(--accent-soft); }
+.schloss svg { width: 14px; height: 14px; }
+.schloss[aria-pressed="false"] { color: var(--accent); border-color: var(--accent); }
+.pfadinfo .m-rein { color: var(--fg); }
+.pfadinfo .m-raus { color: var(--accent); }
+.pfadinfo { position: absolute; top: 10px; left: 10px; right: 160px; font-size: 13px; background: var(--accent-soft); color: var(--fg); padding: 6px 10px; border-radius: 6px; font-family: var(--mono); overflow-wrap: anywhere; z-index: 2; }
 .lade { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 8px 14px; font-size: 13px; color: var(--muted); z-index: 3; }
 
 aside { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: grid; gap: 16px; align-content: start; min-width: 0; height: calc(100vh - 190px); min-height: 560px; overflow: auto; }
@@ -110,4 +118,21 @@ ul.liste code { font-family: var(--mono); font-size: 12px; overflow-wrap: anywhe
 button.zur { all: unset; color: var(--accent); cursor: pointer; font-size: 13px; text-decoration: underline; }
 button.zur:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .bereich + .bereich { margin-top: 8px; }
+.kopfzeile { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.symbole { display: flex; gap: 6px; flex-shrink: 0; }
+.symbole button, .symbole a { display: inline-flex; align-items: center; gap: 5px; font: inherit; font-size: 12.5px; color: var(--accent); background: var(--accent-soft); border: 0; border-radius: 6px; padding: 5px 8px; cursor: pointer; text-decoration: none; }
+.symbole button:disabled { color: var(--muted); background: var(--bg); cursor: not-allowed; }
+.symbole svg, .ed svg { width: 14px; height: 14px; }
+.ed { all: unset; cursor: pointer; color: var(--accent); display: inline-grid; place-items: center; width: 22px; height: 20px; border-radius: 4px; vertical-align: middle; }
+.ed:hover, .ed:focus-visible { background: var(--accent-soft); outline: none; }
+button.ed:disabled { color: var(--muted); opacity: .55; cursor: not-allowed; }
+table.belege th { font-size: 11px; font-weight: 600; color: var(--muted); text-align: left; padding: 2px 6px 2px 0; border-bottom: 1px solid var(--line); }
+table.belege td { padding-right: 6px; }
+table.belege td:last-child { text-align: right; }
+table.belege code { font-family: var(--mono); font-size: 12px; overflow-wrap: anywhere; }
+details.ordner { font-size: 13px; padding: 3px 0; border-bottom: 1px solid var(--line); }
+details.ordner summary { cursor: pointer; }
+details.ordner ul { margin: 4px 0 4px; }
+.toast { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: 16px; max-width: min(460px, calc(100vw - 32px)); background: var(--fg); color: var(--bg); padding: 10px 14px; border-radius: 8px; font-size: 13px; opacity: 0; transform: translateY(8px); transition: opacity .2s, transform .2s; pointer-events: none; z-index: 20; overflow-wrap: anywhere; }
+.toast.an { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
