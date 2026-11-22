@@ -1,6 +1,6 @@
 # Datenformat
 
-Stand 2026-11-22 (A04). Diese Datei beschreibt `daidalos.json` (Ausgabe des Programms),
+Stand 2026-11-22 (A06). Diese Datei beschreibt `daidalos.json` (Ausgabe des Programms),
 `deutung.json` (Ausgabe des Skills, vom Programm nur gelesen) und `daidalos.toml` (Konfiguration im
 Zielrepo). Jede Änderung am Format wird hier nachgetragen;
 inkompatible Änderungen erhöhen `schema`.
@@ -339,8 +339,8 @@ Pfade, keine Rechnernamen. Die Laufzeit erscheint nur auf stdout.
 
 ## `deutung.json`, `schema: 1`
 
-Ablage: `<zielrepo>/docs/daidalos/deutung.json`. Geschrieben nur vom Skill (ab A06), gelesen von
-`daidalos render`. Enthält nur Gedeutetes und verweist über Ids auf die Messung.
+Ablage: `<zielrepo>/docs/daidalos/deutung.json`. Inhalt nur vom Skill (ab A06), gespeichert über
+`daidalos deutung uebernehmen`, gelesen von `daidalos render`. Enthält nur Gedeutetes und verweist über Ids auf die Messung.
 
 ```json
 {
@@ -382,6 +382,90 @@ Alle Felder außer `schema` sind optional.
 - Unbekannte Schlüssel auf oberster Ebene: Warnung, kein Abbruch.
 - Einschätzungen werden nach `prioritaet` sortiert (ohne Priorität ans Ende, Gleichstand nach
   Befund-Id), Bereiche nach `name`.
+
+### Entwurf für `daidalos deutung uebernehmen` (seit A06)
+
+Der Skill schreibt nie direkt in `deutung.json`, sondern einen **Entwurf** im selben Format, aber
+**ohne** `hash`. `daidalos deutung uebernehmen ENTWURF.json [ZIEL]` prüft ihn, setzt die Hashes
+ein und führt ihn mit der bestehenden `deutung.json` zusammen. Den Inhalt schreibt der Skill; das
+Programm setzt nur Hashes ein, prüft und speichert.
+
+- `schema` ist optional; wenn angegeben, muss es `1` sein.
+- Ein `hash` im Entwurf wird ignoriert und durch den aktuellen Hash des Knotens ersetzt.
+- Zusätzlicher Schlüssel `entfernen`: Liste von Ids (Knoten-Id einer Beschreibung, Kanten-Id,
+  Bereichs-Id oder Befund-Id einer Einschätzung); diese Einträge fallen aus dem Bestand. So lassen
+  sich tote Verweise beseitigen. `entfernen` wird vor den neuen Einträgen angewendet.
+- **Prüfung** (jeder Fehler wird gemeldet, Exit-Code 2, es wird nichts geschrieben): unbekannte
+  Knoten-, Befund- und Kanten-Ids; unbekannte Schlüssel auf oberster Ebene und in Einträgen; leere
+  Texte; Bereich ohne `id` mit Präfix `bereich:`, ohne `name`, `beschreibung` oder mit leerer
+  `knoten`-Liste; doppelte Bereichs-Ids oder Einschätzungen zum selben Befund; `prioritaet` keine
+  ganze Zahl ≥ 1; Einschätzung ohne `titel` oder `begruendung`; Einschätzung **mit** `prioritaet`
+  ohne `vorschlag`.
+- **Zusammenführung:** Einträge des Entwurfs ersetzen gleichnamige ganz (Beschreibung und
+  Kantentext je Id, Bereich je `id`, Einschätzung je `befund`), alles andere bleibt, auch
+  Bestandseinträge mit toten Verweisen.
+- **Ausgabe** deterministisch wie `daidalos.json` (UTF-8, LF, Einrückung 2, Schlüssel sortiert):
+  `bereiche` nach `id`, deren `knoten` sortiert und ohne Doppelte, `einschaetzungen` nach `befund`,
+  ohne Felder mit `null`.
+
+**Einschätzung ohne Priorität (seit A06):** Jeder Befund braucht eine Einschätzung, sonst gilt er
+als offen. 3 bis 10 Befunde bekommen eine `prioritaet`; die übrigen eine Einschätzung ohne
+`prioritaet` (nachrangig, `vorschlag` freiwillig). Die Karte zeigt sie nach den priorisierten.
+
+## Zusammenfassung (`daidalos zusammenfassung`, seit A06)
+
+Markdown auf stdout (`--json`: dasselbe als JSON), nur aus Messung und Deutung, schreibt nichts.
+Inhalt: Projekt, Commit und Zahlen; Module und Ordner (Dateien, Zeilen, Fan-in, Fan-out,
+Gradle-Kanten nach außen); Pakete je Modul bzw. Ordner; wichtige Dateien mit Grund; Befunde in
+einer Zeile; **Offen**. Die Spalte „Deutung“ zeigt je Knoten `ok`, `fehlt`, `veraltet` oder
+`fremd`.
+
+**Wichtige Dateien** (Auswahlregel, keine Deutung): produktive (`rolle` nicht `test`), nicht
+fremde Dateien, die mindestens eines erfüllen. Gründe in dieser Reihenfolge:
+
+| Grund | Regel |
+| --- | --- |
+| `fan-in` | unter den 30 mit dem höchsten `metriken.fan_in` (nur Fan-in > 0; Gleichstand nach Id) |
+| `befund` | in `knoten` eines Befunds |
+| `einstieg` | in `beleg.einstiege` eines Zyklus |
+| `trennstelle` | Ende der `trennstelle` eines Datei-Zyklus; bei Paket- und Modulzyklen die Enden aller Datei-Kanten gleicher Art und Rolle, die die verdichtete Trennstelle tragen |
+| `jni` | Ende einer `jni`-Kante |
+| `modulkante` | Ende einer produktiven `nutzt`-Datei-Kante mit `gewicht` ≥ 3 zwischen verschiedenen Modulen bzw. Ordnern |
+
+**Offen:**
+
+- Beschreibung `fehlt` für Module, Ordner und Pakete (ohne reinen Fremdcode) und wichtige Dateien
+  ohne Eintrag mit Text in `beschreibungen`.
+- Beschreibung `veraltet` für jeden beschriebenen Knoten, dessen `hash` vom aktuellen abweicht.
+- Befunde ohne Einschätzung.
+- Tote Verweise: Ids in `beschreibungen`, `bereiche[].knoten`, `einschaetzungen[].befund` und
+  `kanten`, die es in der Messung nicht gibt.
+
+Sind alle offenen Beschreibungen bzw. Befunde einer Art offen, nennt das Markdown nur die Zahl;
+über 40 Einträge ebenso. `--json` listet immer alle: `offen.beschreibungen` (`id`, `stand`),
+`offen.befunde_ohne_einschaetzung`, `offen.tote_verweise` (`"<wo>: <id>"`).
+
+`daidalos deutung pruefen` meldet genau diese Liste und endet mit 0, wenn sie leer ist, sonst
+mit 1 (fehlende oder ungültige Messung bzw. ungültige `deutung.json`: 2; fehlende
+`deutung.json`: alles offen, 1).
+
+## Arbeitsblatt (`daidalos arbeitsblatt`, seit A06)
+
+Markdown auf stdout für ein Modul, einen Ordner, ein Paket oder eine Datei (Id oder eindeutiger
+Suchbegriff wie bei `daidalos pfad`). Die Dateien werden neu gelesen; `daidalos.json` ändert sich
+nicht. Je Datei: Id, Zeilen, Sprache, Quellsatz, Fan-in/Fan-out, Grund als wichtige Datei, Stand
+der Deutung; bei Kotlin die erste KDoc-Zeile der Datei (KDoc vor `package`) und die Deklarationen
+der obersten Ebene mit Zeile und erster KDoc-Zeile (Tags wie `@param` zählen nicht, höchstens 160
+Zeichen); `nutzt` und `genutzt von` (produktive vor Test-Kanten, nach Gewicht, je Richtung höchstens
+8 Kanten mit je 3 Belegen); `ADR-\d{4}` in Kommentaren (bei Sprachen ohne Adapter im ganzen Text)
+mit Anzahl. Hat sich die Datei seit dem Scan geändert oder fehlt sie, steht ein Vermerk dabei.
+Für Module und Ordner: Kanten nach außen verdichtet, Pakete, wichtige Dateien voll, die übrigen
+als eine Zeile (mit erster KDoc-Zeile); für Pakete alle Dateien voll, solange das Blatt unter
+etwa 400 Zeilen bleibt. Was nicht passt, steht als Kurzzeile oder als „… und n weitere“.
+
+## Ausgaben auf der Befehlszeile
+
+Seit A06 schreibt `daidalos` stdout und stderr immer als UTF-8, auch in Pipes unter Windows.
 
 ## `karte.html` und `KARTE.md`
 

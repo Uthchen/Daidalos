@@ -36,6 +36,9 @@ _DEKLARATIONEN = frozenset(
         "type_alias",
     }
 )
+# Annotationen auf eigener Zeile liest die Grammatik teils als eigene Knoten vor der Deklaration
+# (``@Deprecated("x")`` als ``annotated_expression``); die KDoc davor gehört trotzdem dazu.
+_NUR_ANNOTATION = frozenset({"annotated_expression", "annotation"})
 _ART_WORT = {
     "klasse": "class",
     "objekt": "object",
@@ -47,6 +50,10 @@ _ART_WORT = {
 
 class ArbeitsblattFehler(Exception):
     """Knoten passt nicht; Exit-Code 2."""
+
+
+def _mehrzahl(anzahl: int, eins: str, viele: str) -> str:
+    return f"{anzahl} {eins if anzahl == 1 else viele}"
 
 
 # ---------------------------------------------------------------- Lesen einer Datei
@@ -106,7 +113,10 @@ def lies_quelle(ziel: Path, knoten: Knoten) -> Gelesen:
                 erste = erste_kdoc_zeile(text(vorher))
                 if erste is not None:
                     kdoc[zeile(kind)] = erste
-            vorher = kind if kind.type == "block_comment" else None
+            if kind.type == "block_comment":
+                vorher = kind
+            elif kind.type not in _NUR_ANNOTATION:
+                vorher = None
         datei = lies_kotlin(inhalt, knoten["pfad"])
         for d in datei.deklarationen:
             if d.oberste_ebene:
@@ -276,10 +286,10 @@ class Arbeitsblatt:
                 if k["art"] == "nutzt":
                     was = (
                         f"nutzt {k.get('rolle')}, Gewicht {k.get('gewicht', 0)}, "
-                        f"{k.get('dateikanten', 0)} Datei-Kanten"
+                        f"{_mehrzahl(k.get('dateikanten', 0), 'Datei-Kante', 'Datei-Kanten')}"
                     )
                 else:
-                    was = f"{k['art']}, {k.get('gewicht', 0)} Belege"
+                    was = f"{k['art']}, {_mehrzahl(k.get('gewicht', 0), 'Beleg', 'Belege')}"
                 z.append(f"  - {self.name(k[ende])} ({was})")
         return z or ["- keine Kanten nach außen"]
 

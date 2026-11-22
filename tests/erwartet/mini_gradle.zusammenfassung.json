@@ -1,0 +1,153 @@
+{
+  "befunde": [],
+  "daidalos": "0.1.0",
+  "gruppen": [
+    {
+      "dateien": 3,
+      "deutung": "fehlt",
+      "fan_in": 0,
+      "fan_out": 1,
+      "gradle": [
+        "core (impl)"
+      ],
+      "id": "modul::app",
+      "zeilen": 22
+    },
+    {
+      "dateien": 3,
+      "deutung": "fehlt",
+      "fan_in": 1,
+      "fan_out": 0,
+      "gradle": [],
+      "id": "modul::core",
+      "zeilen": 17
+    },
+    {
+      "dateien": 4,
+      "deutung": "fehlt",
+      "fan_in": 0,
+      "fan_out": 0,
+      "gradle": [],
+      "id": "ordner:.",
+      "zeilen": 11
+    },
+    {
+      "dateien": 1,
+      "deutung": "fehlt",
+      "fan_in": 0,
+      "fan_out": 0,
+      "gradle": [],
+      "id": "ordner:daten",
+      "zeilen": 0
+    },
+    {
+      "dateien": 1,
+      "deutung": "fehlt",
+      "fan_in": 0,
+      "fan_out": 0,
+      "gradle": [],
+      "id": "ordner:gradle",
+      "zeilen": 4
+    }
+  ],
+  "offen": {
+    "befunde_ohne_einschaetzung": [],
+    "beschreibungen": [
+      {
+        "id": "datei:core/src/main/kotlin/de/beispiel/zeichnen/Punkt.kt",
+        "stand": "fehlt"
+      },
+      {
+        "id": "datei:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt",
+        "stand": "fehlt"
+      },
+      {
+        "id": "modul::app",
+        "stand": "fehlt"
+      },
+      {
+        "id": "modul::core",
+        "stand": "fehlt"
+      },
+      {
+        "id": "ordner:.",
+        "stand": "fehlt"
+      },
+      {
+        "id": "ordner:daten",
+        "stand": "fehlt"
+      },
+      {
+        "id": "ordner:gradle",
+        "stand": "fehlt"
+      },
+      {
+        "id": "paket::app/de.beispiel.app",
+        "stand": "fehlt"
+      },
+      {
+        "id": "paket::core/de.beispiel.zeichnen",
+        "stand": "fehlt"
+      }
+    ],
+    "tote_verweise": []
+  },
+  "pakete": [
+    {
+      "dateien": 2,
+      "deutung": "fehlt",
+      "fan_in": 0,
+      "fan_out": 1,
+      "gruppe": "modul::app",
+      "id": "paket::app/de.beispiel.app",
+      "zeilen": 15
+    },
+    {
+      "dateien": 2,
+      "deutung": "fehlt",
+      "fan_in": 1,
+      "fan_out": 0,
+      "gruppe": "modul::core",
+      "id": "paket::core/de.beispiel.zeichnen",
+      "zeilen": 14
+    }
+  ],
+  "wichtige_dateien": [
+    {
+      "deutung": "fehlt",
+      "fan_in": 2,
+      "fan_out": 0,
+      "gruende": [
+        "fan-in"
+      ],
+      "id": "datei:core/src/main/kotlin/de/beispiel/zeichnen/Punkt.kt",
+      "zeilen": 3
+    },
+    {
+      "deutung": "fehlt",
+      "fan_in": 1,
+      "fan_out": 1,
+      "gruende": [
+        "fan-in"
+      ],
+      "id": "datei:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt",
+      "zeilen": 11
+    }
+  ],
+  "zahlen": {
+    "befunde": 0,
+    "dateien": 13,
+    "dateien_fremd": 1,
+    "dateikanten": 3,
+    "module": 2,
+    "ordner": 3,
+    "pakete": 2,
+    "wichtige_dateien": 2,
+    "zeilen": 56
+  },
+  "ziel": {
+    "git_aenderungen": null,
+    "git_commit": null,
+    "name": "mini_gradle"
+  }
+}
