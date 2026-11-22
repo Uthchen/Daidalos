@@ -1,0 +1,61 @@
+{
+  "bereiche": [
+    {
+      "beschreibung": "Alles rund um Striche. Enthält zum Test </script><b>fett</b> im Text.",
+      "id": "bereich:zeichnen",
+      "knoten": [
+        "modul::kern",
+        "modul::kern-labor",
+        "paket::verschwunden/x"
+      ],
+      "name": "Zeichnen"
+    }
+  ],
+  "beschreibungen": {
+    "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt": {
+      "hash": "sha256:66f78acdae44132b2ec79eba6abacc3b242fad8df23504e651028e768bcfec93",
+      "text": "Beginn des Rings; wird von außen betreten."
+    },
+    "modul::anwendung": {
+      "hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "text": "Startet das Beispiel und setzt die Teile zusammen."
+    },
+    "modul::gibt-es-nicht": {
+      "hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "text": "Verweis ins Leere."
+    },
+    "modul::kern": {
+      "hash": "sha256:3fea97ba7468732adff2839c7b46f51bb75dd17f2e5beaa478805a9d19c420e0",
+      "text": "Fachlicher Kern: Punkte, Striche und Werkzeuge ohne Plattformbezug."
+    },
+    "paket::kern/beispiel.kern.zyklus": {
+      "hash": "sha256:93b31390ad0c4516cb2aa2833f967c19337dbf181d511edd44feb471742191cc",
+      "text": "Absichtlicher Ring aus drei Dateien für die Tests."
+    }
+  },
+  "einschaetzungen": [
+    {
+      "befund": "befund:zyklus:datei:produktiv:f45327fbce97",
+      "begruendung": "Anfang, Mitte und Ende kennen sich gegenseitig.",
+      "prioritaet": 1,
+      "titel": "Ring im Kern auflösen",
+      "vorschlag": "Die schwächste Verbindung Anfang → Mitte entfernen."
+    },
+    {
+      "befund": "befund:zyklus:datei:produktiv:000000000000",
+      "begruendung": "",
+      "prioritaet": 2,
+      "titel": "Toter Verweis",
+      "vorschlag": ""
+    }
+  ],
+  "kanten": {
+    "kante:nutzt:datei:a.kt->datei:b.kt:produktiv": {
+      "text": "Gibt es nicht."
+    },
+    "kante:nutzt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt:produktiv": {
+      "text": "Anfang braucht Mitte."
+    }
+  },
+  "schema": 1
+}

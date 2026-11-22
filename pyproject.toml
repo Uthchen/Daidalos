@@ -29,10 +29,15 @@ path = "src/daidalos/__init__.py"
 packages = ["src/daidalos"]
 
 [dependency-groups]
-dev = ["pytest>=8", "ruff>=0.6"]
+dev = [
+    "playwright>=1.65.2",
+    "pytest>=8",
+    "ruff>=0.6",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = ["browser: Browser-Probe mit Playwright und Chromium"]
 
 [tool.ruff]
 line-length = 100

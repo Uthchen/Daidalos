@@ -17,6 +17,12 @@ jobs:
         with:
           python-version: "3.12"
       - run: uv sync
+      - name: Chromium für die Browser-Probe
+        if: runner.os == 'Linux'
+        run: uv run playwright install --with-deps chromium
       - run: uv run ruff check
       - run: uv run ruff format --check
       - run: uv run pytest
+      - name: Browser-Probe ist gelaufen
+        if: runner.os == 'Linux'
+        run: uv run pytest -m browser -rs | tee browser.txt && ! grep -q SKIPPED browser.txt
