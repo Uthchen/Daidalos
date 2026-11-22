@@ -93,6 +93,18 @@ def test_kdoc_und_adr(tmp_path: Path) -> None:
     assert dict(gelesen.adr) == {"ADR-0001": 2, "ADR-0002": 1}
 
 
+def test_kdoc_vor_annotation_class_mit_annotationszeilen(tmp_path: Path) -> None:
+    # Die Grammatik liest ``annotation class`` nach Annotationszeilen nicht als Deklaration.
+    (tmp_path / "M.kt").write_text(
+        "package a\n\n/**\n * Markiert Code im Strichpfad.\n */\n"
+        "@Target(AnnotationTarget.CLASS)\n@Retention(AnnotationRetention.SOURCE)\n"
+        "annotation class Markierung\n",
+        encoding="utf-8",
+    )
+    gelesen = lies_quelle(tmp_path, {"pfad": "M.kt", "sprache": "kotlin"})
+    assert gelesen.deklariert == [("klasse", "Markierung", 8, "Markiert Code im Strichpfad.")]
+
+
 def test_erste_kdoc_zeile() -> None:
     assert erste_kdoc_zeile("/** Kurz. */") == "Kurz."
     assert erste_kdoc_zeile("/*\n * kein KDoc\n */") is None

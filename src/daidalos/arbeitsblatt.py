@@ -27,15 +27,6 @@ BELEGE_JE_KANTE = 3
 KDOC_LAENGE = 160
 
 _ADR = re.compile(r"ADR-\d{4}")
-_DEKLARATIONEN = frozenset(
-    {
-        "class_declaration",
-        "object_declaration",
-        "function_declaration",
-        "property_declaration",
-        "type_alias",
-    }
-)
 # Annotationen auf eigener Zeile liest die Grammatik teils als eigene Knoten vor der Deklaration
 # (``@Deprecated("x")`` als ``annotated_expression``); die KDoc davor gehört trotzdem dazu.
 _NUR_ANNOTATION = frozenset({"annotated_expression", "annotation"})
@@ -104,24 +95,33 @@ def lies_quelle(ziel: Path, knoten: Knoten) -> Gelesen:
         return gelesen
     if knoten.get("sprache") == "kotlin" and knoten["pfad"].endswith(".kt"):
         wurzel = parse("kotlin", inhalt)
-        kdoc: dict[int, str] = {}
+        # (erste Zeile, letzte Zeile) des Knotens nach einer KDoc → erste KDoc-Zeile. Gilt für die
+        # erste Deklaration in diesem Bereich; so auch für Deklarationen, die die Grammatik nur
+        # als Teil eines anderen Knotens liest (``annotation class`` nach Annotationszeilen).
+        kdoc: dict[tuple[int, int], str] = {}
         vorher = None
         for kind in wurzel.named_children:
             if kind.type == "package_header" and vorher is not None and gelesen.kdoc_datei is None:
                 gelesen.kdoc_datei = erste_kdoc_zeile(text(vorher))
-            if kind.type in _DEKLARATIONEN and vorher is not None:
+            elif kind.type != "block_comment" and vorher is not None:
                 erste = erste_kdoc_zeile(text(vorher))
                 if erste is not None:
-                    kdoc[zeile(kind)] = erste
+                    kdoc[(zeile(kind), kind.end_point[0] + 1)] = erste
             if kind.type == "block_comment":
                 vorher = kind
             elif kind.type not in _NUR_ANNOTATION:
                 vorher = None
         datei = lies_kotlin(inhalt, knoten["pfad"])
-        for d in datei.deklarationen:
-            if d.oberste_ebene:
-                gelesen.deklariert.append((d.art, d.name, d.zeile, kdoc.get(d.zeile)))
-        gelesen.deklariert.sort(key=lambda d: (d[2], d[1]))
+        oberste = sorted(
+            (d for d in datei.deklarationen if d.oberste_ebene), key=lambda d: (d.zeile, d.name)
+        )
+        vergeben: set[tuple[int, int]] = set()
+        for d in oberste:
+            bereich = next((b for b in kdoc if b[0] <= d.zeile <= b[1] and b not in vergeben), None)
+            if bereich is not None:
+                vergeben.add(bereich)
+            doc = kdoc[bereich] if bereich is not None else None
+            gelesen.deklariert.append((d.art, d.name, d.zeile, doc))
         for k in alle(wurzel):
             if k.type in ("line_comment", "block_comment"):
                 gelesen.adr.update(_ADR.findall(text(k)))
