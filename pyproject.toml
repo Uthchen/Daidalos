@@ -1,0 +1,41 @@
+[project]
+name = "daidalos"
+dynamic = ["version"]
+description = "Karte der Verflechtung einer Codebase: messen, deuten, zeigen."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Manuel Grimm" }]
+requires-python = ">=3.12"
+dependencies = ["pathspec>=0.12"]
+
+[project.scripts]
+daidalos = "daidalos.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/daidalos/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/daidalos"]
+
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+# In lokal/ liegt eine Kopie von Sketchorus mit eigenem Python-Code.
+extend-exclude = ["lokal"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
+# Deutsche Anführungszeichen („“) in Texten sind gewollt.
+ignore = ["RUF001", "RUF002", "RUF003"]
