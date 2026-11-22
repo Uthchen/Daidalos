@@ -6,6 +6,7 @@ import pytest
 
 from daidalos.konfiguration import (
     STANDARD_EDITOR_BEFEHL,
+    STANDARD_EDITOR_LINK,
     Konfiguration,
     KonfigurationsFehler,
     lade_konfiguration,
@@ -85,3 +86,28 @@ def test_falscher_typ_ist_fehler(tmp_path: Path, text: str, schluessel: str) -> 
 def test_kaputtes_toml_ist_fehler(tmp_path: Path) -> None:
     with pytest.raises(KonfigurationsFehler, match="kein gültiges TOML"):
         lade_konfiguration(_schreibe(tmp_path, "[scan\n"))
+
+
+def test_projektname(tmp_path: Path) -> None:
+    konfiguration = lade_konfiguration(_schreibe(tmp_path, '[projekt]\nname = "Beispiel"\n'))
+    assert konfiguration.projekt.name == "Beispiel"
+    assert lade_konfiguration(tmp_path / "fehlt.toml").projekt.name is None
+
+
+@pytest.mark.parametrize("wert", ["1", '""'])
+def test_projektname_falsch(tmp_path: Path, wert: str) -> None:
+    with pytest.raises(KonfigurationsFehler, match=r"\[projekt\]\.name"):
+        lade_konfiguration(_schreibe(tmp_path, f"[projekt]\nname = {wert}\n"))
+
+
+def test_editor_link(tmp_path: Path) -> None:
+    assert lade_konfiguration(tmp_path / "fehlt.toml").editor.link == STANDARD_EDITOR_LINK
+    pfad = _schreibe(tmp_path, '[editor]\nlink = "idea://open?file={pfad}&line={zeile}"\n')
+    assert lade_konfiguration(pfad).editor.link == "idea://open?file={pfad}&line={zeile}"
+    warnungen: list[str] = []
+    lade_konfiguration(
+        _schreibe(tmp_path, '[editor]\nlink = "x://{zeile}"\n'), warne=warnungen.append
+    )
+    assert any("{pfad}" in w for w in warnungen)
+    with pytest.raises(KonfigurationsFehler, match=r"\[editor\]\.link"):
+        lade_konfiguration(_schreibe(tmp_path, "[editor]\nlink = 1\n"))

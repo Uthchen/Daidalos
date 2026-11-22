@@ -7,17 +7,19 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from conftest import BEISPIELE, ERWARTET
 from daidalos.cli import main
 
-GOLDEN = ERWARTET / "mini_gradle.daidalos.json"
 
-
-def test_mini_gradle_golden(tmp_path: Path, aktualisiere_golden: bool) -> None:
+@pytest.mark.parametrize("beispiel", ["mini_gradle", "mini_modulgraph"])
+def test_golden(beispiel: str, tmp_path: Path, aktualisiere_golden: bool) -> None:
+    golden = ERWARTET / f"{beispiel}.daidalos.json"
     ausgabe = tmp_path / "daidalos.json"
-    # Das Beispiel liegt im Daidalos-Repo, hat aber selbst kein .git: Verzeichnisdurchlauf.
-    assert main(["scan", str(BEISPIELE / "mini_gradle"), "--ausgabe", str(ausgabe)]) == 0
+    # Die Beispiele liegen im Daidalos-Repo, haben aber selbst kein .git: Verzeichnisdurchlauf.
+    assert main(["scan", str(BEISPIELE / beispiel), "--ausgabe", str(ausgabe)]) == 0
     if aktualisiere_golden:
-        GOLDEN.parent.mkdir(parents=True, exist_ok=True)
-        GOLDEN.write_bytes(ausgabe.read_bytes())
-    assert ausgabe.read_bytes() == GOLDEN.read_bytes()
+        golden.parent.mkdir(parents=True, exist_ok=True)
+        golden.write_bytes(ausgabe.read_bytes())
+    assert ausgabe.read_bytes() == golden.read_bytes()

@@ -11,6 +11,8 @@ from typing import Any
 
 DATEINAME = "daidalos.toml"
 STANDARD_EDITOR_BEFEHL = "code -g {datei}:{zeile}"
+# Vorlage für „Im Editor öffnen“ in karte.html; {pfad} und {zeile} setzt die Karte ein.
+STANDARD_EDITOR_LINK = "vscode://file/{pfad}:{zeile}"
 
 # Gelten immer, zusätzlich zu .gitignore und [scan].ausschliessen.
 EINGEBAUTE_AUSSCHLUESSE: tuple[str, ...] = (
@@ -48,10 +50,18 @@ class ScanKonfiguration:
 @dataclass(frozen=True)
 class EditorKonfiguration:
     befehl: str = STANDARD_EDITOR_BEFEHL
+    link: str = STANDARD_EDITOR_LINK
+
+
+@dataclass(frozen=True)
+class ProjektKonfiguration:
+    # Anzeigename des Zielrepos; ohne Angabe gilt der Ordnername.
+    name: str | None = None
 
 
 @dataclass(frozen=True)
 class Konfiguration:
+    projekt: ProjektKonfiguration = field(default_factory=ProjektKonfiguration)
     scan: ScanKonfiguration = field(default_factory=ScanKonfiguration)
     editor: EditorKonfiguration = field(default_factory=EditorKonfiguration)
     # Datei, aus der gelesen wurde; None, wenn keine vorhanden war.
@@ -63,8 +73,9 @@ def warne_stderr(text: str) -> None:
 
 
 _BEKANNT: dict[str, frozenset[str]] = {
+    "projekt": frozenset({"name"}),
     "scan": frozenset({"ausschliessen", "fremd"}),
-    "editor": frozenset({"befehl"}),
+    "editor": frozenset({"befehl", "link"}),
 }
 
 
@@ -98,15 +109,26 @@ def lade_konfiguration(
             if schluessel not in _BEKANNT[abschnitt]:
                 warne(f"{pfad}: unbekannter Schlüssel [{abschnitt}].{schluessel} wird ignoriert")
 
+    projekt = daten.get("projekt", {})
     scan = daten.get("scan", {})
     editor = daten.get("editor", {})
+    link = _text(pfad, editor, "editor", "link", STANDARD_EDITOR_LINK)
+    if "{pfad}" not in link:
+        warne(f"{pfad}: [editor].link enthält kein {{pfad}}")
+    name = projekt.get("name")
+    if name is not None and (not isinstance(name, str) or not name.strip()):
+        raise KonfigurationsFehler(
+            f"{pfad}: [projekt].name muss eine nicht leere Zeichenkette sein"
+        )
     return Konfiguration(
+        projekt=ProjektKonfiguration(name=name),
         scan=ScanKonfiguration(
             ausschliessen=_liste_von_texten(pfad, scan, "scan", "ausschliessen"),
             fremd=_liste_von_texten(pfad, scan, "scan", "fremd"),
         ),
         editor=EditorKonfiguration(
             befehl=_text(pfad, editor, "editor", "befehl", STANDARD_EDITOR_BEFEHL),
+            link=link,
         ),
         quelle=pfad,
     )

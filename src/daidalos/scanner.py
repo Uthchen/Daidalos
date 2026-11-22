@@ -23,6 +23,7 @@ from daidalos.konfiguration import (
     warne_stderr,
 )
 from daidalos.sprachen import BINAER, erkenne_sprache
+from daidalos.struktur import baue_struktur
 
 SCHEMA = 1
 GROSSE_DATEI = 5 * 1024 * 1024  # ab hier keine Zeilenzählung
@@ -298,8 +299,9 @@ def scanne(ziel: Path, konfiguration: Konfiguration, warne: Warner = warne_stder
     ziel = ziel.resolve()
     pfade, git_modus = finde_dateien(ziel, konfiguration, warne)
     fremd = GitIgnoreSpec.from_lines(konfiguration.scan.fremd)
-    knoten = [miss_datei(ziel, pfad, fremd, warne) for pfad in pfade]
-    knoten.sort(key=lambda k: k["id"])
+    dateien = [miss_datei(ziel, pfad, fremd, warne) for pfad in pfade]
+    struktur = baue_struktur(ziel, dateien, warne)
+    knoten = sorted([*dateien, *struktur.knoten], key=lambda k: k["id"])
 
     git_commit: str | None = None
     git_aenderungen: bool | None = None
@@ -314,13 +316,13 @@ def scanne(ziel: Path, konfiguration: Konfiguration, warne: Warner = warne_stder
         "schema": SCHEMA,
         "daidalos": __version__,
         "ziel": {
-            "name": ziel.name,
+            "name": konfiguration.projekt.name or ziel.name,
             "git_commit": git_commit,
             "git_aenderungen": git_aenderungen,
         },
         "knoten": knoten,
-        "kanten": [],
-        "befunde": [],
+        "kanten": struktur.kanten,
+        "befunde": struktur.befunde,
     }
     return ScanErgebnis(daten=daten, git_modus=git_modus)
 
@@ -329,5 +331,7 @@ def zaehle_sprachen(knoten: Iterable[Knoten]) -> list[tuple[str, int]]:
     """Sprachen nach Anzahl Dateien, absteigend, bei Gleichstand alphabetisch."""
     zaehler: dict[str, int] = {}
     for k in knoten:
+        if k.get("art") != "datei":
+            continue
         zaehler[k["sprache"]] = zaehler.get(k["sprache"], 0) + 1
     return sorted(zaehler.items(), key=lambda paar: (-paar[1], paar[0]))

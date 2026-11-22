@@ -3,3 +3,6 @@
 # Testbeispiele mit absichtlichen CRLF-Zeilenenden und Binärdateien unverändert lassen
 tests/beispiele/**/*crlf* -text
 tests/beispiele/**/*.bin binary
+
+# Eingebettete Bibliotheken byte-genau lassen (Prüfsummen)
+src/daidalos/karte/vendor/** -text

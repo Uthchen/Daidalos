@@ -42,6 +42,10 @@ Bezeichnern Umlaute umschreiben (`ae`, `oe`, `ue`, `ss`). Übliche Fachwörter b
 ```
 uv sync                                   # Umgebung anlegen
 uv run daidalos scan <zielrepo>           # Zielrepo scannen
+uv run daidalos render <zielrepo>         # karte.html und KARTE.md erzeugen
+uv run daidalos pfad VON NACH --daten D   # kürzester belegter Weg
+uv run playwright install chromium        # einmalig, für die Browser-Probe (Marker browser)
+uv run python werkzeuge/hole_vendor.py --pruefen   # Prüfsummen der eingebetteten Bibliotheken
 uv run pytest                             # Tests
 uv run pytest --aktualisiere-golden       # Golden-Dateien unter tests/erwartet/ neu schreiben
 uv run ruff check                         # Lint
@@ -51,5 +55,13 @@ uv run ruff format                        # Formatieren
 ## Aufbau
 
 - `src/daidalos/`: `cli.py` (Befehlszeile), `konfiguration.py` (`daidalos.toml`), `scanner.py`
-  (Dateien finden und messen), `sprachen.py` (Endungstabelle), `export.py` (JSON schreiben).
-- `tests/beispiele/`: erfundene Mini-Projekte; `tests/erwartet/`: Golden-Dateien.
+  (Dateien finden und messen), `sprachen.py` (Endungstabelle), `export.py` (JSON schreiben),
+  `struktur.py` (Module, Pakete, Kanten, Befunde, Metriken zusammensetzen), `aufloeser.py`
+  (Kotlin-Namen → Datei-Kanten), `deutung.py` (`deutung.json` lesen und abgleichen), `render.py`
+  (`karte.html`, `KARTE.md`), `pfad.py` (`daidalos pfad`).
+- `src/daidalos/karte/`: `vorlage.html`, `karte.css`, `karte.js` (die Karte), `vendor/`
+  (Cytoscape.js, elkjs, cytoscape-elk mit `HERKUNFT.md`; byte-genau, siehe `.gitattributes`).
+- `src/daidalos/adapter/`: `gradle.py`, `kotlin.py`, `jni.py` (tree-sitter), `baum.py` (Hilfen).
+- `src/daidalos/analysen/`: `zyklen.py` (Zyklen, Einstiege, Trennstelle).
+- `tests/beispiele/`: erfundene Mini-Projekte; `tests/erwartet/`: Golden-Dateien;
+  `tests/plausibilitaet.py`: Testhilfe (Datei-Kanten gegen Gradle-Kanten).

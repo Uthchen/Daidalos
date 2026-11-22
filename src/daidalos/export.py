@@ -15,9 +15,15 @@ def als_json(daten: dict[str, Any]) -> str:
 
 
 def schreibe_json(daten: dict[str, Any], ziel: Path) -> None:
-    """Schreibt über eine temporäre Datei und ``os.replace``; nie bleibt eine halbe Datei."""
+    schreibe_text(als_json(daten), ziel)
+
+
+def schreibe_text(text: str, ziel: Path) -> None:
+    """Schreibt UTF-8 mit LF über eine temporäre Datei und ``os.replace``.
+
+    Nie bleibt eine halbe Datei zurück.
+    """
     ziel.parent.mkdir(parents=True, exist_ok=True)
-    text = als_json(daten)
     deskriptor, temp_name = tempfile.mkstemp(
         prefix=f".{ziel.name}.", suffix=".tmp", dir=ziel.parent
     )

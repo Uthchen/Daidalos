@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="de" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="generator" content="daidalos {{VERSION}}">
+<title>{{TITEL}}</title>
+{{LIZENZEN}}
+<style>
+{{CSS}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><span>daidalos</span> Karte · <b id="projekt"></b></h1>
+    <span class="sub" id="stand"></span>
+    <span class="hinweis" id="aenderungen" hidden>mit nicht committeten Änderungen</span>
+    <div class="seg thema" role="group" aria-label="Darstellung">
+      <button type="button" data-thema="dark">Dunkel</button>
+      <button type="button" data-thema="light">Hell</button>
+      <button type="button" data-thema="system">System</button>
+    </div>
+  </header>
+
+  <div class="leiste" role="toolbar" aria-label="Ansicht">
+    <div class="gruppe"><b>Ebene</b>
+      <div class="seg" role="group" aria-label="Ebene" id="ebenen">
+        <button type="button" data-ebene="modul">Module</button>
+        <button type="button" data-ebene="paket">Pakete</button>
+        <button type="button" data-ebene="datei">Dateien</button>
+      </div>
+    </div>
+    <div class="gruppe"><b>Rolle</b>
+      <div class="seg" role="group" aria-label="Rolle" id="rollen">
+        <button type="button" data-rolle="produktiv">nur produktiv</button>
+        <button type="button" data-rolle="mit-tests">mit Tests</button>
+      </div>
+    </div>
+    <div class="gruppe"><b>Kanten</b>
+      <label class="chk"><input type="checkbox" id="k-gradle"><i class="gradle"></i>Gradle</label>
+      <label class="chk"><input type="checkbox" id="k-nutzt"><i></i>nutzt</label>
+      <label class="chk"><input type="checkbox" id="k-jni"><i class="jni"></i>JNI</label>
+      <label class="chk"><input type="checkbox" id="k-plugin"><i class="plugin"></i>Plugins</label>
+    </div>
+    <div class="gruppe"><b>Überlagern</b>
+      <label class="chk"><input type="checkbox" id="u-zyklen" checked><i class="red"></i>Zyklen</label>
+    </div>
+    <div class="gruppe"><b>Warum hängt</b>
+      <input type="search" class="suche" id="pfad-von" list="pfad-liste" placeholder="Von" aria-label="Von" autocomplete="off">
+      <span>an</span>
+      <input type="search" class="suche" id="pfad-nach" list="pfad-liste" placeholder="Nach" aria-label="Nach" autocomplete="off">
+      <button type="button" class="btn" id="pfad-los">Kette zeigen</button>
+      <datalist id="pfad-liste"></datalist>
+    </div>
+    <div class="gruppe">
+      <button type="button" class="btn" id="einpassen">Einpassen</button>
+      <button type="button" class="btn" id="zuruecksetzen" title="Gemerkte Positionen dieser Ebene löschen">Anordnung zurücksetzen</button>
+    </div>
+  </div>
+
+  <div class="haupt">
+    <div class="flaeche">
+      <div id="cy" role="img" aria-label="Geflecht der Codebase"></div>
+      <button type="button" class="schloss" id="schloss" aria-pressed="true" title="Alle Elemente zum Verschieben entsperren"></button>
+      <div class="pfadinfo" id="pfadinfo" hidden></div>
+      <div class="lade" id="lade" hidden>Layout wird berechnet …</div>
+      <div class="legende" aria-hidden="true">
+        <span><i class="sw"></i>Modul · Paket · Datei</span>
+        <span><i class="sw test"></i>Test</span>
+        <span><i class="sw fremd"></i>Fremdcode</span>
+        <span><i class="ln"></i>nutzt</span>
+        <span><i class="ln unsicher"></i>unsicher</span>
+        <span><i class="ln verdichtet"></i>verdichtet</span>
+        <span><i class="ln jni"></i>JNI</span>
+        <span><i class="ln red"></i>Zyklus</span>
+        <span><i class="sw einstieg"></i>Einstieg</span>
+        <span>an jeder Datei: Code · Editor · Schloss</span>
+      </div>
+    </div>
+    <aside id="seite" aria-live="polite"></aside>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script type="application/json" id="daidalos-daten">{{DATEN}}</script>
+<script type="application/json" id="daidalos-deutung">{{DEUTUNG}}</script>
+<script type="application/json" id="daidalos-einstellungen">{{EINSTELLUNGEN}}</script>
+{{BIBLIOTHEKEN}}
+<script>
+{{SKRIPT}}
+</script>
+</body>
+</html>

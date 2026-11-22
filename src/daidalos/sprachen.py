@@ -7,11 +7,15 @@ BINAER = "binaer"
 
 # Volle Dateinamen haben Vorrang vor Endungen.
 DATEINAMEN: dict[str, str] = {
-    "build.gradle.kts": "gradle-kotlin",
-    "settings.gradle.kts": "gradle-kotlin",
     "build.gradle": "groovy-gradle",
     "settings.gradle": "groovy-gradle",
     "CMakeLists.txt": "cmake",
+}
+
+# Mehrteilige Endungen (klein geschrieben) haben Vorrang vor der letzten Endung: Jedes Gradle-Skript
+# in Kotlin (build.gradle.kts, settings.gradle.kts, gradle/x.gradle.kts) ist gradle-kotlin.
+MEHRTEILIGE_ENDUNGEN: dict[str, str] = {
+    ".gradle.kts": "gradle-kotlin",
 }
 
 # Endungen klein geschrieben, mit Punkt.
@@ -50,6 +54,7 @@ ENDUNGEN: dict[str, str] = {
     ".gradle": "groovy-gradle",
     ".properties": "properties",
     ".txt": "text",
+    ".sql": "sql",
 }
 
 
@@ -61,6 +66,10 @@ def erkenne_sprache(pfad: str) -> str:
     name = pfad.rsplit("/", 1)[-1]
     if name in DATEINAMEN:
         return DATEINAMEN[name]
+    klein = name.lower()
+    for endung, sprache in MEHRTEILIGE_ENDUNGEN.items():
+        if klein.endswith(endung) and len(klein) > len(endung):
+            return sprache
     punkt = name.rfind(".")
     if punkt <= 0:
         return UNBEKANNT

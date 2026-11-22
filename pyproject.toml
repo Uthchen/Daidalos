@@ -7,7 +7,13 @@ license = "MIT"
 license-files = ["LICENSE"]
 authors = [{ name = "Manuel Grimm" }]
 requires-python = ">=3.12"
-dependencies = ["pathspec>=0.12"]
+dependencies = [
+    "networkx>=3.3",
+    "pathspec>=0.12",
+    "tree-sitter>=0.23",
+    "tree-sitter-c>=0.23",
+    "tree-sitter-kotlin>=1.0",
+]
 
 [project.scripts]
 daidalos = "daidalos.cli:main"
@@ -23,10 +29,15 @@ path = "src/daidalos/__init__.py"
 packages = ["src/daidalos"]
 
 [dependency-groups]
-dev = ["pytest>=8", "ruff>=0.6"]
+dev = [
+    "playwright>=1.65.2",
+    "pytest>=8",
+    "ruff>=0.6",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = ["browser: Browser-Probe mit Playwright und Chromium"]
 
 [tool.ruff]
 line-length = 100
