@@ -1,0 +1,121 @@
+{
+  "befunde": [],
+  "daidalos": "0.1.0",
+  "kanten": [],
+  "knoten": [
+    {
+      "art": "datei",
+      "bytes": 6,
+      "hash": "sha256:318d9a16533732a69cda7bb7b174ee392fdd15be3d72a114cd8f2d51f3eab510",
+      "id": "datei:.gitignore",
+      "pfad": ".gitignore",
+      "sprache": "unbekannt",
+      "zeilen": 1
+    },
+    {
+      "art": "datei",
+      "bytes": 64,
+      "hash": "sha256:d9de48a103bb41940439ffd6a93e047e544f89b9c1094ba1133f51c1920351f5",
+      "id": "datei:README.md",
+      "pfad": "README.md",
+      "sprache": "markdown",
+      "zeilen": 3
+    },
+    {
+      "art": "datei",
+      "bytes": 85,
+      "hash": "sha256:30910c9358a999cf47193c4ee8888e3c487a449a2cad5d6de76c2b1c31cc3853",
+      "id": "datei:app/build.gradle.kts",
+      "pfad": "app/build.gradle.kts",
+      "sprache": "gradle-kotlin",
+      "zeilen": 7
+    },
+    {
+      "art": "datei",
+      "bytes": 202,
+      "hash": "sha256:21b3a725e4a017ace961133974734f49a48b74cd0a3d36e301f0faa1ebb06ecd",
+      "id": "datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt",
+      "pfad": "app/src/main/kotlin/de/beispiel/app/Haupt.kt",
+      "sprache": "kotlin",
+      "zeilen": 10
+    },
+    {
+      "art": "datei",
+      "bytes": 67,
+      "hash": "sha256:5d5dee1e960a03f4269c1ef30dc2185d6e438f6752ecf99ee5e014ef35f05207",
+      "id": "datei:app/src/main/kotlin/de/beispiel/app/Leiste-crlf.kt",
+      "pfad": "app/src/main/kotlin/de/beispiel/app/Leiste-crlf.kt",
+      "sprache": "kotlin",
+      "zeilen": 5
+    },
+    {
+      "art": "datei",
+      "bytes": 30,
+      "hash": "sha256:8affd4e517a905cfc7bc43575c3ab65bc5a558ec8c10568573554489681c6ce6",
+      "id": "datei:core/build.gradle.kts",
+      "pfad": "core/build.gradle.kts",
+      "sprache": "gradle-kotlin",
+      "zeilen": 3
+    },
+    {
+      "art": "datei",
+      "bytes": 78,
+      "fremd": true,
+      "hash": "sha256:17e0aa39e6e0726c8a58a8bb8e1ba276e83e132543cf72d671c2d3613a57c514",
+      "id": "datei:core/src/main/cpp/fremd/mini.c",
+      "pfad": "core/src/main/cpp/fremd/mini.c",
+      "sprache": "c",
+      "zeilen": 2
+    },
+    {
+      "art": "datei",
+      "bytes": 75,
+      "hash": "sha256:69afec09ba4ba129fac3dec89bf7ba4b4d30863deb65a24ae08abc919985a930",
+      "id": "datei:core/src/main/kotlin/de/beispiel/zeichnen/Punkt.kt",
+      "pfad": "core/src/main/kotlin/de/beispiel/zeichnen/Punkt.kt",
+      "sprache": "kotlin",
+      "zeilen": 3
+    },
+    {
+      "art": "datei",
+      "bytes": 200,
+      "hash": "sha256:a4ef0c17fe2abe04686d6fa0fc0ea6f48e3096ffe90ff6c8bffd5d5598ff6a75",
+      "id": "datei:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt",
+      "pfad": "core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt",
+      "sprache": "kotlin",
+      "zeilen": 11
+    },
+    {
+      "art": "datei",
+      "bytes": 71,
+      "hash": "sha256:31298265a669097bd944575f98f2989b49706b57066b0c97748a931ca59f90e9",
+      "id": "datei:daidalos.toml",
+      "pfad": "daidalos.toml",
+      "sprache": "toml",
+      "zeilen": 3
+    },
+    {
+      "art": "datei",
+      "bytes": 10,
+      "hash": "sha256:c81d09f04358354f883e99a44112117d16a28e02d8538e579a5cae0d343d461a",
+      "id": "datei:daten/logo.bin",
+      "pfad": "daten/logo.bin",
+      "sprache": "binaer"
+    },
+    {
+      "art": "datei",
+      "bytes": 60,
+      "hash": "sha256:6f31b262121cd37d0b3e745a41b47748e6f5f3da5cf1d1402346c98375e0b272",
+      "id": "datei:settings.gradle.kts",
+      "pfad": "settings.gradle.kts",
+      "sprache": "gradle-kotlin",
+      "zeilen": 4
+    }
+  ],
+  "schema": 1,
+  "ziel": {
+    "git_aenderungen": null,
+    "git_commit": null,
+    "name": "mini_gradle"
+  }
+}

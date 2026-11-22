@@ -1,0 +1,3 @@
+[scan]
+ausschliessen = ["entwurf/"]
+fremd = ["**/src/main/cpp/fremd/"]
