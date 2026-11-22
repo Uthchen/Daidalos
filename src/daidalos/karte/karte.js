@@ -25,6 +25,8 @@
   const CODE_SPRACHEN = new Set(['kotlin', 'java', 'c', 'cpp']);
   const GROSS_AB = 150;
   const SAMMEL = 'sammel:ordner';
+  // Schriftgröße der Datei-Kästen (und der übrigen Blätter außer Paketen) in px bei Zoom 1.
+  const SCHRIFT_DATEI = 11.5;
 
   const gruppen = M.knoten.filter(k => k.art === 'modul' || k.art === 'ordner');
   const pakete = M.knoten.filter(k => k.art === 'paket');
@@ -116,7 +118,7 @@
   }
   // Blätter tragen oben rechts Symbole (Schloss; bei Dateien Code, Editor, Schloss).
   function blatt(id, zeilen, typ, extra, mono) {
-    const schrift = (mono ? '11px ' + tok('--mono') : '11.5px ' + tok('--font'));
+    const schrift = (mono ? '11px ' + tok('--mono') : SCHRIFT_DATEI + 'px ' + tok('--font'));
     const text = Math.ceil(breiteVon(zeilen, schrift)) + 28;
     const datei = typ === 'datei';
     const w = datei ? Math.max(82, text) : Math.max(80, text + 18);
@@ -375,7 +377,7 @@
 
   // Dateiebene beim Öffnen: Wird beim Einpassen alles unlesbar klein (Dateinamen unter etwa 9 px),
   // zeigt sie das größte Paket in lesbarer Größe. „Einpassen“ zeigt weiter alles.
-  const LESBAR = 9 / 11.5;
+  const LESBAR = 9 / SCHRIFT_DATEI;
   function startAnsicht() {
     if (ziel(cy.elements(), 30).zoom >= LESBAR) { einpassen(cy.elements(), 30); return; }
     let best = null, zahl = -1;
@@ -412,7 +414,7 @@
     const editorFarbe = editorBasis() ? tok('--accent') : tok('--muted');
     const editorDeck = editorBasis() ? 0.85 : 0.35;
     const regeln = [
-      { selector: 'node', style: Object.assign({ 'font-family': f, color: tok('--fg'), 'text-wrap': 'wrap', 'font-size': 11.5, 'text-valign': 'center', 'text-halign': 'center', shape: 'round-rectangle', 'background-color': tok('--node'), 'border-width': 1, 'border-color': tok('--edge'), label: 'data(label)', 'line-height': 1.35, 'min-zoomed-font-size': 5,
+      { selector: 'node', style: Object.assign({ 'font-family': f, color: tok('--fg'), 'text-wrap': 'wrap', 'font-size': SCHRIFT_DATEI, 'text-valign': 'center', 'text-halign': 'center', shape: 'round-rectangle', 'background-color': tok('--node'), 'border-width': 1, 'border-color': tok('--edge'), label: 'data(label)', 'line-height': 1.35, 'min-zoomed-font-size': 5,
         'background-image': bild(SCHLOSS_ZU(tok('--muted'))), 'background-image-opacity': 0.7 }, symbol) },
       { selector: 'node.offen', style: { 'background-image': bild(SCHLOSS_AUF(tok('--accent'))), 'background-image-opacity': 1 } },
       { selector: 'node[w]', style: { width: 'data(w)', height: 'data(h)' } },
@@ -532,10 +534,13 @@
   }
   function passen(eles, padding) { if (eles.nonempty()) fahre(ziel(eles, padding)); }
 
-  // Fokus-Zoom: Passen gewählter Knoten und direkte Nachbarn nur unter Zoom 0,6 ins Bild, steht der
-  // gewählte Knoten bei 0,6 in der Mitte; die Nachbarn nennen Seitenleiste und Zählzeile. Ist ein
-  // gewählter Behälter selbst bei 0,6 zu groß, gilt der Zoom, der ihn ganz zeigt.
-  const MIN_ZOOM_FOKUS = 0.6;
+  // Fokus-Zoom: Passen gewählter Knoten und direkte Nachbarn nur unter MIN_ZOOM_FOKUS ins Bild,
+  // steht der gewählte Knoten bei MIN_ZOOM_FOKUS in der Mitte; die Nachbarn nennen Seitenleiste und
+  // Zählzeile. MIN_ZOOM_FOKUS ist der Zoom, bei dem Dateinamen mindestens 11 px hoch erscheinen:
+  // 11 / SCHRIFT_DATEI = 11 / 11,5 ≈ 0,957 (seit A06; vorher fest 0,6, Dateinamen nur etwa 7 px).
+  // Ist ein gewählter Behälter selbst dabei zu groß, gilt der Zoom, der ihn ganz zeigt.
+  const LESBAR_PX_FOKUS = 11;
+  const MIN_ZOOM_FOKUS = LESBAR_PX_FOKUS / SCHRIFT_DATEI;
   function fokusZiel(gewaehlt, umgebung, padding) {
     const v = ziel(umgebung, padding);
     if (v.zoom >= MIN_ZOOM_FOKUS) return v;
@@ -1501,7 +1506,7 @@
   // Für Tests und spätere Erweiterungen.
   window.daidalos = {
     cy, zustand, zeiten, zeichne, zeigeBefund, zeigeKnoten, zeigeKante, zeigePfad, sucheWeg, editorLink,
-    kartenDateien, gross, SAMMEL, sperre, sperren, speicherName,
+    kartenDateien, gross, SAMMEL, MIN_ZOOM_FOKUS, sperre, sperren, speicherName,
     fluss: () => fluss.stand(),
     letzterLink: () => letzterLink
   };
