@@ -17,7 +17,7 @@ def test_standard_ausgabepfad(mini_kopie: Path, capsys: pytest.CaptureFixture[st
     daten = json.loads(ausgabe.read_text(encoding="utf-8"))
     assert daten["schema"] == 1
     stdout = capsys.readouterr().out
-    assert "Dateien:   12 (davon fremd: 1)" in stdout
+    assert "Dateien:   13 (davon fremd: 1)" in stdout
     assert "Module:    2 (Gradle-Kanten: 1)" in stdout
     assert "Zyklen:    datei 0/0" in stdout
     assert "Laufzeit:" in stdout

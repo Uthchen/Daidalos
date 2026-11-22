@@ -167,6 +167,12 @@
     },
     {
       "art": "enthaelt",
+      "id": "kante:enthaelt:ordner:gradle->datei:gradle/pruefungen.gradle.kts",
+      "nach": "datei:gradle/pruefungen.gradle.kts",
+      "von": "ordner:gradle"
+    },
+    {
+      "art": "enthaelt",
       "id": "kante:enthaelt:paket::app/de.beispiel.app->datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt",
       "nach": "datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt",
       "von": "paket::app/de.beispiel.app"
@@ -388,6 +394,22 @@
     },
     {
       "art": "datei",
+      "bytes": 139,
+      "hash": "sha256:4272504008a7578ab6f11fc200cd366e55e7768de78b3c1b0b61c5844e2085a0",
+      "id": "datei:gradle/pruefungen.gradle.kts",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
+      "ordner": "ordner:gradle",
+      "pfad": "gradle/pruefungen.gradle.kts",
+      "rolle": "produktiv",
+      "sprache": "gradle-kotlin",
+      "zeilen": 4
+    },
+    {
+      "art": "datei",
       "bytes": 60,
       "hash": "sha256:6f31b262121cd37d0b3e745a41b47748e6f5f3da5cf1d1402346c98375e0b272",
       "id": "datei:settings.gradle.kts",
@@ -461,6 +483,19 @@
       },
       "pfad": "daten",
       "zeilen": 0
+    },
+    {
+      "art": "ordner",
+      "dateien": 1,
+      "hash": "sha256:4268183536f21c96b95438faa83fe23a1db94a9cca6d3cdb3fecee20cab97d6e",
+      "id": "ordner:gradle",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
+      "pfad": "gradle",
+      "zeilen": 4
     },
     {
       "art": "paket",

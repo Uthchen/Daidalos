@@ -161,7 +161,7 @@ def erwartete_knoten(ebene: str) -> int:
         for k in knoten
         if k["art"] == "datei"
         and (
-            (k["sprache"] in CODE and not k["pfad"].endswith(".gradle.kts")) or k["id"] in mit_kante
+            k["sprache"] in CODE or k["id"] in mit_kante
         )
     ]
     if ebene == "modul":

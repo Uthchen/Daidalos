@@ -30,9 +30,8 @@
   const pakete = M.knoten.filter(k => k.art === 'paket');
   const mitKante = new Set();
   M.kanten.forEach(k => { if (k.art === 'nutzt' || k.art === 'jni') { mitKante.add(k.von); mitKante.add(k.nach); } });
-  // Auf der Karte: Quellcode-Dateien und jede Datei mit einer Kante. Gradle-Skripte (*.gradle.kts)
-  // zählen nicht als Quellcode, auch wenn die Endungstabelle sie als kotlin führt.
-  const istCode = k => CODE_SPRACHEN.has(k.sprache) && !k.pfad.endsWith('.gradle.kts');
+  // Auf der Karte: Quellcode-Dateien und jede Datei mit einer Kante (Gradle-Skripte sind gradle-kotlin).
+  const istCode = k => CODE_SPRACHEN.has(k.sprache);
   const kartenDateien = M.knoten.filter(k => k.art === 'datei' && (istCode(k) || mitKante.has(k.id)));
   const aufKarte = new Set(kartenDateien.map(d => d.id));
   const gross = kartenDateien.length > GROSS_AB;

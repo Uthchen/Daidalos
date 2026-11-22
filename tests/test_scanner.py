@@ -27,6 +27,7 @@ ERWARTETE_DATEIEN = [
     "core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt",
     "daidalos.toml",
     "daten/logo.bin",
+    "gradle/pruefungen.gradle.kts",
     "settings.gradle.kts",
 ]
 
@@ -227,6 +228,13 @@ def test_binaer_erkennung(tmp_path: Path) -> None:
     assert bild["hash"] == "sha256:" + hashlib.sha256(roh).hexdigest()
     # Null-Byte erst nach 8 KiB: gilt als Text.
     assert _knoten(daten, "spaet.kt")["sprache"] == "kotlin"
+
+
+def test_gradle_skripte_sind_gradle_kotlin(mini_kopie: Path) -> None:
+    # Jede Datei *.gradle.kts zählt als gradle-kotlin, nicht nur build/settings (A05b).
+    daten = scanne(mini_kopie, _konfig(mini_kopie)).daten
+    for pfad in ("gradle/pruefungen.gradle.kts", "app/build.gradle.kts", "settings.gradle.kts"):
+        assert _knoten(daten, pfad)["sprache"] == "gradle-kotlin"
 
 
 def test_grosse_datei_ohne_zeilen(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

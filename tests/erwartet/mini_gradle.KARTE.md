@@ -9,10 +9,10 @@ Erzeugt von Daidalos 0.1.0 aus `daidalos.json`. Gemessenes und Gedeutetes sind g
 | Größe | Wert |
 | --- | ---: |
 | Module | 2 |
-| Ordner außerhalb der Module | 2 |
+| Ordner außerhalb der Module | 3 |
 | Pakete | 2 |
-| Dateien (davon fremd) | 12 (1) |
-| Zeilen | 52 |
+| Dateien (davon fremd) | 13 (1) |
+| Zeilen | 56 |
 | `nutzt`-Kanten zwischen Dateien | 3 |
 | Zyklen | 0 |
 
@@ -31,6 +31,7 @@ Fan-in und Fan-out zählen verschiedene Module (und Ordner), die über produktiv
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
 | [(Wurzel)](karte.html#knoten=ordner%3A.) | 4 | 11 | 0 | 0 | – |  |
 | [daten/](karte.html#knoten=ordner%3Adaten) | 1 | 0 | 0 | 0 | – |  |
+| [gradle/](karte.html#knoten=ordner%3Agradle) | 1 | 4 | 0 | 0 | – |  |
 
 ## Gradle-Abhängigkeiten
 

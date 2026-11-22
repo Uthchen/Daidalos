@@ -108,12 +108,12 @@ Binär ist eine Datei, wenn die ersten 8 KiB ein Null-Byte enthalten.
 
 ### Sprachen
 
-Volle Dateinamen haben Vorrang vor Endungen; Endungen werden ohne Rücksicht auf Groß- und
-Kleinschreibung verglichen.
+Volle Dateinamen haben Vorrang vor Endungen, die mehrteilige Endung `.gradle.kts` hat Vorrang vor
+`.kts`; Endungen werden ohne Rücksicht auf Groß- und Kleinschreibung verglichen.
 
 | Sprache | Dateinamen / Endungen |
 | --- | --- |
-| `gradle-kotlin` | `build.gradle.kts`, `settings.gradle.kts` |
+| `gradle-kotlin` | `.gradle.kts` (seit A05b jede solche Datei, z. B. auch `gradle/x.gradle.kts`; vorher nur `build.gradle.kts` und `settings.gradle.kts`) |
 | `groovy-gradle` | `build.gradle`, `settings.gradle`, `.gradle` |
 | `cmake` | `CMakeLists.txt`, `.cmake` |
 | `kotlin` | `.kt`, `.kts` |
@@ -399,9 +399,9 @@ absoluten Pfade).
   Zielrepos (`../..` im Standardordner `docs/daidalos/`), `null`, wenn der Ausgabeordner nicht im
   Zielrepo liegt. In allen Blöcken ist jedes `<` als `\u003c` geschrieben, damit Inhalte das
   Script-Tag nicht beenden können. Quelltext wird nicht eingebettet.
-- Auf der Dateiebene der Karte stehen Quellcode-Dateien (`kotlin`, `java`, `c`, `cpp`, ohne
-  Gradle-Skripte `*.gradle.kts`) und jede Datei mit einer `nutzt`- oder `jni`-Kante. Bei mehr als
-  150 solcher Dateien sind nur ausgeklappte Module zu sehen.
+- Auf der Dateiebene der Karte stehen Quellcode-Dateien (`kotlin`, `java`, `c`, `cpp`;
+  Gradle-Skripte sind seit A05b `gradle-kotlin` und fallen damit heraus) und jede Datei mit einer
+  `nutzt`- oder `jni`-Kante. Bei mehr als 150 solcher Dateien sind nur ausgeklappte Module zu sehen.
 - Auf der Modulebene werden Ordner ohne Dateien der Karte und ohne Kanten zu einem Kasten
   „Weitere Ordner“ (Id `sammel:ordner`) zusammengefasst; `gradle-plugin`-Kanten sind standardmäßig
   ausgeblendet (Vermerk „Plugin für n Module“ am Ziel, Schalter „Plugins“).
