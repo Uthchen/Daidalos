@@ -520,10 +520,22 @@
     return { zoom, pan: { x: cy.width() / 2 - zoom * (bb.x1 + bb.w / 2), y: cy.height() / 2 - zoom * (bb.y1 + bb.h / 2) } };
   }
   function einpassen(eles, padding) { if (eles.nonempty()) cy.viewport(ziel(eles, padding)); }
-  function passen(eles, padding) {
-    if (!eles.nonempty()) return;
+  function fahre(v) {
     cy.stop(true, true);
-    if (ruhig()) einpassen(eles, padding); else cy.animate(Object.assign(ziel(eles, padding), { duration: 300 }));
+    if (ruhig()) cy.viewport(v); else cy.animate(Object.assign(v, { duration: 300 }));
+  }
+  function passen(eles, padding) { if (eles.nonempty()) fahre(ziel(eles, padding)); }
+
+  // Fokus-Zoom: Passen gewählter Knoten und direkte Nachbarn nur unter Zoom 0,6 ins Bild, steht der
+  // gewählte Knoten bei 0,6 in der Mitte; die Nachbarn nennen Seitenleiste und Zählzeile. Ist ein
+  // gewählter Behälter selbst bei 0,6 zu groß, gilt der Zoom, der ihn ganz zeigt.
+  const MIN_ZOOM_FOKUS = 0.6;
+  function fokusZiel(gewaehlt, umgebung, padding) {
+    const v = ziel(umgebung, padding);
+    if (v.zoom >= MIN_ZOOM_FOKUS) return v;
+    const zoom = Math.min(MIN_ZOOM_FOKUS, ziel(gewaehlt, padding).zoom);
+    const bb = gewaehlt.boundingBox();
+    return { zoom, pan: { x: cy.width() / 2 - zoom * (bb.x1 + bb.w / 2), y: cy.height() / 2 - zoom * (bb.y1 + bb.h / 2) } };
   }
 
   // Abgestufter Fokus auf Knoten (bei Behältern: ihr Inhalt). Gewählt voll, direkte Nachbarn n1,
@@ -560,7 +572,7 @@
     const raus2 = raus1.targets().outgoers('edge').filter(e => !imKern(e.target())).not(e1);
     rein1.union(rein2).addClass('rein');
     raus1.union(raus2).addClass('raus');
-    fluss.start(rein1.union(raus1), rein2.union(raus2));
+    if (!opt || !opt.ohneFluss) fluss.start(rein1.union(raus1), rein2.union(raus2));
     const nutzer = rein1.sources(), basis = raus1.targets();
     const nutzer2 = rein2.sources().not(kern).not(nutzer), basis2 = raus2.targets().not(kern).not(basis);
     const wer = opt && opt.titel ? opt.titel : name(gewaehlt[0].data('ref') || gewaehlt[0].id());
@@ -568,7 +580,7 @@
       pfadinfo.innerHTML = `<span class="m-rein">■</span> wer ${esc(wer)} nutzt: ${nutzer.length} direkt, ${nutzer2.length} eine Stufe weiter · <span class="m-raus">■</span> worauf ${esc(wer)} baut: ${basis.length} direkt, ${basis2.length} eine Stufe weiter`;
       pfadinfo.hidden = false;
     }
-    if (!opt || !opt.ohneZoom) passen(gewaehlt.union(kern).union(n1), 60);
+    if (!opt || !opt.ohneZoom) fahre(fokusZiel(gewaehlt, gewaehlt.union(kern).union(n1), 60));
     return { kern, n1, n2, e1, e2 };
   }
 
@@ -580,8 +592,20 @@
 
   function hebeKanteHervor(e) {
     const ids = [e.source().id(), e.target().id()];
-    fokus(ids, { titel: name(e.source().data('ref') || ids[0]) + ' und ' + name(e.target().data('ref') || ids[1]), ohneZeile: true, ohneZoom: true });
-    e.removeClass('blass n1 n2').addClass('kgewaehlt');
+    // Fokus der beiden Enden ohne Animation; nur die gewählte Kante fließt, dicker und voll sichtbar.
+    fokus(ids, { titel: name(e.source().data('ref') || ids[0]) + ' und ' + name(e.target().data('ref') || ids[1]), ohneZeile: true, ohneZoom: true, ohneFluss: true });
+    // Ohne hl, sonst gewinnt bei Zyklus-Kanten die rote, schmalere Regel edge.zyk.hl.
+    e.removeClass('blass n1 n2 hl rein raus').addClass('kgewaehlt');
+    // Gehört sie zu einem Zyklus dieser Ansicht, bleiben dessen übrige Kanten rot, aber still.
+    if (zustand.zyklen) {
+      const zyk = zyklusKanten();
+      const ringIds = new Set();
+      e.data('kanten').forEach(id => (zyklenVonKante.get(id) || []).forEach(b => {
+        if (b.beleg.kanten.some(k => zyk.has(k))) b.beleg.kanten.forEach(k => ringIds.add(k));
+      }));
+      if (ringIds.size) kantenMit([...ringIds]).not(e).removeClass('blass n1 n2 hl rein raus');
+    }
+    fluss.start(e);
     passen(e.union(e.connectedNodes()), 80);
     pfadinfo.textContent = name(e.source().data('ref') || ids[0]) + ' → ' + name(e.target().data('ref') || ids[1]) + ' · ' + kurzArt(e.data('art')) + ' · Gewicht ' + e.data('gewicht');
     pfadinfo.hidden = false;
@@ -1226,7 +1250,26 @@
   });
 
   // Gemerkte Positionen je Projekt, Ebene und Knoten-Id (nur Blätter; Behälter folgen ihrem Inhalt).
-  const speicherName = ebene => 'daidalos-positionen|' + M.ziel.name + '|' + ebene;
+  // Das Projekt erkennt der Schlüssel an ziel.name, dem eingebetteten Weg zur Repo-Wurzel und dem
+  // Ablageort der Karte, damit zwei gleichnamige Projekte sich nicht in die Quere kommen.
+  function ablageort() {
+    if (location.protocol !== 'file:') return location.origin + location.pathname;
+    return (location.host ? '//' + location.host : '') + decodeURIComponent(location.pathname);
+  }
+  const speicherName = ebene => ['daidalos-positionen', M.ziel.name, E.wurzel === null || E.wurzel === undefined ? '' : E.wurzel, ablageort(), ebene].join('|');
+  const alterSpeicherName = ebene => 'daidalos-positionen|' + M.ziel.name + '|' + ebene;  // bis A05
+  // Einträge unter dem alten Schlüssel einmal übernehmen; der alte Eintrag fällt dabei weg.
+  function uebernimmAltePositionen() {
+    try {
+      Object.keys(ARTEN_JE_EBENE).forEach(ebene => {
+        const alt = localStorage.getItem(alterSpeicherName(ebene));
+        if (alt === null) return;
+        if (localStorage.getItem(speicherName(ebene)) === null) localStorage.setItem(speicherName(ebene), alt);
+        localStorage.removeItem(alterSpeicherName(ebene));
+      });
+    } catch (e) { /* ohne Speicher */ }
+  }
+  uebernimmAltePositionen();
   function lesePositionen(ebene) {
     try { return JSON.parse(localStorage.getItem(speicherName(ebene)) || '{}') || {}; } catch (e) { return {}; }
   }
@@ -1452,7 +1495,7 @@
   // Für Tests und spätere Erweiterungen.
   window.daidalos = {
     cy, zustand, zeiten, zeichne, zeigeBefund, zeigeKnoten, zeigeKante, zeigePfad, sucheWeg, editorLink,
-    kartenDateien, gross, SAMMEL, sperre, sperren,
+    kartenDateien, gross, SAMMEL, sperre, sperren, speicherName,
     fluss: () => fluss.stand(),
     letzterLink: () => letzterLink
   };

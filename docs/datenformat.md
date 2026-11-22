@@ -415,8 +415,11 @@ absoluten Pfade).
   URL-kodiert außer dem Laufwerk; `{zeile}` ist die Zeile (Datei-Kasten: 1, Beleg: seine Zeile).
   Ohne `file://` oder ohne `wurzel` sind die Editor-Symbole ausgegraut.
 - **Gemerkte Positionen** (nur im Browser): `localStorage` unter
-  `daidalos-positionen|<ziel.name>|<ebene>`, Wert `{ "<knoten-id>": [x, y] }` für verschobene
-  Blätter. Unbekannte Ids werden ignoriert; „Anordnung zurücksetzen“ löscht den Eintrag der Ebene.
+  `daidalos-positionen|<ziel.name>|<wurzel>|<ablageort>|<ebene>`, Wert `{ "<knoten-id>": [x, y] }`
+  für verschobene Blätter. `<wurzel>` ist der eingebettete Weg zur Repo-Wurzel (leer ohne),
+  `<ablageort>` der Pfad aus der eigenen Adresse der Karte (bei `file://` dekodiert, mit `//host`
+  bei Netzlaufwerken; sonst Origin und Pfad). Seit A05b; Einträge unter dem alten Schlüssel
+  `daidalos-positionen|<ziel.name>|<ebene>` übernimmt die Karte beim Öffnen einmal und löscht sie. Unbekannte Ids werden ignoriert; „Anordnung zurücksetzen“ löscht den Eintrag der Ebene.
 - `KARTE.md` fasst Module, Gradle-Abhängigkeiten, Bereiche und Befunde zusammen; jede Erwähnung
   eines Knotens oder Befunds verlinkt auf seine Sprungadresse.
 

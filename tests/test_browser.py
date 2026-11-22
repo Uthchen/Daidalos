@@ -157,12 +157,7 @@ def erwartete_knoten(ebene: str) -> int:
     gruppen = [k for k in knoten if k["art"] in ("modul", "ordner")]
     mit_kante = {k[s] for k in d["kanten"] if k["art"] in ("nutzt", "jni") for s in ("von", "nach")}
     dateien = [
-        k
-        for k in knoten
-        if k["art"] == "datei"
-        and (
-            k["sprache"] in CODE or k["id"] in mit_kante
-        )
+        k for k in knoten if k["art"] == "datei" and (k["sprache"] in CODE or k["id"] in mit_kante)
     ]
     if ebene == "modul":
         # Ordner ohne Kartendateien und ohne Kanten werden ein Kasten „Weitere Ordner“.
@@ -494,6 +489,122 @@ def test_keine_bewegung_bei_reduced_motion(browser: Any, karte: Path) -> None:
     assert s.evaluate("daidalos.cy.edges('.fluss')[0].style('line-dash-offset')") == versatz
     assert fehler == []
     kontext.close()
+
+
+FOKUS_ZOOM = """(() => {
+  const cy = daidalos.cy, n = cy.getElementById(%s);
+  const umgebung = n.union(n.connectedEdges().connectedNodes());
+  const bb = umgebung.boundingBox();
+  const passend = Math.min(1.3, (cy.width() - 120) / bb.w, (cy.height() - 120) / bb.h);
+  const p = n.renderedPosition();
+  return { passend, zoom: cy.zoom(), dx: p.x - cy.width() / 2, dy: p.y - cy.height() / 2 };
+})()"""
+
+
+def test_fokus_zoom_nicht_unter_0_6(browser: Any, karte: Path) -> None:
+    # Kleine Kartenfläche, damit Strich.kt mit seinen Nachbarn nur unter Zoom 0,6 ins Bild passt.
+    kontext, s, fehler = _neue_seite(browser, reduced_motion="reduce")
+    oeffne(s, karte, "#ebene=datei")
+    s.add_style_tag(content="#cy { width: 300px !important; height: 220px !important; }")
+    s.evaluate("daidalos.cy.resize()")
+    s.evaluate(f"daidalos.zeigeKnoten('{STRICH}')")
+    warte(s, 100)
+    r = s.evaluate(FOKUS_ZOOM % json.dumps(STRICH))
+    assert r["passend"] < 0.6
+    assert r["zoom"] == pytest.approx(0.6)
+    assert abs(r["dx"]) < 1 and abs(r["dy"]) < 1
+    # Auch der Sprung aus einer Liste der Seitenleiste hält den Mindestzoom.
+    ziel_id = s.eval_on_selector(
+        "#seite [data-knoten^='datei:']", "b => { b.click(); return b.dataset.knoten; }"
+    )
+    warte(s, 100)
+    r = s.evaluate(FOKUS_ZOOM % json.dumps(ziel_id))
+    assert r["zoom"] >= 0.6 - 1e-9
+    if r["passend"] < 0.6:
+        assert abs(r["dx"]) < 1 and abs(r["dy"]) < 1
+    # Auf der vollen Fläche passt die Umgebung: dann wie bisher alles im Bild.
+    s.evaluate("document.querySelector('style:last-of-type').remove(); daidalos.cy.resize()")
+    s.evaluate(f"daidalos.zeigeKnoten('{STRICH}')")
+    warte(s, 100)
+    r = s.evaluate(FOKUS_ZOOM % json.dumps(STRICH))
+    assert r["passend"] >= 0.6 and r["zoom"] >= 0.6
+    assert fehler == []
+    kontext.close()
+
+
+def test_gewaehlte_kante_fliesst_allein(seite: tuple[Any, list[str]], karte: Path) -> None:
+    s, fehler = seite
+    oeffne(s, karte, "#ebene=datei")
+    s.evaluate(f"daidalos.zeigeKante({json.dumps(ANFANG_MITTE)})")
+    warte(s, 200)
+    stand = s.evaluate("daidalos.fluss()")
+    assert stand["laeuft"] is True
+    assert stand["kanten"] == [ANFANG_MITTE] and stand["kanten2"] == []
+    assert s.evaluate("daidalos.cy.edges('.fluss, .fluss2').map(e => e.id())") == [ANFANG_MITTE]
+    ring_ids = sorted(
+        {
+            k
+            for b in messung()["befunde"]
+            if b["regel"] == "zyklus" and ANFANG_MITTE in b["beleg"]["kanten"]
+            for k in b["beleg"]["kanten"]
+        }
+        - {ANFANG_MITTE}
+    )
+    assert ring_ids
+    r = s.evaluate(
+        """(() => {
+      const cy = daidalos.cy, e = cy.getElementById(KANTE);
+      const ring = cy.collection(RING.map(id => cy.getElementById(id)));
+      return {
+        breite: parseFloat(e.style('width')), deckung: e.style('opacity'),
+        farbe: e.style('line-color'),
+        enden: e.connectedNodes().map(n => n.style('opacity')),
+        ring: ring.map(x => [x.style('opacity'), x.style('line-color'), x.hasClass('fluss')]),
+        rot: getComputedStyle(document.documentElement).getPropertyValue('--crit').trim(),
+        andere: Math.max(...cy.edges().not(e).map(x => parseFloat(x.style('width'))))
+      };
+    })()""".replace("KANTE", json.dumps(ANFANG_MITTE)).replace("RING", json.dumps(ring_ids))
+    )
+    assert r["deckung"] == "1" and r["breite"] > r["andere"]
+    assert r["enden"] == ["1", "1"]
+    # Die übrigen Kanten des Zyklus bleiben rot und voll sichtbar, aber still.
+    assert len(r["ring"]) == len(ring_ids)
+    farben = {x[1] for x in r["ring"]}
+    assert len(farben) == 1 and farben != {r["farbe"]}
+    assert all(x[0] == "1" and x[2] is False for x in r["ring"])
+    assert fehler == []
+
+
+def test_positionen_alter_schluessel_wird_uebernommen(
+    seite: tuple[Any, list[str]], karte: Path
+) -> None:
+    s, fehler = seite
+    oeffne(s, karte, "#ebene=datei")
+    name = s.evaluate("JSON.parse(document.getElementById('daidalos-daten').textContent).ziel.name")
+    neu = s.evaluate("daidalos.speicherName('datei')")
+    alt = f"daidalos-positionen|{name}|datei"
+    assert neu != alt and neu.startswith(f"daidalos-positionen|{name}|../..|")
+    assert "karte.html" in neu
+    vorher = position(s, STRICH)
+    gemerkt = [vorher["x"] + 123.0, vorher["y"] + 45.0]
+    s.evaluate(
+        f"localStorage.removeItem({json.dumps(neu)});"
+        f"localStorage.setItem({json.dumps(alt)}, JSON.stringify({{[{json.dumps(STRICH)}]: "
+        f"{json.dumps(gemerkt)}}}))"
+    )
+    s.reload()
+    s.wait_for_function(BEREIT)
+    assert position(s, STRICH) == pytest.approx({"x": gemerkt[0], "y": gemerkt[1]}, abs=0.2)
+    assert s.evaluate(f"localStorage.getItem({json.dumps(alt)})") is None
+    assert json.loads(s.evaluate(f"localStorage.getItem({json.dumps(neu)})")) == {STRICH: gemerkt}
+    # Nur einmal: ein später wieder auftauchender alter Eintrag überschreibt den neuen nicht.
+    s.evaluate(f"localStorage.setItem({json.dumps(alt)}, '{{}}')")
+    s.reload()
+    s.wait_for_function(BEREIT)
+    assert position(s, STRICH) == pytest.approx({"x": gemerkt[0], "y": gemerkt[1]}, abs=0.2)
+    s.click("#zuruecksetzen")
+    warte(s)
+    assert fehler == []
 
 
 # ---------------------------------------------------------------- B4 Kanten
