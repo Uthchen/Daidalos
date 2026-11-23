@@ -60,6 +60,10 @@ label.chk i.detekt { border-color: var(--muted); border-top-style: dashed; }
 .kette { list-style: none; margin: 0; padding: 0; }
 .kette li { padding: 1px 0; }
 .kette .ort { color: var(--muted); font-size: 12px; }
+.kette li { overflow-wrap: anywhere; }
+table.kettenbeleg { table-layout: fixed; width: 100%; }
+table.kettenbeleg td:first-child { width: 36%; }
+table.kettenbeleg td:last-child { text-align: left; overflow-wrap: anywhere; }
 .legende i.ln.unsicher { border-top-style: dashed; }
 .legende i.ln.verdichtet { border-top-style: dotted; }
 input[type="checkbox"] { accent-color: var(--accent); margin: 0; }

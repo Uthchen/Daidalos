@@ -254,7 +254,8 @@ def frische_auf(ziel: Ziel) -> str:
     commit = git("-C", ziel.klon, "rev-parse", "--verify", "-q", f"{ref}^{{commit}}")
     git("-C", ziel.klon, "checkout", "-q", "--detach", commit)
     git("-C", ziel.klon, "reset", "-q", "--hard", commit)
-    git("-C", ziel.klon, "clean", "-q", "-fdx")
+    # Lange Pfade (Build-Ausgaben unter Windows) sonst nicht löschbar
+    git("-C", ziel.klon, "-c", "core.longPaths=true", "clean", "-q", "-fdx")
     return commit
 
 

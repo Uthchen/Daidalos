@@ -46,6 +46,7 @@ uv run daidalos scan <zielrepo>           # Zielrepo scannen
 uv run daidalos render <zielrepo>         # karte.html und KARTE.md erzeugen
 uv run daidalos pfad VON NACH --daten D   # kürzester belegter Weg
 uv run daidalos aufrufe ID --daten D      # Baum der erreichbaren Funktionen (--rueckwaerts, --tiefe N, --unsicher)
+uv run daidalos markierung --daten D      # Grenzkanten der Markierungs-Kette (--datei D, --unsicher)
 uv run daidalos zusammenfassung <zielrepo>          # Übersicht und Offenes für den Skill
 uv run daidalos arbeitsblatt KNOTEN <zielrepo>      # Arbeitsblatt für Modul, Paket oder Datei
 uv run daidalos deutung uebernehmen E.json <zielrepo>   # Entwurf prüfen, Hashes einsetzen
@@ -53,6 +54,7 @@ uv run daidalos deutung pruefen <zielrepo>          # Exit 0, wenn nichts offen 
 uv run playwright install chromium        # einmalig, für die Browser-Probe (Marker browser)
 uv run python werkzeuge/hole_vendor.py --pruefen   # Prüfsummen der eingebetteten Bibliotheken
 uv run python werkzeuge/ziel_auffrischen.py NAME  # Klon eines Ziels aus lokal/ziele.toml auffrischen, scannen, rendern
+uv run python werkzeuge/ziel_auffrischen.py NAME --mit-detekt  # vorher detekt im Klon (Befehl aus lokal/ziele.toml)
 uv run pytest                             # Tests
 uv run pytest --aktualisiere-golden       # Golden-Dateien unter tests/erwartet/ neu schreiben
 uv run ruff check                         # Lint
@@ -64,7 +66,8 @@ uv run ruff format                        # Formatieren
 - `src/daidalos/`: `cli.py` (Befehlszeile), `konfiguration.py` (`daidalos.toml`), `scanner.py`
   (Dateien finden und messen), `sprachen.py` (Endungstabelle), `export.py` (JSON schreiben),
   `struktur.py` (Module, Pakete, Kanten, Befunde, Metriken zusammensetzen), `aufloeser.py`
-  (Kotlin-Namen → Datei-Kanten), `aufrufgraph.py` (Funktionsknoten, `ruft`-Kanten), `deutung.py` (`deutung.json` lesen und abgleichen), `render.py`
+  (Kotlin-Namen → Datei-Kanten), `aufrufgraph.py` (Funktionsknoten, `ruft`-Kanten), `ids.py` (abgeleitete Ids: `ruft`-Kanten, Datei einer
+  Funktion), `markierung_text.py` (`daidalos markierung`), `deutung.py` (`deutung.json` lesen und abgleichen), `render.py`
   (`karte.html`, `KARTE.md`), `pfad.py` (`daidalos pfad`), `zusammenfassung.py` (Übersicht,
   wichtige Dateien, Offenes), `arbeitsblatt.py` (Arbeitsblätter); `deutung.py` auch für
   `deutung uebernehmen`.
@@ -72,7 +75,7 @@ uv run ruff format                        # Formatieren
 - `src/daidalos/karte/`: `vorlage.html`, `karte.css`, `karte.js` (die Karte), `vendor/`
   (Cytoscape.js, elkjs, cytoscape-elk mit `HERKUNFT.md`; byte-genau, siehe `.gitattributes`).
 - `src/daidalos/adapter/`: `gradle.py`, `kotlin.py`, `kotlin_funktionen.py` (Funktionen, Klassen,
-  Annotationen, rohe Aufrufe), `jni.py` (tree-sitter), `baum.py` (Hilfen).
-- `src/daidalos/analysen/`: `zyklen.py` (Zyklen, Einstiege, Trennstelle).
+  Annotationen, rohe Aufrufe), `jni.py` (tree-sitter), `detekt.py` (SARIF), `baum.py` (Hilfen).
+- `src/daidalos/analysen/`: `zyklen.py` (Zyklen, Einstiege, Trennstelle), `markierung.py` (Markierungs-Kette).
 - `tests/beispiele/`: erfundene Mini-Projekte; `tests/erwartet/`: Golden-Dateien;
   `tests/plausibilitaet.py`: Testhilfe (Datei-Kanten gegen Gradle-Kanten).
