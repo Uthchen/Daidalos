@@ -55,6 +55,11 @@ label.chk i, .legende i.ln { width: 14px; height: 0; border-top: 2px solid var(-
 label.chk i.gradle { border-top-width: 3px; }
 label.chk i.jni, .legende i.ln.jni { border-color: var(--adr); }
 label.chk i.red, .legende i.ln.red { border-color: var(--crit); }
+label.chk i.mark { border-color: var(--warn); }
+label.chk i.detekt { border-color: var(--muted); border-top-style: dashed; }
+.kette { list-style: none; margin: 0; padding: 0; }
+.kette li { padding: 1px 0; }
+.kette .ort { color: var(--muted); font-size: 12px; }
 .legende i.ln.unsicher { border-top-style: dashed; }
 .legende i.ln.verdichtet { border-top-style: dotted; }
 input[type="checkbox"] { accent-color: var(--accent); margin: 0; }

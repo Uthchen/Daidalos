@@ -548,7 +548,6 @@
         }
       ],
       "gewicht": 1,
-      "id": "kante:ruft:funktion:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt#Start.bibliothek/0->funktion:anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt#Bibliothek.<init>/0:produktiv",
       "nach": "funktion:anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt#Bibliothek.<init>/0",
       "rolle": "produktiv",
       "sicher": true,
@@ -566,7 +565,6 @@
         }
       ],
       "gewicht": 1,
-      "id": "kante:ruft:funktion:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt#Start.los/0->funktion:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt#Strich.<init>/0:produktiv",
       "nach": "funktion:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt#Strich.<init>/0",
       "rolle": "produktiv",
       "sicher": true,
@@ -584,7 +582,6 @@
         }
       ],
       "gewicht": 1,
-      "id": "kante:ruft:funktion:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt#Start.los/0->funktion:nativ/src/main/kotlin/beispiel/nativ/Insel.kt#Insel.rechne_schnell/1:produktiv",
       "nach": "funktion:nativ/src/main/kotlin/beispiel/nativ/Insel.kt#Insel.rechne_schnell/1",
       "rolle": "produktiv",
       "sicher": true,
@@ -602,7 +599,6 @@
         }
       ],
       "gewicht": 1,
-      "id": "kante:ruft:funktion:anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt#Bibliothek.start/0->funktion:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt#Start.<init>/0:produktiv",
       "nach": "funktion:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt#Start.<init>/0",
       "rolle": "produktiv",
       "sicher": true,
@@ -620,7 +616,6 @@
         }
       ],
       "gewicht": 1,
-      "id": "kante:ruft:funktion:anwendung/src/test/kotlin/beispiel/anwendung/StartTest.kt#StartTest.pruefe/0->funktion:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt#Start.<init>/0:test",
       "nach": "funktion:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt#Start.<init>/0",
       "rolle": "test",
       "sicher": true,
@@ -638,7 +633,6 @@
         }
       ],
       "gewicht": 1,
-      "id": "kante:ruft:funktion:anwendung/src/test/kotlin/beispiel/anwendung/StartTest.kt#StartTest.pruefe/0->funktion:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt#Start.los/0:test",
       "nach": "funktion:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt#Start.los/0",
       "rolle": "test",
       "sicher": true,
@@ -656,7 +650,6 @@
         }
       ],
       "gewicht": 1,
-      "id": "kante:ruft:funktion:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt#auswerten/2->funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#Hilfen.kennung/0:produktiv",
       "nach": "funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#Hilfen.kennung/0",
       "rolle": "produktiv",
       "sicher": true,
@@ -674,7 +667,6 @@
         }
       ],
       "gewicht": 1,
-      "id": "kante:ruft:funktion:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt#auswerten/2->funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#abstand/2:produktiv",
       "nach": "funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#abstand/2",
       "rolle": "produktiv",
       "sicher": true,
@@ -692,7 +684,6 @@
         }
       ],
       "gewicht": 1,
-      "id": "kante:ruft:funktion:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt#beginne/0->funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt#Anfang.<init>/0:produktiv",
       "nach": "funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt#Anfang.<init>/0",
       "rolle": "produktiv",
       "sicher": true,
@@ -710,7 +701,6 @@
         }
       ],
       "gewicht": 1,
-      "id": "kante:ruft:funktion:kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt#AuswertungTest.pruefe/0->funktion:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt#auswerten/2:test",
       "nach": "funktion:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt#auswerten/2",
       "rolle": "test",
       "sicher": true,
@@ -728,7 +718,6 @@
         }
       ],
       "gewicht": 1,
-      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt#Strich.schiebe/1->funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#[Punkt]verschoben/1:produktiv",
       "nach": "funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#[Punkt]verschoben/1",
       "rolle": "produktiv",
       "sicher": true,
@@ -746,7 +735,6 @@
         }
       ],
       "gewicht": 1,
-      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#[Punkt]verschoben/1->funktion:kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt#Punkt.<init>/2:produktiv",
       "nach": "funktion:kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt#Punkt.<init>/2",
       "rolle": "produktiv",
       "sicher": true,
@@ -764,7 +752,6 @@
         }
       ],
       "gewicht": 1,
-      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt#Anfang.weiter/0->funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt#Mitte.<init>/0:produktiv",
       "nach": "funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt#Mitte.<init>/0",
       "rolle": "produktiv",
       "sicher": true,
@@ -782,7 +769,6 @@
         }
       ],
       "gewicht": 1,
-      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt#Ende.zurueck/0->funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt#Anfang.<init>/0:produktiv",
       "nach": "funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt#Anfang.<init>/0",
       "rolle": "produktiv",
       "sicher": true,
@@ -800,7 +786,6 @@
         }
       ],
       "gewicht": 1,
-      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt#Mitte.weiter/0->funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt#Ende.<init>/0:produktiv",
       "nach": "funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt#Ende.<init>/0",
       "rolle": "produktiv",
       "sicher": true,
@@ -2218,7 +2203,6 @@
     {
       "art": "funktion",
       "behaelter": "Start",
-      "datei": "anwendung/src/main/kotlin/beispiel/anwendung/Start.kt",
       "erweiterung": null,
       "id": "funktion:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt#Start.<init>/0",
       "implizit": true,
@@ -2243,7 +2227,6 @@
     {
       "art": "funktion",
       "behaelter": "Start",
-      "datei": "anwendung/src/main/kotlin/beispiel/anwendung/Start.kt",
       "erweiterung": null,
       "hash": "sha256:f59c6fcf4508ffe4029d5dbe369b675279a1d8a3c725eb6915d2627091e6efbb",
       "id": "funktion:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt#Start.bibliothek/0",
@@ -2268,7 +2251,6 @@
     {
       "art": "funktion",
       "behaelter": "Start",
-      "datei": "anwendung/src/main/kotlin/beispiel/anwendung/Start.kt",
       "erweiterung": null,
       "hash": "sha256:853e5e91fc43d57f17490b64524efaf75f3e6c9d6a5035181246db740ed33eee",
       "id": "funktion:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt#Start.los/0",
@@ -2293,7 +2275,6 @@
     {
       "art": "funktion",
       "behaelter": "Bibliothek",
-      "datei": "anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt",
       "erweiterung": null,
       "id": "funktion:anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt#Bibliothek.<init>/0",
       "implizit": true,
@@ -2318,7 +2299,6 @@
     {
       "art": "funktion",
       "behaelter": "Bibliothek",
-      "datei": "anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt",
       "erweiterung": null,
       "hash": "sha256:133b31588937788c25d9f913609c585a72fd277cf4d0837aad75fe75a87be1e8",
       "id": "funktion:anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt#Bibliothek.start/0",
@@ -2343,7 +2323,6 @@
     {
       "art": "funktion",
       "behaelter": "StartTest",
-      "datei": "anwendung/src/test/kotlin/beispiel/anwendung/StartTest.kt",
       "erweiterung": null,
       "hash": "sha256:40d887ec8a54903a9630d841073613af6cc08d5411509274e7153d6ff22f6bf3",
       "id": "funktion:anwendung/src/test/kotlin/beispiel/anwendung/StartTest.kt#StartTest.pruefe/0",
@@ -2368,7 +2347,6 @@
     {
       "art": "funktion",
       "behaelter": "",
-      "datei": "kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt",
       "erweiterung": null,
       "hash": "sha256:559f4a263a778ebdb3323726116daa7fb8945d1b5bc45237332e6aa21413182e",
       "id": "funktion:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt#auswerten/2",
@@ -2397,7 +2375,6 @@
     {
       "art": "funktion",
       "behaelter": "",
-      "datei": "kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt",
       "erweiterung": null,
       "hash": "sha256:a531bbcd1249fc397c6126a0ab2c097146a4c72e39236c95734017a86d8fdf58",
       "id": "funktion:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt#beginne/0",
@@ -2422,7 +2399,6 @@
     {
       "art": "funktion",
       "behaelter": "",
-      "datei": "kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt",
       "erweiterung": null,
       "hash": "sha256:6f1e4157b4fbbf9731fa3cea98b346cf9e8ccd93368d7290317cea76854defeb",
       "id": "funktion:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt#letzteMessung/0",
@@ -2447,7 +2423,6 @@
     {
       "art": "funktion",
       "behaelter": "Messung",
-      "datei": "kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt",
       "erweiterung": null,
       "hash": "sha256:62594bcff3f2f63c8c91a9ae517876c3146dd1fa058ec6d2c8eb69c6ceca689f",
       "id": "funktion:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt#Messung.journal/0",
@@ -2472,7 +2447,6 @@
     {
       "art": "funktion",
       "behaelter": "Eintrag",
-      "datei": "kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt",
       "erweiterung": null,
       "hash": "sha256:d572aab53445966fd5a3e8fa431c12e7cefafffa7d39a4ea582409e7a5db1aa6",
       "id": "funktion:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt#Eintrag.quelle/0",
@@ -2497,7 +2471,6 @@
     {
       "art": "funktion",
       "behaelter": "AuswertungTest",
-      "datei": "kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt",
       "erweiterung": null,
       "hash": "sha256:d4c0a24512a58e8fbafff07d6b52cb0543b30bf0e75e1aea5f832264350dfacc",
       "id": "funktion:kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt#AuswertungTest.pruefe/0",
@@ -2522,7 +2495,6 @@
     {
       "art": "funktion",
       "behaelter": "Punkt",
-      "datei": "kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt",
       "erweiterung": null,
       "id": "funktion:kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt#Punkt.<init>/2",
       "implizit": true,
@@ -2551,7 +2523,6 @@
     {
       "art": "funktion",
       "behaelter": "Strich",
-      "datei": "kern/src/commonMain/kotlin/beispiel/kern/Strich.kt",
       "erweiterung": null,
       "hash": "sha256:bbe2c7ecac99ba1b32be6de6addbeb4eabcf4760537f3c55846784c4400460a8",
       "id": "funktion:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt#Strich.<init>/0",
@@ -2576,7 +2547,6 @@
     {
       "art": "funktion",
       "behaelter": "Strich",
-      "datei": "kern/src/commonMain/kotlin/beispiel/kern/Strich.kt",
       "erweiterung": null,
       "hash": "sha256:b0abb2ade58fec7f81086255263b914ab8516b003e3a391ff2357ce681cd7a6c",
       "id": "funktion:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt#Strich.schiebe/1",
@@ -2604,7 +2574,6 @@
     {
       "art": "funktion",
       "behaelter": "Hilfen",
-      "datei": "kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt",
       "erweiterung": null,
       "hash": "sha256:8378d05d3dabc0f980c06601ee133270a2b0622d91946a0e55f1db331279cfb2",
       "id": "funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#Hilfen.kennung/0",
@@ -2629,7 +2598,6 @@
     {
       "art": "funktion",
       "behaelter": "",
-      "datei": "kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt",
       "erweiterung": "Punkt",
       "hash": "sha256:9c23ea439e5a7f227e889ee018fe662dd31d5d60d7bc8fa2533565b839d17713",
       "id": "funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#[Punkt]verschoben/1",
@@ -2657,7 +2625,6 @@
     {
       "art": "funktion",
       "behaelter": "",
-      "datei": "kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt",
       "erweiterung": null,
       "hash": "sha256:67db0f87e3a873d8137bf26fc405827bd3aa8da63a56a6377e30d3197e1fc6df",
       "id": "funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#abstand/2",
@@ -2686,7 +2653,6 @@
     {
       "art": "funktion",
       "behaelter": "Anfang",
-      "datei": "kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt",
       "erweiterung": null,
       "id": "funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt#Anfang.<init>/0",
       "implizit": true,
@@ -2711,7 +2677,6 @@
     {
       "art": "funktion",
       "behaelter": "Anfang",
-      "datei": "kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt",
       "erweiterung": null,
       "hash": "sha256:15c789b6046723e082ebe63117aa34274840ee3add35705c7932197f221bb150",
       "id": "funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt#Anfang.weiter/0",
@@ -2736,7 +2701,6 @@
     {
       "art": "funktion",
       "behaelter": "Ende",
-      "datei": "kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt",
       "erweiterung": null,
       "id": "funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt#Ende.<init>/0",
       "implizit": true,
@@ -2761,7 +2725,6 @@
     {
       "art": "funktion",
       "behaelter": "Ende",
-      "datei": "kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt",
       "erweiterung": null,
       "hash": "sha256:80c80bdf6562538c9a2175d1bd49fd43fe9de2fd9d809868a22fe5e6b0f33eea",
       "id": "funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt#Ende.art/0",
@@ -2786,7 +2749,6 @@
     {
       "art": "funktion",
       "behaelter": "Ende",
-      "datei": "kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt",
       "erweiterung": null,
       "hash": "sha256:af081c45afa08bf526d5855ad56c4e19f26e2aa51b5b1cf65cefc56d74f871f2",
       "id": "funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt#Ende.zurueck/0",
@@ -2811,7 +2773,6 @@
     {
       "art": "funktion",
       "behaelter": "Mitte",
-      "datei": "kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt",
       "erweiterung": null,
       "hash": "sha256:127c4649acacc885f553b8ade601680870ee6929e05fd2c72e3d0341eda83965",
       "id": "funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt#Mitte.<init>/0",
@@ -2836,7 +2797,6 @@
     {
       "art": "funktion",
       "behaelter": "Mitte",
-      "datei": "kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt",
       "erweiterung": null,
       "hash": "sha256:946b8c1f088288cd9819f64f902525d296e531f49ba1c11c92e42793b630a541",
       "id": "funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt#Mitte.weiter/0",
@@ -2861,7 +2821,6 @@
     {
       "art": "funktion",
       "behaelter": "",
-      "datei": "nativ/src/main/cpp/insel_jni.c",
       "erweiterung": null,
       "hash": "sha256:fc5c48bdc2511d937c2598dfe4cd30e20cea512496539e8c9848160923547941",
       "id": "funktion:nativ/src/main/cpp/insel_jni.c#Java_beispiel_nativ_Insel_rechne_1schnell/3",
@@ -2891,7 +2850,6 @@
     {
       "art": "funktion",
       "behaelter": "Insel",
-      "datei": "nativ/src/main/kotlin/beispiel/nativ/Insel.kt",
       "erweiterung": null,
       "hash": "sha256:6e61f4550f105fe68179c5eb81df48ada68f116507758fa6d94097691321331e",
       "id": "funktion:nativ/src/main/kotlin/beispiel/nativ/Insel.kt#Insel.fehlt/0",
@@ -2908,6 +2866,7 @@
         "external"
       ],
       "name": "fehlt",
+      "ohne_koerper": true,
       "quellsatz": "main",
       "rolle": "produktiv",
       "sichtbarkeit": "public",
@@ -2919,7 +2878,6 @@
     {
       "art": "funktion",
       "behaelter": "Insel",
-      "datei": "nativ/src/main/kotlin/beispiel/nativ/Insel.kt",
       "erweiterung": null,
       "hash": "sha256:4fd0d5c71395e35135b3caa81bd9def5127bae682b6eab8616db3fff44f2e70e",
       "id": "funktion:nativ/src/main/kotlin/beispiel/nativ/Insel.kt#Insel.rechne_schnell/1",
@@ -2936,6 +2894,7 @@
         "external"
       ],
       "name": "rechne_schnell",
+      "ohne_koerper": true,
       "parameter": [
         "Int"
       ],
@@ -2950,7 +2909,6 @@
     {
       "art": "funktion",
       "behaelter": "",
-      "datei": "werkzeug/Pruefung.kt",
       "erweiterung": null,
       "hash": "sha256:9ca2f50b1965b1da149a4040d4332ffedba5f800ee0d3c397a0654fe1fa807ed",
       "id": "funktion:werkzeug/Pruefung.kt#pruefe/0",
