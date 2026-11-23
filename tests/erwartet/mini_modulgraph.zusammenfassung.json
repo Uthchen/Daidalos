@@ -106,6 +106,15 @@
       "zeilen": 3
     }
   ],
+  "messung": {
+    "funktionen": 27,
+    "funktionen_test": 2,
+    "ruft_sicher": 14,
+    "ruft_unsicher": 1,
+    "unaufgeloeste_aufrufe": 0,
+    "unaufgeloeste_dateien": 0,
+    "unaufgeloeste_namen": []
+  },
   "offen": {
     "befunde_ohne_einschaetzung": [
       "befund:unaufgeloest:kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt",

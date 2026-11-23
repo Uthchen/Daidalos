@@ -48,10 +48,17 @@ def test_golden(
     assert text.encode("utf-8") == golden.read_bytes()
 
 
-def test_datei_ohne_adapter_hat_kein_deklariert(capsys: pytest.CaptureFixture[str]) -> None:
+def test_c_datei_listet_nur_jni_funktionen(capsys: pytest.CaptureFixture[str]) -> None:
     text = _blatt(capsys, "nativ/src/main/cpp/insel_jni.c")
-    assert "deklariert" not in text
+    # Ohne Kotlin-Adapter nur die JNI-Funktionen als Funktionsknoten (A07)
+    assert "- deklariert:\n  - Funktionen:\n" in text
+    assert "insel_jni.c#Java_beispiel_nativ_Insel_rechne_1schnell/3` (Z. " in text
     assert "7 Zeilen" in text and "Insel.kt" in text  # Pfad, Zeilen, Kanten
+
+
+def test_datei_listet_funktionen_mit_komplexitaet(capsys: pytest.CaptureFixture[str]) -> None:
+    text = _blatt(capsys, "Strich.kt")
+    assert "Strich.kt#Strich.schiebe/1` (Z. 7, Komplexität 1)" in text
 
 
 def test_unbekannter_knoten_ist_bedienfehler(capsys: pytest.CaptureFixture[str]) -> None:

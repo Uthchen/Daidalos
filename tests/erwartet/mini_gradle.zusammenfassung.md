@@ -41,6 +41,11 @@ Auswahlregel: produktiv, nicht fremd und mindestens eines: unter den 30 mit dem 
 
 Keine.
 
+## Messung
+
+Funktionen: 5 produktiv, 0 Test; ruft-Kanten: 4 sicher, 0 unsicher.
+Unaufgelöste Aufrufe: keine.
+
 ## Offen
 
 - Beschreibung fehlt: alle 9 (Module, Ordner, Pakete und wichtige Dateien; siehe Spalte Deutung)

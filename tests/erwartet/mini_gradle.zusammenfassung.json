@@ -50,6 +50,15 @@
       "zeilen": 4
     }
   ],
+  "messung": {
+    "funktionen": 5,
+    "funktionen_test": 0,
+    "ruft_sicher": 4,
+    "ruft_unsicher": 0,
+    "unaufgeloeste_aufrufe": 0,
+    "unaufgeloeste_dateien": 0,
+    "unaufgeloeste_namen": []
+  },
   "offen": {
     "befunde_ohne_einschaetzung": [],
     "beschreibungen": [

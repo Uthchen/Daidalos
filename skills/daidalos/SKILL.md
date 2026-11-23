@@ -187,3 +187,13 @@ daidalos pfad X Y
 (`--mit-tests` für Testkanten, `--ebene modul|paket|datei`, `--json`). Nenne die Schritte mit
 Belegzeilen und verlinke die Sprungadresse der Karte: `docs/daidalos/karte.html#ebene=<ebene>&von=<id>&nach=<id>`
 (Ids URL-kodiert). Für einen Knoten `karte.html#knoten=<id>`, für einen Befund `karte.html#befund=<id>`.
+
+„Was ruft diese Funktion auf?“ bzw. „Wer ruft sie?“ beantwortest du mit
+
+```
+daidalos aufrufe ID --tiefe 3
+```
+
+(`--rueckwaerts` für die Aufrufer, `--unsicher` auch für unsichere Kanten; Funktions-Ids stehen im
+Arbeitsblatt einer Datei). `daidalos pfad` nimmt auch Funktions-Ids und folgt dann `ruft`-Kanten.
+Unsichere Kanten nennst du immer als unsicher. Die Karte zeigt Funktionen noch nicht.

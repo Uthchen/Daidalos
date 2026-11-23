@@ -1,6 +1,6 @@
 # Datenformat
 
-Stand 2026-11-22 (A06). Diese Datei beschreibt `daidalos.json` (Ausgabe des Programms),
+Stand 2026-11-23 (A07). Diese Datei beschreibt `daidalos.json` (Ausgabe des Programms),
 `deutung.json` (Ausgabe des Skills, vom Programm nur gelesen) und `daidalos.toml` (Konfiguration im
 Zielrepo). Jede Änderung am Format wird hier nachgetragen;
 inkompatible Änderungen erhöhen `schema`.
@@ -61,12 +61,25 @@ Alle späteren Kanten und Befunde verweisen über diese Ids auf Knoten.
 | paket | `paket:<gradle-pfad>/<paketname>` | `paket::core/de.beispiel.zeichnen` |
 | paket außerhalb von Modulen | `paket:<ordner-id>/<paketname>` | `paket:ordner:werkzeug/werkzeug` |
 | ordner | `ordner:<erster Pfadteil>`, Wurzel `ordner:.` | `ordner:werkzeuge`, `ordner:.` |
-| funktion | `funktion:<dateipfad>#<Klasse>.<name>/<stelligkeit>` | `funktion:core/.../Strich.kt#Strich.fuegeHinzu/1` |
+| funktion | `funktion:<dateipfad>#<Behälter>.<name>/<stelligkeit>` | `funktion:core/.../Strich.kt#Strich.fuegeHinzu/1` |
 
 - Pfade sind relativ zum Zielrepo und verwenden `/`.
 - Pakete tragen den Modulpfad, weil derselbe Paketname in mehreren Modulen vorkommen kann.
-- Die Funktions-Id ist vorläufig und wird in Etappe 4 festgezurrt.
-- Seit A03 entstehen Knoten der Arten `datei`, `modul`, `paket` und `ordner`.
+- Seit A03 entstehen Knoten der Arten `datei`, `modul`, `paket` und `ordner`, seit A07 `funktion`.
+
+**Funktions-Id (seit A07 endgültig):**
+
+| Fall | Form | Beispiel |
+| --- | --- | --- |
+| Grundform | `funktion:<dateipfad>#<Behälter>.<name>/<stelligkeit>` | `…/Strich.kt#Strich.setze/1` |
+| Behälter | Klassenkette relativ zur Datei (`Aussen.Innen`, `Klasse.Companion` bzw. der Name eines benannten Companion, `Enum.EINTRAG` bei Einträgen mit Körper); oberste Ebene leer | `…/Werkzeug.kt#fakultaet/1` |
+| Konstruktoren | `<init>` | `…/Strich.kt#Strich.<init>/1` |
+| Accessoren | `<get-feld>` bzw. `<set-feld>` | `…/Strich.kt#Strich.<get-laenge>/0` |
+| Erweiterungsfunktionen | Empfängertyp wie geschrieben (ohne Leerzeichen) in eckigen Klammern vor dem Namen | `…#[Strich]laenge/0`, `…#Hilfen.[Strich]laenge/0` |
+| Stelligkeit | Zahl der Parameter; der Empfänger zählt nicht, ein `vararg` zählt als 1 | |
+| gleiche Stelligkeit | an **alle** betroffenen Ids die Parametertypen wie geschrieben, ohne Leerzeichen; fehlt ein Typ: `?` | `…#Strich.setze/2(Int,Float)`, `…#Strich.setze/2(Punkt,Float)` |
+| danach noch gleich | zusätzlich `@<zeile_von>` | `…#f/1(Int)@12` |
+| C (JNI) | Behälter leer, Name der C-Funktion, Stelligkeit = Zahl der C-Parameter | `…/insel.c#Java_de_a_Insel_rechne/3` |
 
 Kanten und Befunde haben ebenfalls stabile Ids:
 
@@ -75,7 +88,8 @@ Kanten und Befunde haben ebenfalls stabile Ids:
 | Kante | `kante:<art>:<von>-><nach>[:<rolle>]` | `kante:gradle-api:modul::core-labor->modul::core` |
 | Kante mit Rolle | Rolle angehängt bei `nutzt` und `jni` | `kante:nutzt:paket::app/de.a->paket::core/de.b:test` |
 | Befund `zyklus` | `befund:zyklus:<ebene>[:<kantenart>]:<rolle>:<hash12>` | `befund:zyklus:datei:produktiv:3fa2c81b0d4e` |
-| Befund `unaufgeloest` | `befund:unaufgeloest:<pfad>` | |
+| Befund `unaufgeloest` (Importe) | `befund:unaufgeloest:<pfad>` | |
+| Befund `unaufgeloest` (Aufrufe, seit A07) | `befund:unaufgeloest:aufruf:<pfad>` | |
 | Befund `jni-ohne-gegenstueck` | `befund:jni-ohne-gegenstueck:<pfad>:<name>` | |
 
 `<hash12>` sind die ersten 12 Hex-Zeichen von SHA-256 über die sortierten Mitglieder-Ids, mit
@@ -100,6 +114,9 @@ Zeilenumbruch verbunden.
 | `rolle` | Text | `test`, wenn der Quellsatz `test` oder `Test` enthält (auch `androidTest`), sonst `produktiv` |
 | `paket` | Text | Id des Pakets; nur bei Kotlin-Dateien (`.kt`) mit `package`-Zeile |
 | `metriken` | Objekt | Kopplung, siehe [Metriken](#metriken) |
+| `funktionen` | Zahl | seit A07: Zahl der Funktionsknoten der Datei (auch implizite Konstruktoren); bei Kotlin-Dateien und C/C++-Dateien mit `Java_…`-Funktionen |
+| `klassen` | Liste | seit A07, nur Kotlin, siehe [Klassen](#klassen) |
+| `annotationen` | Liste | seit A07, nur Kotlin: `@file:`-Annotationen, siehe [Annotationen](#annotationen) |
 
 **Modul einer Datei:** der Modulordner mit dem längsten passenden Pfadpräfix (verschachtelte
 Module). Paketnamen werden dafür nicht herangezogen.
@@ -212,7 +229,11 @@ veraltete Beschreibungen.
 | `nutzt` | datei → datei | Kotlin-Bezug (Import, gleiches Paket, voll qualifiziert) |
 | `nutzt` | paket → paket, modul/ordner → modul/ordner | Verdichtung der Datei-Kanten, getrennt nach Rolle |
 | `jni` | datei (Kotlin) → datei (C/C++) | `external fun` zu `Java_…` |
-| `enthaelt` | modul/ordner → paket, paket → datei, modul/ordner → datei | Hierarchie |
+| `enthaelt` | modul/ordner → paket, paket → datei, modul/ordner → datei, datei → funktion | Hierarchie |
+| `ruft` | funktion → funktion | Aufruf, seit A07; siehe [Funktionsebene](#funktionsebene-seit-a07) |
+| `ueberschreibt` | funktion → funktion | `override fun` → Funktion im internen Obertyp, seit A07 |
+| `actual` | funktion → funktion | `actual fun` → `expect fun`, seit A07 |
+| `jni` | funktion (Kotlin) → funktion (C) | seit A07 zusätzlich auf Funktionsebene |
 
 | Feld | bei | Bedeutung |
 | --- | --- | --- |
@@ -331,6 +352,172 @@ ist bei Kotlin der volle Name `paket.Klasse.methode`, bei C der `Java_…`-Name.
 **`unaufgeloest`:** je Datei `{ "importe": [ { "import": …, "zeile": … } ] }` für Importe mit
 internem Präfix, die nicht aufgelöst werden konnten.
 
+**`unaufgeloest` der Art `aufruf` (seit A07):** je Datei mit unaufgelösten Aufrufen
+`{ "art": "aufruf", "anzahl": n, "namen": [ { "name", "grund", "anzahl" } ] }`, die zehn häufigsten
+Namen (nach Anzahl absteigend, dann Name). Kein Problem des Zielcodes, sondern ein Maß für die
+Abdeckung: nicht in Karte, `KARTE.md` und Befundliste der Zusammenfassung, braucht keine
+Einschätzung und macht eine Datei nicht wichtig. Die Zusammenfassung zeigt ihn unter „Messung“.
+
+### Funktionsebene (seit A07)
+
+Nur Kotlin (`.kt`) und die C-Seite von JNI. Karte, `KARTE.md`, Zusammenfassung und der Abgleich
+der Deutung arbeiten auf der **Strukturansicht**: der Messung ohne Funktionsknoten, ohne Kanten von
+oder zu Funktionen, ohne Abdeckungsbefunde (`unaufgeloest` der Art `aufruf`) und ohne die
+Datei-Felder `funktionen`, `klassen` und `annotationen`. Für Messungen ohne Funktionsebene ist sie
+gleich der Messung.
+
+#### Welche Funktionen Knoten werden
+
+- jede `fun` auf oberster Ebene, in Klassen, Objekten, `companion object`, Schnittstellen und
+  `enum`-Einträgen mit Körper, auch ohne Körper (abstrakt, Schnittstelle, `expect`, `external`);
+- der primäre Konstruktor (`<init>`), sobald die Klasse (auch ein Objekt) `init`-Blöcke oder
+  Initialisierer von Eigenschaften (auch `by`-Delegaten) mit Aufrufen hat. Seine Aufrufe stammen aus
+  diesen Teilen, aus Vorgabewerten der Klassenparameter und aus dem Aufruf des
+  Oberklassen-Konstruktors (`: Basis(…)`). Seine Zeilen reichen vom Klassenkopf bis zum letzten Teil;
+- jeder sekundäre Konstruktor; `this(…)` und `super(…)` gelten als Aufruf eines Konstruktors;
+- `get()`/`set()` mit Körper;
+- **implizite Konstruktoren** (`implizit: true`): nur wenn ein Aufruf `Klasse(…)` eine Klasse ohne
+  Konstruktorknoten trifft. Parameter aus dem primären Konstruktor, ohne `hash`, `zeile_von` =
+  `zeile_bis` = Zeile der Klasse;
+- C: jede Funktionsdefinition `Java_…` (wie bei `jni`).
+
+Lokale Funktionen, Lambdas, anonyme Objekte und lokale Klassen gehören zur umgebenden Funktion.
+Aufrufe in Initialisierern von Eigenschaften der obersten Ebene gehören zu keiner Funktion und werden
+nicht gezählt.
+
+#### Felder eines Funktionsknotens
+
+| Feld | Bedeutung |
+| --- | --- |
+| `id`, `art` (`"funktion"`) | siehe Id-Schema |
+| `datei` | Pfad der Datei (relativ, mit `/`) |
+| `sprache` | `kotlin` oder `c` |
+| `zeile_von`, `zeile_bis` | erste (mit Annotationen und Modifikatoren) und letzte Zeile |
+| `name`, `behaelter`, `stelligkeit` | wie in der Id; `behaelter` auf oberster Ebene `""` |
+| `sichtbarkeit` | `public`, `internal`, `protected`, `private` (ohne Angabe `public`) |
+| `modifikatoren` | sortiert, aus `abstract`, `actual`, `expect`, `external`, `infix`, `inline`, `open`, `operator`, `override`, `suspend` |
+| `erweiterung` | Empfängertyp wie geschrieben oder `null` |
+| `parameter` | `[{ "name", "typ", "vorgabe": bool, "vararg": bool }]`; `typ` wie geschrieben ohne Leerzeichen, `null` ohne Angabe (Setter) |
+| `rolle`, `quellsatz` | wie bei der Datei |
+| `annotationen` | siehe [Annotationen](#annotationen) |
+| `metriken` | siehe [Metriken je Funktion](#metriken-je-funktion) |
+| `hash` | `sha256:` über den Text der Funktion nach CRLF→LF; beim primären Konstruktor über seine Teile, mit Zeilenumbruch verbunden; fehlt bei impliziten Konstruktoren |
+| `implizit` | `true` bei impliziten Konstruktoren, sonst fehlt das Feld |
+
+#### Klassen
+
+Je Kotlin-Datei `klassen`: `{ "name", "art", "zeile", "annotationen", "obertypen" }`, sortiert nach
+`name`. `name` ist die Kette relativ zur Datei. `art` ist `klasse`, `schnittstelle`, `objekt`,
+`companion`, `enum`, `annotation` oder `enum-eintrag` (nur Einträge mit Körper). `obertypen`:
+`[{ "name": wie geschrieben ohne Typargumente, "voll": voller Name oder null }]`. `voll` ist
+gesetzt, wenn der Name intern oder über einen expliziten Import aufgelöst wird.
+
+#### Annotationen
+
+An Funktionen, Klassen und Dateien (`@file:`) als sortierte Liste `{ "name", "sicher" }`. Der Name
+wird aufgelöst über Import und Alias, die eigene Datei, das gleiche Paket desselben Moduls und
+Stern-Importe interner Pakete; voll qualifiziert Geschriebenes gilt als aufgelöst. Sonst bleibt der
+Name wie geschrieben, mit `"sicher": false` (etwa `Suppress` oder `JvmName` ohne Import).
+Ziel-Präfixe wie `@get:` und Argumente fallen weg. Annotationen auf eigener Zeile, die die Grammatik
+als eigenen Knoten liest (`@A("x")` nach einer Ausdrucksfunktion), gehören zur nächsten Deklaration.
+Es gibt keine Sonderregeln für bestimmte Namen; was als Markierung gilt, entscheidet A08.
+
+#### Regeln für `ruft`
+
+Ausgewertet wird jeder Aufruf in einem Funktionskörper, in Vorgabewerten von Parametern, Lambdas,
+lokalen Funktionen und anonymen Objekten: `f(…)`, `x.f(…)`, `x?.f(…)`, `Klasse(…)`, `super.f(…)`,
+`this.f(…)`, `this@A.f(…)` und Funktionsreferenzen `::f`, `X::f` (Herkunft `referenz`, jede
+Stelligkeit passt). Kommentare und String-Inhalte zählen nicht, Interpolationen schon. Gezählt wird
+die Zahl der Argumente; ein nachgestelltes Lambda zählt mit.
+
+**Sichtbarkeit der Ziele:** Produktiver Code sieht keinen Testcode. Im selben Modul sieht ein
+Quellsatz sich selbst und `commonMain`, ein Test-Quellsatz zusätzlich `commonTest`, `main` und seinen
+`…Main`-Partner (`jvmTest` → `jvmMain`). Zwischen Modulen gilt nur, wovon das aufrufende Modul laut
+Gradle abhängt (jede Gradle-Kante, transitiv); Ordner außerhalb von Modulen sehen alles. `private`
+Funktionen anderer Dateien sind unsichtbar.
+
+Auflösung; es gilt der erste Schritt, der greift:
+
+1. **Empfänger mit bekanntem Typ:** `this` (auch implizit, mit äußeren Klassen und dem
+   Erweiterungsempfänger), Parameter mit Typangabe, Eigenschaften mit Typangabe oder Initialisierer
+   `= Klasse(…)` (der Klasse, ihrer Obertypen, der obersten Ebene), lokale `val`/`var` mit
+   Typangabe oder `= Klasse(…)` (nur wenn vor dem Aufruf in einem umgebenden Block deklariert),
+   Objekt-, Companion-, Klassen- und Enum-Namen sowie Ketten aus solchen **Eigenschaften**
+   (`a.b.f()`, `Klasse.Companion.f()`, `Enum.EINTRAG.f()`; `Enum.entries` ist extern).
+   Typparameter gelten als ihre Schranke. Keine Rückgabetypen, keine Ketten über Aufrufe
+   (`a.b().c()`, auch `Klasse(…).f()`), keine Smart-Casts. Gesucht wird in der Klasse und ihren
+   internen Obertypen (Breite zuerst, überschriebene nur einmal), bei Klassennamen im Objekt bzw. im
+   Companion. Gibt es eine Klasse unter dem vollen Namen mehrfach, sind alle Kanten unsicher
+   (`unbekannter-empfaenger`); eine `expect`- und ihre `actual`-Klasse zählen als eine.
+2. **Ohne Empfänger:** Mitglieder der impliziten Empfänger von innen nach außen (Lambdas von
+   `apply`, `run` und `with`, Erweiterungsempfänger, anonyme Objekte, umgebende Klassen mit ihrem
+   Companion). Eine gleichnamige Eigenschaft dort macht den Aufruf zum Aufruf eines Werts (keine
+   Kante). Danach Erweiterungen, deren Empfänger ein impliziter Empfänger ist; dann dieselbe Datei auf
+   oberster Ebene, Importe und Aliase, das gleiche Paket desselben Moduls und Stern-Importe interner
+   Pakete. Lokale Funktionen und Funktionen anonymer Objekte gehören zur Funktion selbst (keine
+   Kante), ebenso der Aufruf eines lokalen Werts oder Parameters (`aktion()`).
+3. **Konstruktor:** `Name(…)`, wenn `Name` als Klasse aufgelöst wird. Ziel ist `<init>` mit passender
+   Stelligkeit, sonst der implizite Konstruktor.
+4. **Überladung:** Ein Kandidat passt, wenn Pflichtparameter ≤ Argumente ≤ Parameter gilt (mit
+   `vararg` ohne Obergrenze). Genau einer: sicher. Mehrere: unsichere Kante zu jedem
+   (`ueberladung`). `expect` und `actual` gleichen Namens zählen als einer; es gilt das `actual`, wenn
+   es sichtbar ist.
+5. **Erweiterungen** bei bekanntem Empfängertyp, wenn kein Mitglied passt: sichtbare Erweiterungen
+   (eigene Datei, Import, gleiches Paket, Stern-Import) mit passender Stelligkeit. Sicher, wenn genau
+   eine zum Typ oder einem internen Obertyp passt (bei externen Typen: gleicher einfacher Name);
+   sonst unsicher (`erweiterung`) zu allen sichtbaren. Passt keine und hat der interne Typ nur
+   interne Obertypen, ist der Aufruf extern.
+6. **Empfänger mit unbekanntem Typ:** unsichere Kanten (`unbekannter-empfaenger`) zu allen sichtbaren
+   Mitgliedern und Erweiterungen dieses Namens mit passender Stelligkeit, wenn es höchstens 5 sind;
+   bei mehr `unaufgeloest` mit Grund `zu-viele-kandidaten`; bei keinem extern.
+7. **Extern:** bekannter externer Empfängertyp ohne passende Erweiterung, oder ohne Empfänger intern
+   nicht gefunden. Keine Kante, nur `metriken.externe_aufrufe`.
+
+**Abschwächungen:** Liegt zwischen Aufruf und Fundort ein impliziter Empfänger mit unbekanntem Typ
+(Lambda von `apply`/`run`/`with` auf unbekanntem Empfänger, Lambda einer internen Funktion mit
+Empfänger-Funktionstyp), werden alle Treffer unsicher (`unbekannter-empfaenger`). Liegt dort ein
+Empfänger mit Mitgliedern, die Daidalos nicht kennt (externer Obertyp einer umgebenden Klasse,
+externer Erweiterungsempfänger, Lambda als Argument einer externen Funktion außer bekannten ohne
+Empfänger wie `let`, `map`, `forEach`, `remember`), werden Treffer **kleingeschriebener** Namen
+außerhalb der Klassen (Datei, Import, Paket) unsicher (`kleingeschrieben`): Ein gleichnamiges
+Mitglied hätte Vorrang.
+
+Kante `ruft`: `gewicht` = Zahl der Aufrufstellen, `sicher` = mindestens ein Beleg sicher, `rolle`
+nach der aufrufenden Datei, `beleg` = `[{ "zeile", "herkunft", "sicher", "grund"? }]` nach Zeile
+sortiert; `zeile` ist die Zeile des Funktionsnamens. `herkunft`: `this`, `parameter`,
+`eigenschaft`, `lokal`, `objekt`, `ohne-empfaenger` (oberste Ebene derselben Datei), `import`,
+`gleiches-paket`, `konstruktor`, `erweiterung`, `referenz`, `super`, `unbekannter-empfaenger`.
+`grund` nur bei unsicheren Belegen: `ueberladung`, `erweiterung`, `unbekannter-empfaenger`,
+`kleingeschrieben`. Selbstaufrufe ergeben eine Kante auf sich selbst. `ruft` wird nicht auf Datei-
+oder Paketebene verdichtet.
+
+**`ueberschreibt`:** von `override fun` zur nächsten Funktion gleichen Namens, gleicher Stelligkeit
+und gleichen Erweiterungsempfängers in den internen Obertypen (Breite zuerst; bei mehreren gleicher
+Stelligkeit entscheiden die einfachen Typnamen der Parameter). Sicher, wenn es genau ein Ziel gibt
+und alle Obertypen der Klasse intern aufgelöst sind. Felder `gewicht` (1), `rolle`, `sicher`.
+
+**`actual`:** von `actual fun` zur `expect fun` mit gleichem vollen Namen, gleicher Stelligkeit und
+gleichem Erweiterungsempfänger im selben Modul; sicher bei genau einer.
+
+**`jni` auf Funktionsebene:** `external fun` → C-Funktion `Java_…`; Regeln und Beleg wie bei der
+Datei-Kante, `gewicht` 1.
+
+#### Metriken je Funktion
+
+```json
+"metriken": { "externe_aufrufe": 2, "fan_in": 1, "fan_in_unsicher": 2, "fan_out": 3,
+              "fan_out_unsicher": 4, "komplexitaet": 3, "zeilen": 12 }
+```
+
+| Feld | Bedeutung |
+| --- | --- |
+| `zeilen` | Zeilen der Funktion mit mindestens einem Zeichen außerhalb von Kommentaren; Leerzeilen zählen nicht. Implizite Konstruktoren 0; C: nicht leere Zeilen |
+| `komplexitaet` | zyklomatisch: **1 + Anzahl von `if`, jedem `when`-Zweig außer `else`, `for`, `while`, `do`, `catch`, `&&`, `\|\|`, `?:` und `?.let`/`?.run`/`?.also`/`?.apply`/`?.takeIf`**, gezählt im ganzen Text der Funktion samt Lambdas und lokaler Funktionen; `null` bei C |
+| `fan_in`, `fan_out` | Zahl verschiedener Funktionen über **sichere** `ruft`-Kanten der Rolle `produktiv`, ohne die Funktion selbst |
+| `fan_in_unsicher`, `fan_out_unsicher` | dasselbe einschließlich unsicherer Kanten |
+| `externe_aufrufe` | Aufrufstellen mit externem Ziel (Schritt 7) |
+
+
 ### Determinismus
 
 Gleicher Stand des Zielrepos ergibt eine byte-gleiche Datei: UTF-8 ohne BOM, Zeilenende LF,
@@ -420,8 +607,10 @@ der nummerierten Liste.
 Markdown auf stdout (`--json`: dasselbe als JSON), nur aus Messung und Deutung, schreibt nichts.
 Inhalt: Projekt, Commit und Zahlen; Module und Ordner (Dateien, Zeilen, Fan-in, Fan-out,
 Gradle-Kanten nach außen); Pakete je Modul bzw. Ordner; wichtige Dateien mit Grund; Befunde in
-einer Zeile; **Offen**. Die Spalte „Deutung“ zeigt je Knoten `ok`, `fehlt`, `veraltet` oder
-`fremd`.
+einer Zeile; **Messung** (seit A07: Funktionen produktiv und Test, `ruft`-Kanten sicher und
+unsicher, unaufgelöste Aufrufe mit den zehn häufigsten Namen; JSON-Schlüssel `messung`); **Offen**.
+Die Spalte „Deutung“ zeigt je Knoten `ok`, `fehlt`, `veraltet` oder `fremd`. Die Zusammenfassung
+arbeitet auf der Strukturansicht (ohne Funktionsebene, siehe dort).
 
 **Wichtige Dateien** (Auswahlregel, keine Deutung): produktive (`rolle` nicht `test`), nicht
 fremde Dateien, die mindestens eines erfüllen. Gründe in dieser Reihenfolge:
@@ -429,7 +618,7 @@ fremde Dateien, die mindestens eines erfüllen. Gründe in dieser Reihenfolge:
 | Grund | Regel |
 | --- | --- |
 | `fan-in` | unter den 30 mit dem höchsten `metriken.fan_in` (nur Fan-in > 0; Gleichstand nach Id) |
-| `befund` | in `knoten` eines Befunds |
+| `befund` | in `knoten` eines Befunds (außer `unaufgeloest` der Art `aufruf`) |
 | `einstieg` | in `beleg.einstiege` eines Zyklus |
 | `trennstelle` | Ende der `trennstelle` eines Datei-Zyklus; bei Paket- und Modulzyklen die Enden aller Datei-Kanten gleicher Art und Rolle, die die verdichtete Trennstelle tragen |
 | `jni` | Ende einer `jni`-Kante |
@@ -440,7 +629,7 @@ fremde Dateien, die mindestens eines erfüllen. Gründe in dieser Reihenfolge:
 - Beschreibung `fehlt` für Module, Ordner und Pakete (ohne reinen Fremdcode) und wichtige Dateien
   ohne Eintrag mit Text in `beschreibungen`.
 - Beschreibung `veraltet` für jeden beschriebenen Knoten, dessen `hash` vom aktuellen abweicht.
-- Befunde ohne Einschätzung.
+- Befunde ohne Einschätzung (außer `unaufgeloest` der Art `aufruf`).
 - Tote Verweise: Ids in `beschreibungen`, `bereiche[].knoten`, `einschaetzungen[].befund` und
   `kanten`, die es in der Messung nicht gibt.
 
@@ -465,6 +654,22 @@ mit Anzahl. Hat sich die Datei seit dem Scan geändert oder fehlt sie, steht ein
 Für Module und Ordner: Kanten nach außen verdichtet, Pakete, wichtige Dateien voll, die übrigen
 als eine Zeile (mit erster KDoc-Zeile); für Pakete alle Dateien voll, solange das Blatt unter
 etwa 400 Zeilen bleibt. Was nicht passt, steht als Kurzzeile oder als „… und n weitere“.
+Seit A07 listet das Arbeitsblatt **einer Datei** unter „deklariert“ zusätzlich die Funktions-Ids mit
+Zeile und Komplexität (C: `C`, implizite Konstruktoren: `implizit`), nach Zeile sortiert.
+
+## Aufrufe (`daidalos pfad` und `daidalos aufrufe`, seit A07)
+
+`daidalos pfad VON NACH` nimmt auch Funktions-Ids (oder eindeutige Suchbegriffe wie
+`Strich.zeichne` bzw. `Strich.zeichne/1`, also den Teil hinter `#`) und sucht dann den kürzesten Weg
+über `ruft`. Ohne `--unsicher` zählen nur sichere Kanten, mit `--unsicher` auch unsichere; die
+Ausgabe nennt je Schritt Datei, Zeile und Herkunft des Aufrufs und kennzeichnet unsichere Belege mit
+ihrem Grund. `--mit-tests` wie auf den anderen Ebenen; `--json` hat zusätzlich `unsicher`.
+
+`daidalos aufrufe ID [--rueckwaerts] [--tiefe N] [--unsicher] [--mit-tests]` gibt den Baum der
+erreichbaren Funktionen als Text aus (Tiefensuche, Nachbarn nach Id): je Zeile Funktion, Datei und
+Zeile sowie die Aufrufstellen. Jede Funktion steht einmal voll; spätere Vorkommen sind Verweise
+(„siehe oben“), Selbstaufrufe „Rekursion“. Ist `--tiefe` erreicht, steht dort die Zahl der nicht
+gezeigten Funktionen.
 
 ## Ausgaben auf der Befehlszeile
 
@@ -478,7 +683,8 @@ absoluten Pfade).
 - `karte.html` ist eine einzige, offline lauffähige Datei: Vorlage, CSS und Skript aus
   `src/daidalos/karte/`, die Bibliotheken aus `src/daidalos/karte/vendor/` mit ihren Lizenztexten
   als HTML-Kommentar und zwei Datenblöcke `<script type="application/json">`:
-  `id="daidalos-daten"` (die Messung unverändert, kompakt, Schlüssel sortiert) und
+  `id="daidalos-daten"` (die Messung, seit A07 als Strukturansicht ohne Funktionsebene, kompakt,
+  Schlüssel sortiert) und
   `id="daidalos-deutung"` (die abgeglichene Deutung mit `veraltet` je Beschreibung, sonst `null`).
   Seit A05 ein dritter Block `id="daidalos-einstellungen"` mit Einstellungen, die keine Messung
   sind: `{ "editor_link": "vscode://file/{pfad}:{zeile}", "wurzel": "../.." }`. `editor_link`

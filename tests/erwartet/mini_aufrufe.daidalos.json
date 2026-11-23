@@ -1,0 +1,4032 @@
+{
+  "befunde": [
+    {
+      "beleg": {
+        "anzahl": 1,
+        "art": "aufruf",
+        "namen": [
+          {
+            "anzahl": 1,
+            "grund": "zu-viele-kandidaten",
+            "name": "wert"
+          }
+        ]
+      },
+      "id": "befund:unaufgeloest:aufruf:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt",
+      "knoten": [
+        "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt"
+      ],
+      "quelle": "daidalos",
+      "regel": "unaufgeloest",
+      "schwere": "hinweis"
+    },
+    {
+      "beleg": {
+        "ebene": "paket",
+        "einstiege": [
+          {
+            "knoten": "paket::kern/de.beispiel.aufrufe",
+            "quellen": [
+              "paket::app/de.beispiel.app"
+            ]
+          }
+        ],
+        "kanten": [
+          "kante:nutzt:paket::kern/de.beispiel.aufrufe->paket::kern/de.beispiel.aufrufe.hilfe:produktiv",
+          "kante:nutzt:paket::kern/de.beispiel.aufrufe.hilfe->paket::kern/de.beispiel.aufrufe:produktiv"
+        ],
+        "knoten": [
+          "paket::kern/de.beispiel.aufrufe",
+          "paket::kern/de.beispiel.aufrufe.hilfe"
+        ],
+        "loesende_kanten": [
+          "kante:nutzt:paket::kern/de.beispiel.aufrufe->paket::kern/de.beispiel.aufrufe.hilfe:produktiv",
+          "kante:nutzt:paket::kern/de.beispiel.aufrufe.hilfe->paket::kern/de.beispiel.aufrufe:produktiv"
+        ],
+        "rolle": "produktiv",
+        "trennstelle": "kante:nutzt:paket::kern/de.beispiel.aufrufe->paket::kern/de.beispiel.aufrufe.hilfe:produktiv",
+        "unsicher": false
+      },
+      "id": "befund:zyklus:paket:produktiv:8e8254fda44c",
+      "knoten": [
+        "paket::kern/de.beispiel.aufrufe",
+        "paket::kern/de.beispiel.aufrufe.hilfe"
+      ],
+      "quelle": "daidalos",
+      "regel": "zyklus",
+      "schwere": "warnung"
+    }
+  ],
+  "daidalos": "0.1.0",
+  "kanten": [
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "symbol": "de.beispiel.aufrufe.Anlage",
+          "zeile": 3
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:app/src/main/kotlin/de/beispiel/app/Bedienung.kt->datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt:produktiv",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:app/src/main/kotlin/de/beispiel/app/Bedienung.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:app/src/main/kotlin/de/beispiel/app/Bedienung.kt->funktion:app/src/main/kotlin/de/beispiel/app/Bedienung.kt#bediene/1",
+      "nach": "funktion:app/src/main/kotlin/de/beispiel/app/Bedienung.kt#bediene/1",
+      "von": "datei:app/src/main/kotlin/de/beispiel/app/Bedienung.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "symbol": "de.beispiel.aufrufe.Abgeleitet",
+          "zeile": 3
+        },
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "symbol": "de.beispiel.aufrufe.Kreis",
+          "zeile": 4
+        },
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "symbol": "de.beispiel.aufrufe.summe",
+          "zeile": 6
+        }
+      ],
+      "gewicht": 3,
+      "id": "kante:nutzt:datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt->datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt:produktiv",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "symbol": "de.beispiel.aufrufe.Strich",
+          "zeile": 5
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt->datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt:produktiv",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt->funktion:app/src/main/kotlin/de/beispiel/app/Haupt.kt#main/0",
+      "nach": "funktion:app/src/main/kotlin/de/beispiel/app/Haupt.kt#main/0",
+      "von": "datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "gleiches-paket",
+          "sicher": true,
+          "symbol": "de.beispiel.aufrufe.Strich",
+          "zeile": 12
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt->datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt:produktiv",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Anlage.<init>/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Anlage.<init>/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Modus.stufe/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Modus.stufe/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Werkbank.<init>/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Werkbank.<init>/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#lautstaerke/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#lautstaerke/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "symbol": "de.beispiel.marken.Strichpfad",
+          "zeile": 3
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt->datei:kern/src/commonMain/kotlin/de/beispiel/marken/Strichpfad.kt:produktiv",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/marken/Strichpfad.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Abgeleitet.<init>/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Abgeleitet.<init>/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Abgeleitet.beschreibe/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Abgeleitet.beschreibe/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Basis.beschreibe/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Basis.beschreibe/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Form.flaeche/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Form.flaeche/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Kreis.<init>/1",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Kreis.<init>/1",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Kreis.flaeche/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Kreis.flaeche/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Quadrat.flaeche/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Quadrat.flaeche/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#summe/1",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#summe/1",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "symbol": "de.beispiel.marken.Strichpfad",
+          "zeile": 3
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt->datei:kern/src/commonMain/kotlin/de/beispiel/marken/Strichpfad.kt:produktiv",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/marken/Strichpfad.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Punkt.<init>/2",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Punkt.<init>/2",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Punkt.Companion.ursprung/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Punkt.Companion.ursprung/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.<init>/1",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.<init>/1",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.male/2",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.male/2",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.pruefe/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.pruefe/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.sammle/1",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.sammle/1",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.setze/1",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.setze/1",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.setze/2(Int,Float)",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.setze/2(Int,Float)",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.setze/2(Punkt,Float)",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.setze/2(Punkt,Float)",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#[Punkt]verschiebe/1",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#[Punkt]verschiebe/1",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "symbol": "de.beispiel.fremdmarken.Strichpfad",
+          "zeile": 3
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt->datei:kern/src/commonMain/kotlin/de/beispiel/fremdmarken/Strichpfad.kt:produktiv",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/fremdmarken/Strichpfad.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Drei.wert/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Drei.wert/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Eins.<init>/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Eins.<init>/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Eins.teil/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Eins.teil/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Eins.wert/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Eins.wert/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Fuenf.wert/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Fuenf.wert/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Sechs.wert/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Sechs.wert/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Vier.wert/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Vier.wert/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Zwei.teil/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Zwei.teil/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Zwei.wert/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Zwei.wert/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#begruesse/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#begruesse/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#ketten/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#ketten/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#liefere/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#liefere/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#liefereEins/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#liefereEins/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#plattformName/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#plattformName/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "gleiches-paket",
+          "sicher": true,
+          "symbol": "de.beispiel.aufrufe.Strich",
+          "zeile": 23
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt->datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt:produktiv",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "symbol": "de.beispiel.aufrufe.hilfe.verdopple",
+          "zeile": 6
+        },
+        {
+          "herkunft": "import",
+          "sicher": false,
+          "symbol": "de.beispiel.aufrufe.hilfe.halbiere",
+          "zeile": 32
+        }
+      ],
+      "gewicht": 2,
+      "id": "kante:nutzt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt->datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt:produktiv",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "symbol": "de.beispiel.marken.Strichpfad",
+          "zeile": 8
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt->datei:kern/src/commonMain/kotlin/de/beispiel/marken/Strichpfad.kt:produktiv",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/marken/Strichpfad.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#Zaehler.erhoehe/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#Zaehler.erhoehe/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#fakultaet/1",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#fakultaet/1",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#liefereStrich/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#liefereStrich/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#testlos/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#testlos/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#wiederhole/2",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#wiederhole/2",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#zeichneAlles/1",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#zeichneAlles/1",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "symbol": "de.beispiel.aufrufe.Punkt",
+          "zeile": 3
+        },
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "symbol": "de.beispiel.aufrufe.Strich",
+          "zeile": 4
+        }
+      ],
+      "gewicht": 2,
+      "id": "kante:nutzt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt->datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt:produktiv",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt#[Punkt]laenge/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt#[Punkt]laenge/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt#[Strich]laenge/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt#[Strich]laenge/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt#halbiere/1",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt#halbiere/1",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt#verdopple/1",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt#verdopple/1",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "gleiches-paket",
+          "sicher": true,
+          "symbol": "de.beispiel.aufrufe.Strich",
+          "zeile": 8
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt->datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt:test",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt",
+      "rolle": "test",
+      "sicher": true,
+      "von": "datei:kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt->funktion:kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt#StrichTest.pruefeZeichnen/0",
+      "nach": "funktion:kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt#StrichTest.pruefeZeichnen/0",
+      "von": "datei:kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt->funktion:kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt#nurImTest/0",
+      "nach": "funktion:kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt#nurImTest/0",
+      "von": "datei:kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/jvmMain/kotlin/de/beispiel/aufrufe/Plattform.kt->funktion:kern/src/jvmMain/kotlin/de/beispiel/aufrufe/Plattform.kt#jvmGruss/0",
+      "nach": "funktion:kern/src/jvmMain/kotlin/de/beispiel/aufrufe/Plattform.kt#jvmGruss/0",
+      "von": "datei:kern/src/jvmMain/kotlin/de/beispiel/aufrufe/Plattform.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/jvmMain/kotlin/de/beispiel/aufrufe/Plattform.kt->funktion:kern/src/jvmMain/kotlin/de/beispiel/aufrufe/Plattform.kt#plattformName/0",
+      "nach": "funktion:kern/src/jvmMain/kotlin/de/beispiel/aufrufe/Plattform.kt#plattformName/0",
+      "von": "datei:kern/src/jvmMain/kotlin/de/beispiel/aufrufe/Plattform.kt"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "parameter",
+          "sicher": true,
+          "zeile": 7
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:app/src/main/kotlin/de/beispiel/app/Bedienung.kt#bediene/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.pruefe/0:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.pruefe/0",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:app/src/main/kotlin/de/beispiel/app/Bedienung.kt#bediene/1"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "konstruktor",
+          "sicher": true,
+          "zeile": 13
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:app/src/main/kotlin/de/beispiel/app/Haupt.kt#main/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Abgeleitet.<init>/0:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Abgeleitet.<init>/0",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:app/src/main/kotlin/de/beispiel/app/Haupt.kt#main/0"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "grund": "unbekannter-empfaenger",
+          "herkunft": "unbekannter-empfaenger",
+          "sicher": false,
+          "zeile": 13
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:app/src/main/kotlin/de/beispiel/app/Haupt.kt#main/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Abgeleitet.beschreibe/0:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Abgeleitet.beschreibe/0",
+      "rolle": "produktiv",
+      "sicher": false,
+      "von": "funktion:app/src/main/kotlin/de/beispiel/app/Haupt.kt#main/0"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "grund": "unbekannter-empfaenger",
+          "herkunft": "unbekannter-empfaenger",
+          "sicher": false,
+          "zeile": 13
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:app/src/main/kotlin/de/beispiel/app/Haupt.kt#main/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Basis.beschreibe/0:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Basis.beschreibe/0",
+      "rolle": "produktiv",
+      "sicher": false,
+      "von": "funktion:app/src/main/kotlin/de/beispiel/app/Haupt.kt#main/0"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "konstruktor",
+          "sicher": true,
+          "zeile": 12
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:app/src/main/kotlin/de/beispiel/app/Haupt.kt#main/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Kreis.<init>/1:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Kreis.<init>/1",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:app/src/main/kotlin/de/beispiel/app/Haupt.kt#main/0"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "zeile": 12
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:app/src/main/kotlin/de/beispiel/app/Haupt.kt#main/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#summe/1:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#summe/1",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:app/src/main/kotlin/de/beispiel/app/Haupt.kt#main/0"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "konstruktor",
+          "sicher": true,
+          "zeile": 10
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:app/src/main/kotlin/de/beispiel/app/Haupt.kt#main/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.<init>/1:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.<init>/1",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:app/src/main/kotlin/de/beispiel/app/Haupt.kt#main/0"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "this",
+          "sicher": true,
+          "zeile": 11
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:app/src/main/kotlin/de/beispiel/app/Haupt.kt#main/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.pruefe/0:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.pruefe/0",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:app/src/main/kotlin/de/beispiel/app/Haupt.kt#main/0"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "konstruktor",
+          "sicher": true,
+          "zeile": 16
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Anlage.<init>/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Werkbank.<init>/0:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Werkbank.<init>/0",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Anlage.<init>/0"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "konstruktor",
+          "sicher": true,
+          "zeile": 12
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Werkbank.<init>/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.<init>/1:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.<init>/1",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Werkbank.<init>/0"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "objekt",
+          "sicher": true,
+          "zeile": 19
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#lautstaerke/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Modus.stufe/0:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Modus.stufe/0",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#lautstaerke/0"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "super",
+          "sicher": true,
+          "zeile": 29
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Abgeleitet.beschreibe/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Basis.beschreibe/0:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Basis.beschreibe/0",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Abgeleitet.beschreibe/0"
+    },
+    {
+      "art": "ueberschreibt",
+      "gewicht": 1,
+      "id": "kante:ueberschreibt:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Abgeleitet.beschreibe/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Basis.beschreibe/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Basis.beschreibe/0",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Abgeleitet.beschreibe/0"
+    },
+    {
+      "art": "ueberschreibt",
+      "gewicht": 1,
+      "id": "kante:ueberschreibt:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Kreis.flaeche/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Form.flaeche/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Form.flaeche/0",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Kreis.flaeche/0"
+    },
+    {
+      "art": "ueberschreibt",
+      "gewicht": 1,
+      "id": "kante:ueberschreibt:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Quadrat.flaeche/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Form.flaeche/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Form.flaeche/0",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Quadrat.flaeche/0"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "parameter",
+          "sicher": true,
+          "zeile": 20
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#summe/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Form.flaeche/0:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Form.flaeche/0",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#summe/1"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "konstruktor",
+          "sicher": true,
+          "zeile": 9
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Punkt.Companion.ursprung/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Punkt.<init>/2:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Punkt.<init>/2",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Punkt.Companion.ursprung/0"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "konstruktor",
+          "sicher": true,
+          "zeile": 15
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.<init>/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Punkt.<init>/2:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Punkt.<init>/2",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.<init>/1"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "objekt",
+          "sicher": true,
+          "zeile": 14
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.<init>/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Punkt.Companion.ursprung/0:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Punkt.Companion.ursprung/0",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.<init>/1"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "this",
+          "sicher": true,
+          "zeile": 18
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.<init>/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.pruefe/0:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.pruefe/0",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.<init>/1"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "grund": "ueberladung",
+          "herkunft": "this",
+          "sicher": false,
+          "zeile": 27
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.setze/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.setze/2(Int,Float):produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.setze/2(Int,Float)",
+      "rolle": "produktiv",
+      "sicher": false,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.setze/1"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "grund": "ueberladung",
+          "herkunft": "this",
+          "sicher": false,
+          "zeile": 27
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.setze/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.setze/2(Punkt,Float):produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.setze/2(Punkt,Float)",
+      "rolle": "produktiv",
+      "sicher": false,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.setze/1"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "konstruktor",
+          "sicher": true,
+          "zeile": 41
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Punkt.<init>/2:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Punkt.<init>/2",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "this",
+          "sicher": true,
+          "zeile": 40
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.male/2:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.male/2",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "this",
+          "sicher": true,
+          "zeile": 41
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.sammle/1:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.sammle/1",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "this",
+          "sicher": true,
+          "zeile": 39
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.setze/1:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.setze/1",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "grund": "ueberladung",
+          "herkunft": "this",
+          "sicher": false,
+          "zeile": 43
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.setze/2(Int,Float):produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.setze/2(Int,Float)",
+      "rolle": "produktiv",
+      "sicher": false,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "grund": "ueberladung",
+          "herkunft": "this",
+          "sicher": false,
+          "zeile": 43
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.setze/2(Punkt,Float):produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.setze/2(Punkt,Float)",
+      "rolle": "produktiv",
+      "sicher": false,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "erweiterung",
+          "sicher": true,
+          "zeile": 42
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#[Punkt]verschiebe/1:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#[Punkt]verschiebe/1",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "konstruktor",
+          "sicher": true,
+          "zeile": 47
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#[Punkt]verschiebe/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Punkt.<init>/2:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Punkt.<init>/2",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#[Punkt]verschiebe/1"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "ohne-empfaenger",
+          "sicher": true,
+          "zeile": 32
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#begruesse/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#plattformName/0:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#plattformName/0",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#begruesse/0"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "grund": "unbekannter-empfaenger",
+          "herkunft": "unbekannter-empfaenger",
+          "sicher": false,
+          "zeile": 25
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#ketten/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Eins.teil/0:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Eins.teil/0",
+      "rolle": "produktiv",
+      "sicher": false,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#ketten/0"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "grund": "unbekannter-empfaenger",
+          "herkunft": "unbekannter-empfaenger",
+          "sicher": false,
+          "zeile": 25
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#ketten/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Zwei.teil/0:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Zwei.teil/0",
+      "rolle": "produktiv",
+      "sicher": false,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#ketten/0"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "ohne-empfaenger",
+          "sicher": true,
+          "zeile": 23
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#ketten/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#liefere/0:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#liefere/0",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#ketten/0"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "ohne-empfaenger",
+          "sicher": true,
+          "zeile": 24
+        },
+        {
+          "herkunft": "ohne-empfaenger",
+          "sicher": true,
+          "zeile": 25
+        }
+      ],
+      "gewicht": 2,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#ketten/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#liefereEins/0:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#liefereEins/0",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#ketten/0"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "konstruktor",
+          "sicher": true,
+          "zeile": 19
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#liefere/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Eins.<init>/0:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Eins.<init>/0",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#liefere/0"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "konstruktor",
+          "sicher": true,
+          "zeile": 28
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#liefereEins/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Eins.<init>/0:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Eins.<init>/0",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#liefereEins/0"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "ohne-empfaenger",
+          "sicher": true,
+          "zeile": 37
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#fakultaet/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#fakultaet/1:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#fakultaet/1",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#fakultaet/1"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "konstruktor",
+          "sicher": true,
+          "zeile": 39
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#liefereStrich/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.<init>/1:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.<init>/1",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#liefereStrich/0"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "parameter",
+          "sicher": true,
+          "zeile": 24
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#zeichneAlles/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#zeichneAlles/1"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "objekt",
+          "sicher": true,
+          "zeile": 25
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#zeichneAlles/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#Zaehler.erhoehe/0:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#Zaehler.erhoehe/0",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#zeichneAlles/1"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "ohne-empfaenger",
+          "sicher": true,
+          "zeile": 30
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#zeichneAlles/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#fakultaet/1:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#fakultaet/1",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#zeichneAlles/1"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "ohne-empfaenger",
+          "sicher": true,
+          "zeile": 34
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#zeichneAlles/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#liefereStrich/0:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#liefereStrich/0",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#zeichneAlles/1"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "ohne-empfaenger",
+          "sicher": true,
+          "zeile": 24
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#zeichneAlles/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#wiederhole/2:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#wiederhole/2",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#zeichneAlles/1"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "grund": "unbekannter-empfaenger",
+          "herkunft": "unbekannter-empfaenger",
+          "sicher": false,
+          "zeile": 34
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#zeichneAlles/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt#[Punkt]laenge/0:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt#[Punkt]laenge/0",
+      "rolle": "produktiv",
+      "sicher": false,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#zeichneAlles/1"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "erweiterung",
+          "sicher": true,
+          "zeile": 33
+        },
+        {
+          "grund": "unbekannter-empfaenger",
+          "herkunft": "unbekannter-empfaenger",
+          "sicher": false,
+          "zeile": 34
+        }
+      ],
+      "gewicht": 2,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#zeichneAlles/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt#[Strich]laenge/0:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt#[Strich]laenge/0",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#zeichneAlles/1"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "import",
+          "sicher": true,
+          "zeile": 32
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#zeichneAlles/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt#halbiere/1:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt#halbiere/1",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#zeichneAlles/1"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "referenz",
+          "sicher": true,
+          "zeile": 27
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#zeichneAlles/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt#verdopple/1:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt#verdopple/1",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#zeichneAlles/1"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "konstruktor",
+          "sicher": true,
+          "zeile": 8
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt#StrichTest.pruefeZeichnen/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.<init>/1:test",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.<init>/1",
+      "rolle": "test",
+      "sicher": true,
+      "von": "funktion:kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt#StrichTest.pruefeZeichnen/0"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "lokal",
+          "sicher": true,
+          "zeile": 9
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt#StrichTest.pruefeZeichnen/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1:test",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1",
+      "rolle": "test",
+      "sicher": true,
+      "von": "funktion:kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt#StrichTest.pruefeZeichnen/0"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "ohne-empfaenger",
+          "sicher": true,
+          "zeile": 10
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt#StrichTest.pruefeZeichnen/0->funktion:kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt#nurImTest/0:test",
+      "nach": "funktion:kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt#nurImTest/0",
+      "rolle": "test",
+      "sicher": true,
+      "von": "funktion:kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt#StrichTest.pruefeZeichnen/0"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "ohne-empfaenger",
+          "sicher": true,
+          "zeile": 6
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/jvmMain/kotlin/de/beispiel/aufrufe/Plattform.kt#jvmGruss/0->funktion:kern/src/jvmMain/kotlin/de/beispiel/aufrufe/Plattform.kt#plattformName/0:produktiv",
+      "nach": "funktion:kern/src/jvmMain/kotlin/de/beispiel/aufrufe/Plattform.kt#plattformName/0",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/jvmMain/kotlin/de/beispiel/aufrufe/Plattform.kt#jvmGruss/0"
+    },
+    {
+      "art": "actual",
+      "gewicht": 1,
+      "id": "kante:actual:funktion:kern/src/jvmMain/kotlin/de/beispiel/aufrufe/Plattform.kt#plattformName/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#plattformName/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#plattformName/0",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/jvmMain/kotlin/de/beispiel/aufrufe/Plattform.kt#plattformName/0"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::app->datei:app/build.gradle.kts",
+      "nach": "datei:app/build.gradle.kts",
+      "von": "modul::app"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::app->datei:app/src/main/kotlin/de/beispiel/app/Bedienung.kt",
+      "nach": "datei:app/src/main/kotlin/de/beispiel/app/Bedienung.kt",
+      "von": "modul::app"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::app->datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt",
+      "nach": "datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt",
+      "von": "modul::app"
+    },
+    {
+      "art": "gradle-impl",
+      "beleg": [
+        {
+          "bedingt": false,
+          "datei": "app/build.gradle.kts",
+          "konfiguration": "implementation",
+          "quellsatz": null,
+          "zeile": 6
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:gradle-impl:modul::app->modul::kern",
+      "nach": "modul::kern",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "modul::app"
+    },
+    {
+      "art": "nutzt",
+      "dateikanten": 3,
+      "gewicht": 5,
+      "id": "kante:nutzt:modul::app->modul::kern:produktiv",
+      "nach": "modul::kern",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "modul::app"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::app->paket::app/de.beispiel.app",
+      "nach": "paket::app/de.beispiel.app",
+      "von": "modul::app"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern->datei:kern/build.gradle.kts",
+      "nach": "datei:kern/build.gradle.kts",
+      "von": "modul::kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern->datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt",
+      "von": "modul::kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern->datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt",
+      "von": "modul::kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern->datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt",
+      "von": "modul::kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern->datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt",
+      "von": "modul::kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern->datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt",
+      "von": "modul::kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern->datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt",
+      "von": "modul::kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern->datei:kern/src/commonMain/kotlin/de/beispiel/fremdmarken/Strichpfad.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/fremdmarken/Strichpfad.kt",
+      "von": "modul::kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern->datei:kern/src/commonMain/kotlin/de/beispiel/marken/Strichpfad.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/marken/Strichpfad.kt",
+      "von": "modul::kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern->datei:kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt",
+      "nach": "datei:kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt",
+      "von": "modul::kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern->datei:kern/src/jvmMain/kotlin/de/beispiel/aufrufe/Plattform.kt",
+      "nach": "datei:kern/src/jvmMain/kotlin/de/beispiel/aufrufe/Plattform.kt",
+      "von": "modul::kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern->paket::kern/de.beispiel.aufrufe",
+      "nach": "paket::kern/de.beispiel.aufrufe",
+      "von": "modul::kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern->paket::kern/de.beispiel.aufrufe.hilfe",
+      "nach": "paket::kern/de.beispiel.aufrufe.hilfe",
+      "von": "modul::kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern->paket::kern/de.beispiel.fremdmarken",
+      "nach": "paket::kern/de.beispiel.fremdmarken",
+      "von": "modul::kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern->paket::kern/de.beispiel.marken",
+      "nach": "paket::kern/de.beispiel.marken",
+      "von": "modul::kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:ordner:.->datei:README.md",
+      "nach": "datei:README.md",
+      "von": "ordner:."
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:ordner:.->datei:daidalos.toml",
+      "nach": "datei:daidalos.toml",
+      "von": "ordner:."
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:ordner:.->datei:settings.gradle.kts",
+      "nach": "datei:settings.gradle.kts",
+      "von": "ordner:."
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::app/de.beispiel.app->datei:app/src/main/kotlin/de/beispiel/app/Bedienung.kt",
+      "nach": "datei:app/src/main/kotlin/de/beispiel/app/Bedienung.kt",
+      "von": "paket::app/de.beispiel.app"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::app/de.beispiel.app->datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt",
+      "nach": "datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt",
+      "von": "paket::app/de.beispiel.app"
+    },
+    {
+      "art": "nutzt",
+      "dateikanten": 3,
+      "gewicht": 5,
+      "id": "kante:nutzt:paket::app/de.beispiel.app->paket::kern/de.beispiel.aufrufe:produktiv",
+      "nach": "paket::kern/de.beispiel.aufrufe",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "paket::app/de.beispiel.app"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::kern/de.beispiel.aufrufe->datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt",
+      "von": "paket::kern/de.beispiel.aufrufe"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::kern/de.beispiel.aufrufe->datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt",
+      "von": "paket::kern/de.beispiel.aufrufe"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::kern/de.beispiel.aufrufe->datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt",
+      "von": "paket::kern/de.beispiel.aufrufe"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::kern/de.beispiel.aufrufe->datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt",
+      "von": "paket::kern/de.beispiel.aufrufe"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::kern/de.beispiel.aufrufe->datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt",
+      "von": "paket::kern/de.beispiel.aufrufe"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::kern/de.beispiel.aufrufe->datei:kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt",
+      "nach": "datei:kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt",
+      "von": "paket::kern/de.beispiel.aufrufe"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::kern/de.beispiel.aufrufe->datei:kern/src/jvmMain/kotlin/de/beispiel/aufrufe/Plattform.kt",
+      "nach": "datei:kern/src/jvmMain/kotlin/de/beispiel/aufrufe/Plattform.kt",
+      "von": "paket::kern/de.beispiel.aufrufe"
+    },
+    {
+      "art": "nutzt",
+      "dateikanten": 1,
+      "gewicht": 2,
+      "id": "kante:nutzt:paket::kern/de.beispiel.aufrufe->paket::kern/de.beispiel.aufrufe.hilfe:produktiv",
+      "nach": "paket::kern/de.beispiel.aufrufe.hilfe",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "paket::kern/de.beispiel.aufrufe"
+    },
+    {
+      "art": "nutzt",
+      "dateikanten": 1,
+      "gewicht": 1,
+      "id": "kante:nutzt:paket::kern/de.beispiel.aufrufe->paket::kern/de.beispiel.fremdmarken:produktiv",
+      "nach": "paket::kern/de.beispiel.fremdmarken",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "paket::kern/de.beispiel.aufrufe"
+    },
+    {
+      "art": "nutzt",
+      "dateikanten": 3,
+      "gewicht": 3,
+      "id": "kante:nutzt:paket::kern/de.beispiel.aufrufe->paket::kern/de.beispiel.marken:produktiv",
+      "nach": "paket::kern/de.beispiel.marken",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "paket::kern/de.beispiel.aufrufe"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::kern/de.beispiel.aufrufe.hilfe->datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt",
+      "von": "paket::kern/de.beispiel.aufrufe.hilfe"
+    },
+    {
+      "art": "nutzt",
+      "dateikanten": 1,
+      "gewicht": 2,
+      "id": "kante:nutzt:paket::kern/de.beispiel.aufrufe.hilfe->paket::kern/de.beispiel.aufrufe:produktiv",
+      "nach": "paket::kern/de.beispiel.aufrufe",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "paket::kern/de.beispiel.aufrufe.hilfe"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::kern/de.beispiel.fremdmarken->datei:kern/src/commonMain/kotlin/de/beispiel/fremdmarken/Strichpfad.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/fremdmarken/Strichpfad.kt",
+      "von": "paket::kern/de.beispiel.fremdmarken"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::kern/de.beispiel.marken->datei:kern/src/commonMain/kotlin/de/beispiel/marken/Strichpfad.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/marken/Strichpfad.kt",
+      "von": "paket::kern/de.beispiel.marken"
+    }
+  ],
+  "knoten": [
+    {
+      "art": "datei",
+      "bytes": 274,
+      "hash": "sha256:273d813515b222bec8ab7c827a944653d6ed2f9d1881eb4774cfe4585f094e95",
+      "id": "datei:README.md",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
+      "ordner": "ordner:.",
+      "pfad": "README.md",
+      "rolle": "produktiv",
+      "sprache": "markdown",
+      "zeilen": 5
+    },
+    {
+      "art": "datei",
+      "bytes": 85,
+      "hash": "sha256:a7655f6b97d18f6f4b2b04ec12587a919dabbd5757ff737dad7bb2d21b01b835",
+      "id": "datei:app/build.gradle.kts",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
+      "modul": "modul::app",
+      "pfad": "app/build.gradle.kts",
+      "rolle": "produktiv",
+      "sprache": "gradle-kotlin",
+      "zeilen": 7
+    },
+    {
+      "annotationen": [],
+      "art": "datei",
+      "bytes": 185,
+      "funktionen": 1,
+      "hash": "sha256:b5067b3dd3d229e831fb139131b6c7a2a38460a3a266d8eb59c231802ba5c191",
+      "id": "datei:app/src/main/kotlin/de/beispiel/app/Bedienung.kt",
+      "klassen": [],
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 1,
+        "instabilitaet": 1.0
+      },
+      "modul": "modul::app",
+      "paket": "paket::app/de.beispiel.app",
+      "pfad": "app/src/main/kotlin/de/beispiel/app/Bedienung.kt",
+      "quellsatz": "main",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 8
+    },
+    {
+      "annotationen": [],
+      "art": "datei",
+      "bytes": 388,
+      "funktionen": 1,
+      "hash": "sha256:92f1a26fdb7b400c6ee716e6c36120abc529ec27a31d2e7c112950756508ec61",
+      "id": "datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt",
+      "klassen": [],
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 2,
+        "instabilitaet": 1.0
+      },
+      "modul": "modul::app",
+      "paket": "paket::app/de.beispiel.app",
+      "pfad": "app/src/main/kotlin/de/beispiel/app/Haupt.kt",
+      "quellsatz": "main",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 14
+    },
+    {
+      "art": "datei",
+      "bytes": 27,
+      "hash": "sha256:c9af45e84179fafc9bc82500393edad07cf8f2587f912221c2e53429c73f8591",
+      "id": "datei:daidalos.toml",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
+      "ordner": "ordner:.",
+      "pfad": "daidalos.toml",
+      "rolle": "produktiv",
+      "sprache": "toml",
+      "zeilen": 2
+    },
+    {
+      "art": "datei",
+      "bytes": 79,
+      "hash": "sha256:8925b0a20ee2e3e2c6fba8b60201f0f4e9c1905e34af68ab58eb6a5373f52bc3",
+      "id": "datei:kern/build.gradle.kts",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
+      "modul": "modul::kern",
+      "pfad": "kern/build.gradle.kts",
+      "rolle": "produktiv",
+      "sprache": "gradle-kotlin",
+      "zeilen": 7
+    },
+    {
+      "annotationen": [],
+      "art": "datei",
+      "bytes": 341,
+      "funktionen": 4,
+      "hash": "sha256:e19857177b39e0cabc6176f114308231fad8c466ae4aa3221ba47c548f68feda",
+      "id": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt",
+      "klassen": [
+        {
+          "annotationen": [],
+          "art": "klasse",
+          "name": "Anlage",
+          "obertypen": [],
+          "zeile": 15
+        },
+        {
+          "annotationen": [],
+          "art": "enum",
+          "name": "Modus",
+          "obertypen": [],
+          "zeile": 4
+        },
+        {
+          "annotationen": [],
+          "art": "klasse",
+          "name": "Werkbank",
+          "obertypen": [],
+          "zeile": 11
+        }
+      ],
+      "metriken": {
+        "fan_in": 1,
+        "fan_out": 1,
+        "instabilitaet": 0.5
+      },
+      "modul": "modul::kern",
+      "paket": "paket::kern/de.beispiel.aufrufe",
+      "pfad": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt",
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 19
+    },
+    {
+      "annotationen": [],
+      "art": "datei",
+      "bytes": 652,
+      "funktionen": 8,
+      "hash": "sha256:906f6ae927f527b0dca5f5055925131970510fd3d4101ca595a65eb4642558a1",
+      "id": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt",
+      "klassen": [
+        {
+          "annotationen": [],
+          "art": "klasse",
+          "name": "Abgeleitet",
+          "obertypen": [
+            {
+              "name": "Basis",
+              "voll": "de.beispiel.aufrufe.Basis"
+            }
+          ],
+          "zeile": 27
+        },
+        {
+          "annotationen": [],
+          "art": "klasse",
+          "name": "Basis",
+          "obertypen": [],
+          "zeile": 23
+        },
+        {
+          "annotationen": [],
+          "art": "schnittstelle",
+          "name": "Form",
+          "obertypen": [],
+          "zeile": 6
+        },
+        {
+          "annotationen": [],
+          "art": "klasse",
+          "name": "Kreis",
+          "obertypen": [
+            {
+              "name": "Form",
+              "voll": "de.beispiel.aufrufe.Form"
+            }
+          ],
+          "zeile": 10
+        },
+        {
+          "annotationen": [],
+          "art": "klasse",
+          "name": "Quadrat",
+          "obertypen": [
+            {
+              "name": "Form",
+              "voll": "de.beispiel.aufrufe.Form"
+            }
+          ],
+          "zeile": 14
+        }
+      ],
+      "metriken": {
+        "fan_in": 1,
+        "fan_out": 1,
+        "instabilitaet": 0.5
+      },
+      "modul": "modul::kern",
+      "paket": "paket::kern/de.beispiel.aufrufe",
+      "pfad": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt",
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 31
+    },
+    {
+      "annotationen": [],
+      "art": "datei",
+      "bytes": 1061,
+      "funktionen": 11,
+      "hash": "sha256:97f0a1eee65a1e8a8afd1130d7fe455f8e1b508849f8061a621a823b824436c9",
+      "id": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt",
+      "klassen": [
+        {
+          "annotationen": [],
+          "art": "klasse",
+          "name": "Punkt",
+          "obertypen": [],
+          "zeile": 7
+        },
+        {
+          "annotationen": [],
+          "art": "companion",
+          "name": "Punkt.Companion",
+          "obertypen": [],
+          "zeile": 8
+        },
+        {
+          "annotationen": [],
+          "art": "klasse",
+          "name": "Strich",
+          "obertypen": [],
+          "zeile": 13
+        }
+      ],
+      "metriken": {
+        "fan_in": 4,
+        "fan_out": 1,
+        "instabilitaet": 0.2
+      },
+      "modul": "modul::kern",
+      "paket": "paket::kern/de.beispiel.aufrufe",
+      "pfad": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt",
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 47
+    },
+    {
+      "annotationen": [],
+      "art": "datei",
+      "bytes": 694,
+      "funktionen": 14,
+      "hash": "sha256:c0686c869db5240eaca74d5f47ff7554d0f7e69c0f8baf6333fe12f060a4a639",
+      "id": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt",
+      "klassen": [
+        {
+          "annotationen": [],
+          "art": "klasse",
+          "name": "Drei",
+          "obertypen": [],
+          "zeile": 11
+        },
+        {
+          "annotationen": [
+            {
+              "name": "de.beispiel.fremdmarken.Strichpfad",
+              "sicher": true
+            }
+          ],
+          "art": "klasse",
+          "name": "Eins",
+          "obertypen": [],
+          "zeile": 6
+        },
+        {
+          "annotationen": [],
+          "art": "klasse",
+          "name": "Fuenf",
+          "obertypen": [],
+          "zeile": 15
+        },
+        {
+          "annotationen": [],
+          "art": "klasse",
+          "name": "Sechs",
+          "obertypen": [],
+          "zeile": 17
+        },
+        {
+          "annotationen": [],
+          "art": "klasse",
+          "name": "Vier",
+          "obertypen": [],
+          "zeile": 13
+        },
+        {
+          "annotationen": [],
+          "art": "klasse",
+          "name": "Zwei",
+          "obertypen": [],
+          "zeile": 9
+        }
+      ],
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 1,
+        "instabilitaet": 1.0
+      },
+      "modul": "modul::kern",
+      "paket": "paket::kern/de.beispiel.aufrufe",
+      "pfad": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt",
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 32
+    },
+    {
+      "annotationen": [
+        {
+          "name": "JvmName",
+          "sicher": false
+        },
+        {
+          "name": "de.beispiel.marken.Strichpfad",
+          "sicher": true
+        }
+      ],
+      "art": "datei",
+      "bytes": 1129,
+      "funktionen": 6,
+      "hash": "sha256:4d1d44f2aded0fc9de0f2daee3d2c5b26a86a38ed306cb4e222a57e205b965e1",
+      "id": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt",
+      "klassen": [
+        {
+          "annotationen": [],
+          "art": "objekt",
+          "name": "Zaehler",
+          "obertypen": [],
+          "zeile": 13
+        }
+      ],
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 3,
+        "instabilitaet": 1.0
+      },
+      "modul": "modul::kern",
+      "paket": "paket::kern/de.beispiel.aufrufe",
+      "pfad": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt",
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 43
+    },
+    {
+      "annotationen": [],
+      "art": "datei",
+      "bytes": 323,
+      "funktionen": 4,
+      "hash": "sha256:64c5ac4d040f1a6f41096b99ebf194a35ea8152222f40fffc7529dc197f095d4",
+      "id": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt",
+      "klassen": [],
+      "metriken": {
+        "fan_in": 1,
+        "fan_out": 1,
+        "instabilitaet": 0.5
+      },
+      "modul": "modul::kern",
+      "paket": "paket::kern/de.beispiel.aufrufe.hilfe",
+      "pfad": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt",
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 13
+    },
+    {
+      "annotationen": [],
+      "art": "datei",
+      "bytes": 127,
+      "funktionen": 0,
+      "hash": "sha256:11f009aca5c29e7507dfe282c04b7176aed0128e3cc6a642f608ee3fd595496a",
+      "id": "datei:kern/src/commonMain/kotlin/de/beispiel/fremdmarken/Strichpfad.kt",
+      "klassen": [
+        {
+          "annotationen": [],
+          "art": "annotation",
+          "name": "Strichpfad",
+          "obertypen": [],
+          "zeile": 4
+        }
+      ],
+      "metriken": {
+        "fan_in": 1,
+        "fan_out": 0,
+        "instabilitaet": 0.0
+      },
+      "modul": "modul::kern",
+      "paket": "paket::kern/de.beispiel.fremdmarken",
+      "pfad": "kern/src/commonMain/kotlin/de/beispiel/fremdmarken/Strichpfad.kt",
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 4
+    },
+    {
+      "annotationen": [],
+      "art": "datei",
+      "bytes": 119,
+      "funktionen": 0,
+      "hash": "sha256:676455bae5f7f5880d709ec96749431d7c0e66d3a6b8c35b35c9f0edf8c7c495",
+      "id": "datei:kern/src/commonMain/kotlin/de/beispiel/marken/Strichpfad.kt",
+      "klassen": [
+        {
+          "annotationen": [],
+          "art": "annotation",
+          "name": "Strichpfad",
+          "obertypen": [],
+          "zeile": 4
+        }
+      ],
+      "metriken": {
+        "fan_in": 3,
+        "fan_out": 0,
+        "instabilitaet": 0.0
+      },
+      "modul": "modul::kern",
+      "paket": "paket::kern/de.beispiel.marken",
+      "pfad": "kern/src/commonMain/kotlin/de/beispiel/marken/Strichpfad.kt",
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 4
+    },
+    {
+      "annotationen": [],
+      "art": "datei",
+      "bytes": 268,
+      "funktionen": 2,
+      "hash": "sha256:d2cc6910452df9fbdf6ca4f24a3554517df4bc6b292f1ba651e48f48498ac8af",
+      "id": "datei:kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt",
+      "klassen": [
+        {
+          "annotationen": [],
+          "art": "klasse",
+          "name": "StrichTest",
+          "obertypen": [],
+          "zeile": 6
+        }
+      ],
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
+      "modul": "modul::kern",
+      "paket": "paket::kern/de.beispiel.aufrufe",
+      "pfad": "kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt",
+      "quellsatz": "commonTest",
+      "rolle": "test",
+      "sprache": "kotlin",
+      "zeilen": 12
+    },
+    {
+      "annotationen": [],
+      "art": "datei",
+      "bytes": 186,
+      "funktionen": 2,
+      "hash": "sha256:f160628f6eb62fc737fa0b4cf5ca81c9b0ff4f2e08ae5014aa19aef03470eac8",
+      "id": "datei:kern/src/jvmMain/kotlin/de/beispiel/aufrufe/Plattform.kt",
+      "klassen": [],
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
+      "modul": "modul::kern",
+      "paket": "paket::kern/de.beispiel.aufrufe",
+      "pfad": "kern/src/jvmMain/kotlin/de/beispiel/aufrufe/Plattform.kt",
+      "quellsatz": "jvmMain",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 6
+    },
+    {
+      "art": "datei",
+      "bytes": 55,
+      "hash": "sha256:cb724841dc21da68f6c24fccf7b8b52b5c3f670b895d9321a286f2dd72ac4fdc",
+      "id": "datei:settings.gradle.kts",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
+      "ordner": "ordner:.",
+      "pfad": "settings.gradle.kts",
+      "rolle": "produktiv",
+      "sprache": "gradle-kotlin",
+      "zeilen": 3
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "",
+      "datei": "app/src/main/kotlin/de/beispiel/app/Bedienung.kt",
+      "erweiterung": null,
+      "hash": "sha256:7dc918929d94478d52ef3e8d36affb81c6b2c0500c00b240eb49f48f9911a2b1",
+      "id": "funktion:app/src/main/kotlin/de/beispiel/app/Bedienung.kt#bediene/1",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 0,
+        "fan_in_unsicher": 0,
+        "fan_out": 1,
+        "fan_out_unsicher": 1,
+        "komplexitaet": 1,
+        "zeilen": 3
+      },
+      "modifikatoren": [],
+      "name": "bediene",
+      "parameter": [
+        {
+          "name": "anlage",
+          "typ": "Anlage",
+          "vararg": false,
+          "vorgabe": false
+        }
+      ],
+      "quellsatz": "main",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 1,
+      "zeile_bis": 8,
+      "zeile_von": 6
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "",
+      "datei": "app/src/main/kotlin/de/beispiel/app/Haupt.kt",
+      "erweiterung": null,
+      "hash": "sha256:f5d3196a2d2798ae6e034d21d6bb9571ac0758ff85666ba672820a719b016c1d",
+      "id": "funktion:app/src/main/kotlin/de/beispiel/app/Haupt.kt#main/0",
+      "metriken": {
+        "externe_aufrufe": 2,
+        "fan_in": 0,
+        "fan_in_unsicher": 0,
+        "fan_out": 5,
+        "fan_out_unsicher": 7,
+        "komplexitaet": 1,
+        "zeilen": 6
+      },
+      "modifikatoren": [],
+      "name": "main",
+      "parameter": [],
+      "quellsatz": "main",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 14,
+      "zeile_von": 9
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Anlage",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt",
+      "erweiterung": null,
+      "hash": "sha256:db9b50be74e6a40cfff016073f4022281c90c1454f4b3eae9c94ac00ef6954b8",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Anlage.<init>/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 0,
+        "fan_in_unsicher": 0,
+        "fan_out": 1,
+        "fan_out_unsicher": 1,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "<init>",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 16,
+      "zeile_von": 15
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Modus",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt",
+      "erweiterung": null,
+      "hash": "sha256:9713e7e7e0924a2059852a1f9a8073229ba4747235074ebb6dc111a54021bbba",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Modus.stufe/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 1,
+        "fan_in_unsicher": 1,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "stufe",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 8,
+      "zeile_von": 8
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Werkbank",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt",
+      "erweiterung": null,
+      "hash": "sha256:f223bc357090fbf800fc85fa44aa38bf1dd532a41b7ef34bd768ed9bc469387a",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Werkbank.<init>/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 1,
+        "fan_in_unsicher": 1,
+        "fan_out": 1,
+        "fan_out_unsicher": 1,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "<init>",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 12,
+      "zeile_von": 11
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt",
+      "erweiterung": null,
+      "hash": "sha256:2a64a00365f7dd137fa21e5dc7cb6e1a0eb17efe09591bea3a77c12b45b961a7",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#lautstaerke/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 0,
+        "fan_in_unsicher": 0,
+        "fan_out": 1,
+        "fan_out_unsicher": 1,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "lautstaerke",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 19,
+      "zeile_von": 19
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Abgeleitet",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt",
+      "erweiterung": null,
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Abgeleitet.<init>/0",
+      "implizit": true,
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 1,
+        "fan_in_unsicher": 1,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 0
+      },
+      "modifikatoren": [],
+      "name": "<init>",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 27,
+      "zeile_von": 27
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Abgeleitet",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt",
+      "erweiterung": null,
+      "hash": "sha256:3b50873b40bf22a6b6a92e987873d54d5701249bfeb9eb52c5c72a371d3939cb",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Abgeleitet.beschreibe/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 0,
+        "fan_in_unsicher": 1,
+        "fan_out": 1,
+        "fan_out_unsicher": 1,
+        "komplexitaet": 1,
+        "zeilen": 3
+      },
+      "modifikatoren": [
+        "override"
+      ],
+      "name": "beschreibe",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 30,
+      "zeile_von": 28
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Basis",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt",
+      "erweiterung": null,
+      "hash": "sha256:b2973bcb784e0de9c004fc73363e68a255e746d5bf2b0a9d761ef033edb59ce7",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Basis.beschreibe/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 1,
+        "fan_in_unsicher": 2,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [
+        "open"
+      ],
+      "name": "beschreibe",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 24,
+      "zeile_von": 24
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Form",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt",
+      "erweiterung": null,
+      "hash": "sha256:492ca6f5870ad4ebb4fa9de6b97f2066441f1a23a1db93bd1e8cf4eaa8ad0e52",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Form.flaeche/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 1,
+        "fan_in_unsicher": 1,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "flaeche",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 7,
+      "zeile_von": 7
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Kreis",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt",
+      "erweiterung": null,
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Kreis.<init>/1",
+      "implizit": true,
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 1,
+        "fan_in_unsicher": 1,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 0
+      },
+      "modifikatoren": [],
+      "name": "<init>",
+      "parameter": [
+        {
+          "name": "radius",
+          "typ": "Double",
+          "vararg": false,
+          "vorgabe": false
+        }
+      ],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 1,
+      "zeile_bis": 10,
+      "zeile_von": 10
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Kreis",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt",
+      "erweiterung": null,
+      "hash": "sha256:0c9bfcb15bea7ef865dd516253aadfd56e322fc26bf0e09362562813bc1f9f91",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Kreis.flaeche/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 0,
+        "fan_in_unsicher": 0,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [
+        "override"
+      ],
+      "name": "flaeche",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 11,
+      "zeile_von": 11
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Quadrat",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt",
+      "erweiterung": null,
+      "hash": "sha256:2d211e0153f396a64529831054cd0a52deeddfcf09c96ad4fe18d5d6680078e5",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#Quadrat.flaeche/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 0,
+        "fan_in_unsicher": 0,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [
+        "override"
+      ],
+      "name": "flaeche",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 15,
+      "zeile_von": 15
+    },
+    {
+      "annotationen": [
+        {
+          "name": "de.beispiel.marken.Strichpfad",
+          "sicher": true
+        }
+      ],
+      "art": "funktion",
+      "behaelter": "",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt",
+      "erweiterung": null,
+      "hash": "sha256:a5ec221cec5748b0ea5f0b7c641a1870d320dfe5c433d65be70c739c0c1c8d5a",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Formen.kt#summe/1",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 1,
+        "fan_in_unsicher": 1,
+        "fan_out": 1,
+        "fan_out_unsicher": 1,
+        "komplexitaet": 1,
+        "zeilen": 4
+      },
+      "modifikatoren": [],
+      "name": "summe",
+      "parameter": [
+        {
+          "name": "form",
+          "typ": "Form",
+          "vararg": false,
+          "vorgabe": false
+        }
+      ],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 1,
+      "zeile_bis": 21,
+      "zeile_von": 18
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Punkt",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt",
+      "erweiterung": null,
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Punkt.<init>/2",
+      "implizit": true,
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 4,
+        "fan_in_unsicher": 4,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 0
+      },
+      "modifikatoren": [],
+      "name": "<init>",
+      "parameter": [
+        {
+          "name": "x",
+          "typ": "Int",
+          "vararg": false,
+          "vorgabe": false
+        },
+        {
+          "name": "y",
+          "typ": "Int",
+          "vararg": false,
+          "vorgabe": false
+        }
+      ],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 2,
+      "zeile_bis": 7,
+      "zeile_von": 7
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Punkt.Companion",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt",
+      "erweiterung": null,
+      "hash": "sha256:fc6b863af4265975da9429858dc44a2eefe7dc487836dd838e9e819c75e3c986",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Punkt.Companion.ursprung/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 1,
+        "fan_in_unsicher": 1,
+        "fan_out": 1,
+        "fan_out_unsicher": 1,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "ursprung",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 9,
+      "zeile_von": 9
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Strich",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt",
+      "erweiterung": null,
+      "hash": "sha256:5c065d15b52655842f50f94d8a074dc1289ece12f505f890f315dbdbcbeee870",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.<init>/1",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 3,
+        "fan_in_unsicher": 3,
+        "fan_out": 3,
+        "fan_out_unsicher": 3,
+        "komplexitaet": 1,
+        "zeilen": 6
+      },
+      "modifikatoren": [],
+      "name": "<init>",
+      "parameter": [
+        {
+          "name": "name",
+          "typ": "String",
+          "vararg": false,
+          "vorgabe": false
+        }
+      ],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 1,
+      "zeile_bis": 19,
+      "zeile_von": 13
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Strich",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt",
+      "erweiterung": null,
+      "hash": "sha256:191117dea9ca714232ffeefabf3c48bdd99d13f518c676b800bc71b441463349",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.male/2",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 1,
+        "fan_in_unsicher": 1,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "male",
+      "parameter": [
+        {
+          "name": "farbe",
+          "typ": "Int",
+          "vararg": false,
+          "vorgabe": false
+        },
+        {
+          "name": "dicke",
+          "typ": "Float",
+          "vararg": false,
+          "vorgabe": true
+        }
+      ],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 2,
+      "zeile_bis": 33,
+      "zeile_von": 33
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Strich",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt",
+      "erweiterung": null,
+      "hash": "sha256:4ad5f1cceae6338f8b14c05db69b826d61a717d5e3f47345722c594996d683bb",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.pruefe/0",
+      "metriken": {
+        "externe_aufrufe": 2,
+        "fan_in": 3,
+        "fan_in_unsicher": 3,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 3,
+        "zeilen": 5
+      },
+      "modifikatoren": [],
+      "name": "pruefe",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 25,
+      "zeile_von": 21
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Strich",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt",
+      "erweiterung": null,
+      "hash": "sha256:ae7c132cd97ef0fc01fc61f2ae40f0a754b7c8f5a0bc305289c3163971f53195",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.sammle/1",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 1,
+        "fan_in_unsicher": 1,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "sammle",
+      "parameter": [
+        {
+          "name": "punkte",
+          "typ": "Punkt",
+          "vararg": true,
+          "vorgabe": false
+        }
+      ],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 1,
+      "zeile_bis": 35,
+      "zeile_von": 35
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Strich",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt",
+      "erweiterung": null,
+      "hash": "sha256:cb1a1fc1916187cb398f52c92a300c350e6b30534c791f54999b5fafcad60899",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.setze/1",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 1,
+        "fan_in_unsicher": 1,
+        "fan_out": 0,
+        "fan_out_unsicher": 2,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "setze",
+      "parameter": [
+        {
+          "name": "x",
+          "typ": "Int",
+          "vararg": false,
+          "vorgabe": false
+        }
+      ],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 1,
+      "zeile_bis": 27,
+      "zeile_von": 27
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Strich",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt",
+      "erweiterung": null,
+      "hash": "sha256:892996e215055337bebc0673eacbd41b43f418a12c73dad3c971c28294eb4e3b",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.setze/2(Int,Float)",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 0,
+        "fan_in_unsicher": 2,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "setze",
+      "parameter": [
+        {
+          "name": "a",
+          "typ": "Int",
+          "vararg": false,
+          "vorgabe": false
+        },
+        {
+          "name": "b",
+          "typ": "Float",
+          "vararg": false,
+          "vorgabe": false
+        }
+      ],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 2,
+      "zeile_bis": 29,
+      "zeile_von": 29
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Strich",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt",
+      "erweiterung": null,
+      "hash": "sha256:73c06a7aa0c6d97f65e16dcc1d2768c5ffc177c6f86ec4b63e773508bd996c28",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.setze/2(Punkt,Float)",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 0,
+        "fan_in_unsicher": 2,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "setze",
+      "parameter": [
+        {
+          "name": "p",
+          "typ": "Punkt",
+          "vararg": false,
+          "vorgabe": false
+        },
+        {
+          "name": "b",
+          "typ": "Float",
+          "vararg": false,
+          "vorgabe": false
+        }
+      ],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 2,
+      "zeile_bis": 31,
+      "zeile_von": 31
+    },
+    {
+      "annotationen": [
+        {
+          "name": "de.beispiel.marken.Strichpfad",
+          "sicher": true
+        }
+      ],
+      "art": "funktion",
+      "behaelter": "Strich",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt",
+      "erweiterung": null,
+      "hash": "sha256:0033b7e163298f1c21921fdd4bf7ad363da7e9a157c3ee745393ca5c18e7ff29",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 1,
+        "fan_in_unsicher": 1,
+        "fan_out": 5,
+        "fan_out_unsicher": 7,
+        "komplexitaet": 1,
+        "zeilen": 8
+      },
+      "modifikatoren": [],
+      "name": "zeichne",
+      "parameter": [
+        {
+          "name": "dicke",
+          "typ": "Float",
+          "vararg": false,
+          "vorgabe": false
+        }
+      ],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 1,
+      "zeile_bis": 44,
+      "zeile_von": 37
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt",
+      "erweiterung": "Punkt",
+      "hash": "sha256:dbc18c831b1cc54129519f6a0b3c50ad68e6e8770b40ff814efde7f951160e6a",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#[Punkt]verschiebe/1",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 1,
+        "fan_in_unsicher": 1,
+        "fan_out": 1,
+        "fan_out_unsicher": 1,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "verschiebe",
+      "parameter": [
+        {
+          "name": "dx",
+          "typ": "Int",
+          "vararg": false,
+          "vorgabe": false
+        }
+      ],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 1,
+      "zeile_bis": 47,
+      "zeile_von": 47
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Drei",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt",
+      "erweiterung": null,
+      "hash": "sha256:eeb83f6708783e87f01149acc04441b04e73fb9d14b502a16d3acc70384d1925",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Drei.wert/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 0,
+        "fan_in_unsicher": 0,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "wert",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 11,
+      "zeile_von": 11
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Eins",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt",
+      "erweiterung": null,
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Eins.<init>/0",
+      "implizit": true,
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 2,
+        "fan_in_unsicher": 2,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 0
+      },
+      "modifikatoren": [],
+      "name": "<init>",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 6,
+      "zeile_von": 6
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Eins",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt",
+      "erweiterung": null,
+      "hash": "sha256:84a9cc994929f72839b71aeef2578d75e3f65e48835c9f29db65edc5adb861c8",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Eins.teil/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 0,
+        "fan_in_unsicher": 1,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "teil",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 7,
+      "zeile_von": 7
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Eins",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt",
+      "erweiterung": null,
+      "hash": "sha256:14cd36fe1d075fd630f453cd490f1f9af9ebf38e6339e38f3fae2ed749eefd15",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Eins.wert/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 0,
+        "fan_in_unsicher": 0,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "wert",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 7,
+      "zeile_von": 7
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Fuenf",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt",
+      "erweiterung": null,
+      "hash": "sha256:1c61f7a026908c8e5c4bff6a2e7aee23509740dce222c1a9818daa508894cd17",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Fuenf.wert/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 0,
+        "fan_in_unsicher": 0,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "wert",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 15,
+      "zeile_von": 15
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Sechs",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt",
+      "erweiterung": null,
+      "hash": "sha256:12e832afb0b1338921272477e73f16ff2f6c64a8fef0bff30d463b097636f30d",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Sechs.wert/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 0,
+        "fan_in_unsicher": 0,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "wert",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 17,
+      "zeile_von": 17
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Vier",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt",
+      "erweiterung": null,
+      "hash": "sha256:a66b38ca7d4855d36f8fc4d966abacfc7de27367c86c73cbf03ac506dad80ce2",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Vier.wert/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 0,
+        "fan_in_unsicher": 0,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "wert",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 13,
+      "zeile_von": 13
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Zwei",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt",
+      "erweiterung": null,
+      "hash": "sha256:4bf13f7a334ef994a2166559ed3322942ad3c35d5f9239abdc32fe643b77657a",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Zwei.teil/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 0,
+        "fan_in_unsicher": 1,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "teil",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 9,
+      "zeile_von": 9
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Zwei",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt",
+      "erweiterung": null,
+      "hash": "sha256:7df09718dcde394642a640bbc68edac14ff754299e291b6428ced880e615b62c",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#Zwei.wert/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 0,
+        "fan_in_unsicher": 0,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "wert",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 9,
+      "zeile_von": 9
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt",
+      "erweiterung": null,
+      "hash": "sha256:31fb74eb82e4d1960bce9cf28985253b8ec7037994795129d7d4576a9fbff99e",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#begruesse/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 0,
+        "fan_in_unsicher": 0,
+        "fan_out": 1,
+        "fan_out_unsicher": 1,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "begruesse",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 32,
+      "zeile_von": 32
+    },
+    {
+      "annotationen": [
+        {
+          "name": "Suppress",
+          "sicher": false
+        }
+      ],
+      "art": "funktion",
+      "behaelter": "",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt",
+      "erweiterung": null,
+      "hash": "sha256:11b90cc6c882b9d11732a3a7f4c65b4c5a84e232b3f203ec8c3218b0a380ef69",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#ketten/0",
+      "metriken": {
+        "externe_aufrufe": 1,
+        "fan_in": 0,
+        "fan_in_unsicher": 0,
+        "fan_out": 2,
+        "fan_out_unsicher": 4,
+        "komplexitaet": 1,
+        "zeilen": 5
+      },
+      "modifikatoren": [],
+      "name": "ketten",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 26,
+      "zeile_von": 22
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt",
+      "erweiterung": null,
+      "hash": "sha256:1f9a83283e2f9fedef32228e56b15e60f6bc0ecdca3d5c7fb361a8f2eb735534",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#liefere/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 1,
+        "fan_in_unsicher": 1,
+        "fan_out": 1,
+        "fan_out_unsicher": 1,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "liefere",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 19,
+      "zeile_von": 19
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt",
+      "erweiterung": null,
+      "hash": "sha256:0f9414b436fd8490f51ec7e7e28c70f619804e25d4a761224fe14e6f902a03d2",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#liefereEins/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 1,
+        "fan_in_unsicher": 1,
+        "fan_out": 1,
+        "fan_out_unsicher": 1,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "liefereEins",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 28,
+      "zeile_von": 28
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt",
+      "erweiterung": null,
+      "hash": "sha256:a6d59bc5cd7d5cb0d7d3720bf6f81d2e0f5d1eeb014bcf197fcea8771c7b4530",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Viele.kt#plattformName/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 1,
+        "fan_in_unsicher": 1,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [
+        "expect"
+      ],
+      "name": "plattformName",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 30,
+      "zeile_von": 30
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Zaehler",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt",
+      "erweiterung": null,
+      "hash": "sha256:60e757463ba3b8419ecdff1b484fc3c8c1f7fa48fad8f23b9d1240662421ecd2",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#Zaehler.erhoehe/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 1,
+        "fan_in_unsicher": 1,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "erhoehe",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 14,
+      "zeile_von": 14
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt",
+      "erweiterung": null,
+      "hash": "sha256:bb2e231594a62a698c347dd30aad3ae1aee1d92d3acabd5b25ed89f133c091b5",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#fakultaet/1",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 1,
+        "fan_in_unsicher": 1,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 2,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "fakultaet",
+      "parameter": [
+        {
+          "name": "n",
+          "typ": "Int",
+          "vararg": false,
+          "vorgabe": false
+        }
+      ],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 1,
+      "zeile_bis": 37,
+      "zeile_von": 37
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt",
+      "erweiterung": null,
+      "hash": "sha256:a811e4fa4d1727e1352a1950e0c4c52ae74fcf8d52db592d9856305dd8951724",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#liefereStrich/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 1,
+        "fan_in_unsicher": 1,
+        "fan_out": 1,
+        "fan_out_unsicher": 1,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "liefereStrich",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 39,
+      "zeile_von": 39
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt",
+      "erweiterung": null,
+      "hash": "sha256:84ae0aa0a9fa1c3eff51da0ae1fc0286aa0fc5be3e4c1ac4798971810f1f1cf6",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#testlos/0",
+      "metriken": {
+        "externe_aufrufe": 1,
+        "fan_in": 0,
+        "fan_in_unsicher": 0,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 3
+      },
+      "modifikatoren": [],
+      "name": "testlos",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 43,
+      "zeile_von": 41
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt",
+      "erweiterung": null,
+      "hash": "sha256:b16deeecd2e5ff2066d7688ed689c28e3488aa08a22f0e15099f5b19ddf76d23",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#wiederhole/2",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 1,
+        "fan_in_unsicher": 1,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 2,
+        "zeilen": 5
+      },
+      "modifikatoren": [],
+      "name": "wiederhole",
+      "parameter": [
+        {
+          "name": "n",
+          "typ": "Int",
+          "vararg": false,
+          "vorgabe": false
+        },
+        {
+          "name": "aktion",
+          "typ": "()->Unit",
+          "vararg": false,
+          "vorgabe": false
+        }
+      ],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 2,
+      "zeile_bis": 21,
+      "zeile_von": 17
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt",
+      "erweiterung": null,
+      "hash": "sha256:e56452eae064e5cd2701799933d3304bcd3008c1cc1528ec3165a31dda1947fc",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#zeichneAlles/1",
+      "metriken": {
+        "externe_aufrufe": 4,
+        "fan_in": 0,
+        "fan_in_unsicher": 0,
+        "fan_out": 8,
+        "fan_out_unsicher": 9,
+        "komplexitaet": 1,
+        "zeilen": 12
+      },
+      "modifikatoren": [],
+      "name": "zeichneAlles",
+      "parameter": [
+        {
+          "name": "strich",
+          "typ": "Strich",
+          "vararg": false,
+          "vorgabe": false
+        }
+      ],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 1,
+      "zeile_bis": 35,
+      "zeile_von": 23
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt",
+      "erweiterung": "Punkt",
+      "hash": "sha256:0ee0fe748a91525ea4c62327d2eb4139bd4c3f35e7078034154b58dedb55b433",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt#[Punkt]laenge/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 0,
+        "fan_in_unsicher": 1,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "laenge",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 13,
+      "zeile_von": 13
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt",
+      "erweiterung": "Strich",
+      "hash": "sha256:e54ba33f79647a528c2800530963a1f2a66a61901e4ec1c6fffcb0f9e6dac3c4",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt#[Strich]laenge/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 1,
+        "fan_in_unsicher": 1,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "laenge",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 11,
+      "zeile_von": 11
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt",
+      "erweiterung": null,
+      "hash": "sha256:463d7e5ef139956d2d5daf1119c6b16a3ea9baeb9abbd25a4769358b7d7e0cab",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt#halbiere/1",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 1,
+        "fan_in_unsicher": 1,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "halbiere",
+      "parameter": [
+        {
+          "name": "x",
+          "typ": "Int",
+          "vararg": false,
+          "vorgabe": false
+        }
+      ],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 1,
+      "zeile_bis": 9,
+      "zeile_von": 9
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt",
+      "erweiterung": null,
+      "hash": "sha256:9c7b11bfd39a7a8d5a72789de0ad89e535748bd46eb43c14c9294c6fb596f40b",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt#verdopple/1",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 1,
+        "fan_in_unsicher": 1,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "verdopple",
+      "parameter": [
+        {
+          "name": "x",
+          "typ": "Int",
+          "vararg": false,
+          "vorgabe": false
+        }
+      ],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 1,
+      "zeile_bis": 7,
+      "zeile_von": 7
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "StrichTest",
+      "datei": "kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt",
+      "erweiterung": null,
+      "hash": "sha256:d382a078f9babfe5a6693b9f7f4163eb56331690f233f190937ce2f183b2078f",
+      "id": "funktion:kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt#StrichTest.pruefeZeichnen/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 0,
+        "fan_in_unsicher": 0,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 5
+      },
+      "modifikatoren": [],
+      "name": "pruefeZeichnen",
+      "parameter": [],
+      "quellsatz": "commonTest",
+      "rolle": "test",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 11,
+      "zeile_von": 7
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "",
+      "datei": "kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt",
+      "erweiterung": null,
+      "hash": "sha256:b552f4d792860b4ed8a98a20954462f29ecc4dbf33de5f3b2260bde5895c82c9",
+      "id": "funktion:kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt#nurImTest/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 0,
+        "fan_in_unsicher": 0,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "nurImTest",
+      "parameter": [],
+      "quellsatz": "commonTest",
+      "rolle": "test",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 4,
+      "zeile_von": 4
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "",
+      "datei": "kern/src/jvmMain/kotlin/de/beispiel/aufrufe/Plattform.kt",
+      "erweiterung": null,
+      "hash": "sha256:221f718ee8bdd5a93e6daf95a05665510ffa4daef9e49db78cbd8e8995af41ac",
+      "id": "funktion:kern/src/jvmMain/kotlin/de/beispiel/aufrufe/Plattform.kt#jvmGruss/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 0,
+        "fan_in_unsicher": 0,
+        "fan_out": 1,
+        "fan_out_unsicher": 1,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "jvmGruss",
+      "parameter": [],
+      "quellsatz": "jvmMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 6,
+      "zeile_von": 6
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "",
+      "datei": "kern/src/jvmMain/kotlin/de/beispiel/aufrufe/Plattform.kt",
+      "erweiterung": null,
+      "hash": "sha256:6b792d55323290bc583a96b6e2e590605c7b3a85f3539017945bb6cf7386cead",
+      "id": "funktion:kern/src/jvmMain/kotlin/de/beispiel/aufrufe/Plattform.kt#plattformName/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 1,
+        "fan_in_unsicher": 1,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [
+        "actual"
+      ],
+      "name": "plattformName",
+      "parameter": [],
+      "quellsatz": "jvmMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 4,
+      "zeile_von": 4
+    },
+    {
+      "art": "modul",
+      "dateien": 3,
+      "gradle_pfad": ":app",
+      "hash": "sha256:0bbcf545408799ed2d655e7bc99b7369bb7ca3d6da46dca4bec21d308fd43e9f",
+      "id": "modul::app",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 1,
+        "instabilitaet": 1.0
+      },
+      "pfad": "app",
+      "plugins": [
+        "org.jetbrains.kotlin.jvm"
+      ],
+      "zeilen": 29
+    },
+    {
+      "art": "modul",
+      "dateien": 11,
+      "gradle_pfad": ":kern",
+      "hash": "sha256:84040f5e8457ea766bd4451ef79503da054441badb482d40bfbe20fe051a72aa",
+      "id": "modul::kern",
+      "metriken": {
+        "fan_in": 1,
+        "fan_out": 0,
+        "instabilitaet": 0.0
+      },
+      "pfad": "kern",
+      "plugins": [
+        "kotlin.multiplatform"
+      ],
+      "zeilen": 218
+    },
+    {
+      "art": "ordner",
+      "dateien": 3,
+      "hash": "sha256:cd7cc2874e791aa1c7f147c01fb8bfc0091e04679b7b539015affc6c2c5524f7",
+      "id": "ordner:.",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "instabilitaet": null
+      },
+      "pfad": ".",
+      "zeilen": 10
+    },
+    {
+      "art": "paket",
+      "dateien": 2,
+      "hash": "sha256:00fbb9da216c91af424f2a4f440fda1a71b3ebbae8a074a60853dbfbd918411c",
+      "id": "paket::app/de.beispiel.app",
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 1,
+        "instabilitaet": 1.0
+      },
+      "modul": "modul::app",
+      "name": "de.beispiel.app",
+      "zeilen": 22
+    },
+    {
+      "art": "paket",
+      "dateien": 7,
+      "hash": "sha256:f0945230b9a7ddf5b1bd1388b294c32ccaf1979de682090656ea58bf894754ab",
+      "id": "paket::kern/de.beispiel.aufrufe",
+      "metriken": {
+        "fan_in": 2,
+        "fan_out": 3,
+        "instabilitaet": 0.6
+      },
+      "modul": "modul::kern",
+      "name": "de.beispiel.aufrufe",
+      "zeilen": 190
+    },
+    {
+      "art": "paket",
+      "dateien": 1,
+      "hash": "sha256:ba4f7c78bb2525087c9259642b001682c319d5c1c8739aa38f3498ced6e4e8c4",
+      "id": "paket::kern/de.beispiel.aufrufe.hilfe",
+      "metriken": {
+        "fan_in": 1,
+        "fan_out": 1,
+        "instabilitaet": 0.5
+      },
+      "modul": "modul::kern",
+      "name": "de.beispiel.aufrufe.hilfe",
+      "zeilen": 13
+    },
+    {
+      "art": "paket",
+      "dateien": 1,
+      "hash": "sha256:050e93a5497ee88bcdf8c5000a01a3890158176e8decd77611ebfd8fa8d68674",
+      "id": "paket::kern/de.beispiel.fremdmarken",
+      "metriken": {
+        "fan_in": 1,
+        "fan_out": 0,
+        "instabilitaet": 0.0
+      },
+      "modul": "modul::kern",
+      "name": "de.beispiel.fremdmarken",
+      "zeilen": 4
+    },
+    {
+      "art": "paket",
+      "dateien": 1,
+      "hash": "sha256:298fbeb25fc5a24d05ab78402391d7c706a19c77f88cad00013999a78dd30c42",
+      "id": "paket::kern/de.beispiel.marken",
+      "metriken": {
+        "fan_in": 1,
+        "fan_out": 0,
+        "instabilitaet": 0.0
+      },
+      "modul": "modul::kern",
+      "name": "de.beispiel.marken",
+      "zeilen": 4
+    }
+  ],
+  "schema": 1,
+  "ziel": {
+    "git_aenderungen": null,
+    "git_commit": null,
+    "name": "Aufrufe"
+  }
+}

@@ -27,13 +27,22 @@ from daidalos.konfiguration import (
     KonfigurationsFehler,
     lade_konfiguration,
 )
-from daidalos.pfad import EBENEN, PfadFehler, ebene_von, finde_knoten, suche_weg, weg_als_json
+from daidalos.pfad import (
+    EBENEN,
+    PfadFehler,
+    aufrufbaum,
+    ebene_von,
+    finde_knoten,
+    suche_weg,
+    weg_als_json,
+)
 from daidalos.render import (
     RenderFehler,
     anzeigename,
     baue_karte,
     baue_karte_md,
     einstellungen_fuer_karte,
+    ist_abdeckungsbefund,
     lade_messung,
     wurzel_relativ,
 )
@@ -107,6 +116,23 @@ def _baue_parser() -> argparse.ArgumentParser:
         "--daten", metavar="DATEI", help="Messung (Standard: ./docs/daidalos/daidalos.json)"
     )
     pfad.add_argument("--json", action="store_true", help="Ausgabe als JSON")
+    pfad.add_argument(
+        "--unsicher",
+        action="store_true",
+        help="auf der Funktionsebene auch unsichere ruft-Kanten verwenden",
+    )
+
+    aufrufe = befehle.add_parser("aufrufe", help="Baum der erreichbaren Funktionen zeigen")
+    aufrufe.add_argument("id", metavar="ID", help="Funktions-Id oder eindeutiger Suchbegriff")
+    aufrufe.add_argument(
+        "--rueckwaerts", action="store_true", help="Aufrufer statt Aufgerufene zeigen"
+    )
+    aufrufe.add_argument("--tiefe", type=int, metavar="N", help="höchstens N Stufen")
+    aufrufe.add_argument("--unsicher", action="store_true", help="auch unsichere Kanten")
+    aufrufe.add_argument("--mit-tests", action="store_true", help="auch Test-Kanten verwenden")
+    aufrufe.add_argument(
+        "--daten", metavar="DATEI", help="Messung (Standard: ./docs/daidalos/daidalos.json)"
+    )
 
     zusammen = befehle.add_parser(
         "zusammenfassung", help="kurze Übersicht der Messung und was in der Deutung offen ist"
@@ -157,6 +183,23 @@ def _anzeigepfad(pfad: Path) -> str:
         return str(pfad.resolve())
 
 
+def _aufrufzeilen(daten: dict[str, Any], aufrufe: dict[str, int]) -> list[str]:
+    """Funktionen und Aufrufstellen für stdout."""
+    funktionen = [k for k in daten["knoten"] if k["art"] == "funktion"]
+    test = sum(1 for k in funktionen if k.get("rolle") == "test")
+    gruende = sorted(
+        (s.split(":", 1)[1], n) for s, n in aufrufe.items() if s.startswith("unsicher:")
+    )
+    unsicher = ", ".join(f"{g} {n}" for g, n in gruende)
+    return [
+        f"Funktionen: {len(funktionen)} (davon Test: {test})",
+        f"Aufrufe:   intern sicher {aufrufe.get('intern-sicher', 0)}, "
+        f"intern unsicher {aufrufe.get('intern-unsicher', 0)}"
+        + (f" ({unsicher})" if unsicher else "")
+        + f", unaufgelöst {aufrufe.get('unaufgeloest', 0)}, extern {aufrufe.get('extern', 0)}",
+    ]
+
+
 def _strukturzeilen(daten: dict[str, Any]) -> list[str]:
     """Zusammenfassung des Strukturgraphen für stdout."""
     knoten = daten["knoten"]
@@ -167,9 +210,13 @@ def _strukturzeilen(daten: dict[str, Any]) -> list[str]:
     gradle = sum(1 for k in kanten if k["art"].startswith("gradle-"))
     datei_kanten = [k for k in kanten if k["art"] == "nutzt" and k["von"].startswith("datei:")]
     sicher = sum(1 for k in datei_kanten if k["sicher"])
-    jni = sum(k["gewicht"] for k in kanten if k["art"] == "jni")
+    jni = sum(k["gewicht"] for k in kanten if k["art"] == "jni" and k["von"].startswith("datei:"))
     jni_offen = sum(1 for b in befunde if b["regel"] == "jni-ohne-gegenstueck")
-    unaufgeloest = sum(len(b["beleg"]["importe"]) for b in befunde if b["regel"] == "unaufgeloest")
+    unaufgeloest = sum(
+        len(b["beleg"]["importe"])
+        for b in befunde
+        if b["regel"] == "unaufgeloest" and not ist_abdeckungsbefund(b)
+    )
 
     zyklen: dict[tuple[str, str], int] = {}
     for b in befunde:
@@ -233,6 +280,8 @@ def _befehl_scan(argumente: argparse.Namespace) -> int:
     print(f"Zeilen:    {zeilen}")
     print(f"Sprachen:  {sprachen or '-'}")
     for zeile in _strukturzeilen(ergebnis.daten):
+        print(zeile)
+    for zeile in _aufrufzeilen(ergebnis.daten, ergebnis.aufrufe):
         print(zeile)
     print(f"Quelle:    {modus}")
     print(f"Ausgabe:   {_anzeigepfad(ausgabe)}")
@@ -306,15 +355,17 @@ def _befehl_pfad(argumente: argparse.Namespace) -> int:
             file=sys.stderr,
         )
         return EXIT_BEDIENFEHLER
-    schritte = suche_weg(daten, von, nach, ebene, argumente.mit_tests)
+    schritte = suche_weg(daten, von, nach, ebene, argumente.mit_tests, argumente.unsicher)
     if argumente.json:
-        ergebnis = weg_als_json(von, nach, ebene, argumente.mit_tests, schritte)
+        ergebnis = weg_als_json(von, nach, ebene, argumente.mit_tests, schritte, argumente.unsicher)
         print(json.dumps(ergebnis, ensure_ascii=False, indent=2, sort_keys=True))
         return EXIT_OK
 
     namen = {k["id"]: anzeigename(k) for k in daten["knoten"]}
     start, ende = namen[von["id"]], namen[nach["id"]]
     kanten = "nutzt- und Gradle-Kanten" if ebene == "modul" else "nutzt-Kanten"
+    if ebene == "funktion":
+        kanten = "ruft-Kanten" + (" (auch unsichere)" if argumente.unsicher else " (nur sichere)")
     rolle = "mit Tests" if argumente.mit_tests else "nur produktiv"
     if schritte is None:
         print(f"Kein Weg von {start} nach {ende} über {kanten} ({rolle}, Ebene {ebene}).")
@@ -331,8 +382,41 @@ def _befehl_pfad(argumente: argparse.Namespace) -> int:
             arten.append(text + ("" if k.get("sicher", True) else " unsicher"))
         print(f"  {nr}. {namen[schritt.von]} → {namen[schritt.nach]}  [{', '.join(arten)}]")
         for b in schritt.belege:
-            was = b["symbol"] if "symbol" in b else b["konfiguration"]
+            if "herkunft" in b:
+                was = b["herkunft"] + (f", unsicher: {b['grund']}" if "grund" in b else "")
+            else:
+                was = b["symbol"] if "symbol" in b else b["konfiguration"]
             print(f"       {b['datei']}:{b['zeile']}  {was}")
+    return EXIT_OK
+
+
+def _befehl_aufrufe(argumente: argparse.Namespace) -> int:
+    daten_pfad = Path(argumente.daten) if argumente.daten else STANDARD_AUSGABE
+    try:
+        daten = lade_messung(daten_pfad)
+        start = finde_knoten(daten, argumente.id, "funktion")
+    except RenderFehler as fehler:
+        print(f"Fehler: {fehler}", file=sys.stderr)
+        return EXIT_BEDIENFEHLER
+    except PfadFehler as fehler:
+        return _pfad_fehler(fehler)
+    if argumente.tiefe is not None and argumente.tiefe < 1:
+        print("Fehler: --tiefe muss mindestens 1 sein", file=sys.stderr)
+        return EXIT_BEDIENFEHLER
+    richtung = "rückwärts (Aufrufer)" if argumente.rueckwaerts else "vorwärts"
+    kanten = "auch unsichere Kanten" if argumente.unsicher else "nur sichere Kanten"
+    rolle = "mit Tests" if argumente.mit_tests else "nur produktiv"
+    tiefe = f"Tiefe {argumente.tiefe}" if argumente.tiefe else "ohne Tiefengrenze"
+    print(f"Aufrufe {richtung}, {kanten}, {rolle}, {tiefe}:")
+    for zeile in aufrufbaum(
+        daten,
+        start,
+        rueckwaerts=argumente.rueckwaerts,
+        tiefe=argumente.tiefe,
+        unsicher=argumente.unsicher,
+        mit_tests=argumente.mit_tests,
+    ):
+        print(zeile)
     return EXIT_OK
 
 
@@ -447,6 +531,7 @@ BEFEHLE = {
     "scan": _befehl_scan,
     "render": _befehl_render,
     "pfad": _befehl_pfad,
+    "aufrufe": _befehl_aufrufe,
     "zusammenfassung": _befehl_zusammenfassung,
     "arbeitsblatt": _befehl_arbeitsblatt,
     "deutung": _befehl_deutung,

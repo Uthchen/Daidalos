@@ -1,0 +1,11 @@
+Aufrufe rückwärts (Aufrufer), nur sichere Kanten, mit Tests, ohne Tiefengrenze:
+Strich.pruefe/0  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt:21
+  ← bediene/1  app/src/main/kotlin/de/beispiel/app/Bedienung.kt:6  (Aufruf Bedienung.kt:7)
+  ← main/0  app/src/main/kotlin/de/beispiel/app/Haupt.kt:9  (Aufruf Haupt.kt:11)
+  ← Strich.<init>/1  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt:13  (Aufruf Strich.kt:18)
+    ← main/0  (siehe oben; Aufruf Haupt.kt:10)
+    ← Werkbank.<init>/0  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt:11  (Aufruf Anlage.kt:12)
+      ← Anlage.<init>/0  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt:15  (Aufruf Anlage.kt:16)
+    ← liefereStrich/0  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt:39  (Aufruf Werkzeug.kt:39)
+      ← zeichneAlles/1  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt:23  (Aufruf Werkzeug.kt:34)
+    ← StrichTest.pruefeZeichnen/0  kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt:7  (Aufruf StrichTest.kt:8)

@@ -81,9 +81,13 @@ def test_datei_kanten_und_verdichtung(daten: dict[str, Any]) -> None:
 
 
 def test_jni(daten: dict[str, Any]) -> None:
-    jni = [k for k in daten["kanten"] if k["art"] == "jni"]
+    jni = [k for k in daten["kanten"] if k["art"] == "jni" and k["von"].startswith("datei:")]
     assert len(jni) == 1
     assert jni[0]["beleg"][0]["funktion"] == "beispiel.nativ.Insel.rechne_schnell"
+    # dieselbe Brücke auf Funktionsebene
+    (funktion,) = [k for k in daten["kanten"] if k["art"] == "jni" and k not in jni]
+    assert funktion["von"].endswith("Insel.kt#Insel.rechne_schnell/1")
+    assert funktion["nach"].endswith("insel_jni.c#Java_beispiel_nativ_Insel_rechne_1schnell/3")
     offen = [b for b in daten["befunde"] if b["regel"] == "jni-ohne-gegenstueck"]
     assert [b["beleg"]["funktion"] for b in offen] == ["beispiel.nativ.Insel.fehlt"]
 
@@ -131,7 +135,8 @@ def test_plausibilitaet(daten: dict[str, Any]) -> None:
 
 def test_metriken_je_ebene(daten: dict[str, Any]) -> None:
     for k in daten["knoten"]:
-        assert set(k["metriken"]) == {"fan_in", "fan_out", "instabilitaet"}
+        if k["art"] != "funktion":
+            assert set(k["metriken"]) == {"fan_in", "fan_out", "instabilitaet"}
     # Messung nutzt Eintrag, Eintrag nutzt Messung (Zyklus im Labor).
     messung = _knoten(daten, f"datei:{LABOR}/messung/Messung.kt")["metriken"]
     assert messung["fan_out"] >= 1

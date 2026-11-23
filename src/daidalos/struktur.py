@@ -12,10 +12,12 @@ from pathlib import Path
 from typing import Any
 
 from daidalos.adapter.gradle import GradleErgebnis, lies_gradle
-from daidalos.adapter.jni import dekodiere, finde_c_funktionen
+from daidalos.adapter.jni import CFunktion, dekodiere, finde_c_funktionen
 from daidalos.adapter.kotlin import KotlinDatei, lies_kotlin
+from daidalos.adapter.kotlin_funktionen import FunktionenDatei, lies_funktionen
 from daidalos.analysen.zyklen import GraphKante, zyklus_befunde
 from daidalos.aufloeser import PRODUKTIV, TEST, Quelldatei, loese_auf
+from daidalos.aufrufgraph import CQuelle, Quelle, miss
 from daidalos.konfiguration import Warner, warne_stderr
 
 Knoten = dict[str, Any]
@@ -32,6 +34,8 @@ class Struktur:
     knoten: list[Knoten]
     kanten: list[Kante]
     befunde: list[Befund]
+    # Zählung der Aufrufstellen (nur für Berichte, nicht in daidalos.json)
+    aufrufe: dict[str, int] | None = None
 
 
 # ---------------------------------------------------------------- Ids
@@ -120,6 +124,7 @@ def baue_struktur(ziel: Path, dateien: list[Knoten], warne: Warner = warne_stder
 
     # Kotlin lesen
     kotlin: dict[str, KotlinDatei] = {}
+    funktionen: dict[str, FunktionenDatei] = {}
     for datei in dateien:
         if not _ist_kotlin(datei) or datei.get("lesefehler"):
             continue
@@ -128,6 +133,7 @@ def baue_struktur(ziel: Path, dateien: list[Knoten], warne: Warner = warne_stder
             continue
         inhalt = lies_kotlin(quelle, datei["pfad"])
         kotlin[datei["pfad"]] = inhalt
+        funktionen[datei["pfad"]] = lies_funktionen(quelle)
         if inhalt.paket:
             behaelter = datei.get("modul") or datei["ordner"]
             datei["paket"] = paket_id(behaelter, inhalt.paket)
@@ -176,7 +182,8 @@ def baue_struktur(ziel: Path, dateien: list[Knoten], warne: Warner = warne_stder
                 "von": von,
             }
         )
-    jni_kanten, jni_befunde = _jni(ziel, dateien, kotlin)
+    c_funktionen = _lies_c(ziel, dateien)
+    jni_kanten, jni_befunde = _jni(dateien, kotlin, c_funktionen)
     kanten.extend(datei_kanten)
     kanten.extend(jni_kanten)
     befunde.extend(jni_befunde)
@@ -196,10 +203,66 @@ def baue_struktur(ziel: Path, dateien: list[Knoten], warne: Warner = warne_stder
     )
     _ergaenze_metriken(knoten, dateien, kanten)
 
+    messung = miss(
+        [
+            Quelle(
+                pfad=pfad,
+                paket=inhalt.paket or "",
+                container=nach_pfad[pfad].get("modul") or nach_pfad[pfad]["ordner"],
+                rolle=nach_pfad[pfad]["rolle"],
+                quellsatz=nach_pfad[pfad].get("quellsatz"),
+                importe=inhalt.importe,
+                inhalt=funktionen[pfad],
+                externe=[(e.klasse, e.name, e.zeile) for e in inhalt.externe],
+                fremd=bool(nach_pfad[pfad].get("fremd")),
+            )
+            for pfad, inhalt in sorted(kotlin.items())
+        ],
+        [
+            CQuelle(
+                pfad=pfad,
+                rolle=nach_pfad[pfad]["rolle"],
+                quellsatz=nach_pfad[pfad].get("quellsatz"),
+                funktionen=liste,
+                namen={
+                    c.name: ((n.klasse, n.methode) if (n := dekodiere(c.name)) else None)
+                    for c in liste
+                },
+            )
+            for pfad, liste in sorted(c_funktionen.items())
+        ],
+        {d["pfad"]: d["id"] for d in dateien},
+        _abhaengigkeiten(kanten),
+    )
+    knoten.extend(messung.knoten)
+    kanten.extend(messung.kanten)
+    befunde.extend(messung.befunde)
+    for pfad, felder in messung.datei_felder.items():
+        nach_pfad[pfad].update(felder)
+
     kanten.sort(key=lambda k: (k["von"], k["nach"], k["art"], k["id"]))
     knoten.sort(key=lambda k: k["id"])
     befunde.sort(key=lambda b: b["id"])
-    return Struktur(knoten, kanten, befunde)
+    return Struktur(knoten, kanten, befunde, dict(messung.statistik))
+
+
+def _abhaengigkeiten(kanten: list[Kante]) -> dict[str, set[str]]:
+    """Modul-Id → alle Module, von denen es über Gradle-Kanten (jeder Art) transitiv abhängt."""
+    direkt: dict[str, set[str]] = defaultdict(set)
+    for k in kanten:
+        if k["art"].startswith("gradle-"):
+            direkt[k["von"]].add(k["nach"])
+    ergebnis: dict[str, set[str]] = {}
+    for modul in direkt:
+        gesehen: set[str] = set()
+        offen = list(direkt[modul])
+        while offen:
+            m = offen.pop()
+            if m not in gesehen:
+                gesehen.add(m)
+                offen.extend(direkt.get(m, set()))
+        ergebnis[modul] = gesehen
+    return ergebnis
 
 
 # ---------------------------------------------------------------- Knoten
@@ -353,8 +416,23 @@ def _verdichte(datei_kanten: list[Kante], zuordnung: dict[str, str | None]) -> l
 # ---------------------------------------------------------------- JNI
 
 
+def _lies_c(ziel: Path, dateien: list[Knoten]) -> dict[str, list[CFunktion]]:
+    """``Java_…``-Funktionen je C/C++-Datei."""
+    ergebnis: dict[str, list[CFunktion]] = {}
+    for datei in dateien:
+        if not _ist_c(datei) or datei.get("lesefehler"):
+            continue
+        quelle = _lies(ziel, datei["pfad"])
+        if quelle is None:
+            continue
+        gefunden = finde_c_funktionen(quelle)
+        if gefunden:
+            ergebnis[datei["pfad"]] = gefunden
+    return ergebnis
+
+
 def _jni(
-    ziel: Path, dateien: list[Knoten], kotlin: dict[str, KotlinDatei]
+    dateien: list[Knoten], kotlin: dict[str, KotlinDatei], c_funktionen: dict[str, list[CFunktion]]
 ) -> tuple[list[Kante], list[Befund]]:
     nach_pfad = {d["pfad"]: d for d in dateien}
     # (JVM-Klasse, Methode) → (Kotlin-Pfad, Zeile)
@@ -365,19 +443,12 @@ def _jni(
             kotlin_seite.setdefault((klasse, ext.name), (pfad, ext.zeile))
     # (JVM-Klasse, Methode) → [(C-Pfad, Zeile, C-Name)]
     c_seite: dict[tuple[str, str], list[tuple[str, int, str]]] = defaultdict(list)
-    for datei in dateien:
-        if not _ist_c(datei) or datei.get("lesefehler"):
-            continue
-        quelle = _lies(ziel, datei["pfad"])
-        if quelle is None:
-            continue
-        for funktion in finde_c_funktionen(quelle):
+    for pfad, liste in sorted(c_funktionen.items()):
+        for funktion in liste:
             name = dekodiere(funktion.name)
             if name is None:
                 continue
-            c_seite[(name.klasse, name.methode)].append(
-                (datei["pfad"], funktion.zeile, funktion.name)
-            )
+            c_seite[(name.klasse, name.methode)].append((pfad, funktion.zeile, funktion.name))
 
     paare: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
     befunde: list[Befund] = []
