@@ -208,3 +208,87 @@ def test_mit_deutung_nichts_offen(aufbau: tuple[Path, Path]) -> None:
     ]
     assert daidalos(uebernehmen) == 0
     assert _lauf(wurzel, "--erzwingen") == 0
+
+
+# ---------------------------------------------------------------- A08: detekt im Klon
+
+SCHREIBE_SARIF = """\
+import json, pathlib, sys
+klon = pathlib.Path.cwd()
+assert (klon / "lokal.properties").read_text(encoding="utf-8") == "sdk=erfunden"
+ziel = klon / "core" / "build" / "reports" / "detekt" / "detekt.sarif"
+ziel.parent.mkdir(parents=True)
+datei = (klon / "core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt").resolve().as_uri()
+ergebnis = {"ruleId": "detekt.style.Probe", "level": "warning", "message": {"text": "Probe"},
+            "locations": [{"physicalLocation": {"artifactLocation": {"uri": datei},
+                                                 "region": {"startLine": 3}}}]}
+ziel.write_text(json.dumps({"version": "2.1.0", "runs": [{"results": [ergebnis]}]}))
+print("SARIF geschrieben")
+if len(sys.argv) > 1:
+    print("Abbruch mit Absicht")
+    sys.exit(3)
+"""
+
+
+def _mit_detekt(aufbau: tuple[Path, Path], argumente: str = "") -> Path:
+    quelle, wurzel = aufbau
+    (quelle / "lokal.properties").write_text("sdk=erfunden", encoding="utf-8")
+    skript = wurzel / "schreibe_sarif.py"
+    skript.write_text(SCHREIBE_SARIF, encoding="utf-8")
+    toml = wurzel / "lokal" / "detekt.toml"
+    toml.write_text('[detekt]\nsarif = ["**/build/reports/detekt/*.sarif"]\n', encoding="utf-8")
+    befehl = json.dumps([sys.executable, skript.as_posix(), *argumente.split()])
+    with (wurzel / "lokal" / "ziele.toml").open("a", encoding="utf-8") as datei:
+        datei.write(
+            f'konfiguration = "{toml.as_posix()}"\nkopiere = ["lokal.properties"]\n'
+            f"detekt = {befehl}\n"
+        )
+    return wurzel
+
+
+def test_mit_detekt_schreibt_sarif_im_klon(
+    aufbau: tuple[Path, Path], capsys: pytest.CaptureFixture[str]
+) -> None:
+    wurzel = _mit_detekt(aufbau)
+    assert _lauf(wurzel, "--mit-detekt") == 1
+    messung = _messung(wurzel)
+    assert messung["ziel"]["detekt"] == {"dateien": 1, "ergebnisse": 1}
+    assert [b["regel"] for b in messung["befunde"] if b["quelle"] == "detekt"] == [
+        "detekt.style.Probe"
+    ]
+    assert "detekt:    fertig nach" in capsys.readouterr().out
+    # ohne --mit-detekt: nach dem Säubern liegt keine SARIF-Datei mehr im Klon
+    assert _lauf(wurzel, "--erzwingen") == 1
+    assert _messung(wurzel)["ziel"]["detekt"] == {"dateien": 0, "ergebnisse": 0}
+    # kopiert wird trotzdem
+    klon = wurzel / "lokal" / "ziele" / "mini" / "klon"
+    assert (klon / "lokal.properties").read_text(encoding="utf-8") == "sdk=erfunden"
+
+
+def test_mit_detekt_abbruch_ergibt_exit_2(
+    aufbau: tuple[Path, Path], capsys: pytest.CaptureFixture[str]
+) -> None:
+    wurzel = _mit_detekt(aufbau, "abbrechen")
+    assert _lauf(wurzel, "--mit-detekt") == 2
+    fehler = capsys.readouterr().err
+    assert "Exit-Code 3" in fehler
+    assert "Abbruch mit Absicht" in fehler
+
+
+def test_mit_detekt_ohne_befehl_ist_fehler(
+    aufbau: tuple[Path, Path], capsys: pytest.CaptureFixture[str]
+) -> None:
+    _, wurzel = aufbau
+    assert _lauf(wurzel, "--mit-detekt") == 2
+    assert "detekt = [...]" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize("pfad", ["../geheim.txt", "a/../../b", "/abs/datei"])
+def test_kopiere_lehnt_pfade_ausserhalb_ab(
+    aufbau: tuple[Path, Path], capsys: pytest.CaptureFixture[str], pfad: str
+) -> None:
+    _, wurzel = aufbau
+    with (wurzel / "lokal" / "ziele.toml").open("a", encoding="utf-8") as datei:
+        datei.write(f'kopiere = ["{pfad}"]\n')
+    assert _lauf(wurzel) == 2
+    assert "relativer Pfad ohne .." in capsys.readouterr().err

@@ -127,6 +127,26 @@ Jeder Befund braucht eine Einschätzung, sonst bleibt er offen.
   teuer).
 - Alle übrigen Befunde bekommen eine Einschätzung **ohne** `prioritaet`: `titel` und eine kurze
   `begruendung`, warum sie nachrangig sind; `vorschlag` ist dann freiwillig.
+- **detekt-Befunde** (`quelle: detekt`) brauchen keine Einschätzung; sie haben schon eine Regel mit
+  eigener Begründung. Die Zusammenfassung zählt sie unter „Messung“ je Regel.
+
+**Grenzkanten der Markierungs-Kette** (`markierung-verlassen`): Eine markierte Funktion (`von`)
+ruft eine unmarkierte (`nach`), dahinter hängt die `kette`. Lies sie zuerst mit
+
+```
+daidalos markierung --datei DATEI
+daidalos aufrufe NACH-ID --tiefe 3
+```
+
+und lies `nach` im Code. Die Einschätzung nennt in der `begruendung`, **warum** `nach` wohl
+unmarkiert ist: reine Hilfsfunktion ohne Zustand (Rechnung, Konstante, Formatierung), vergessen
+(sie gehört sichtbar zum markierten Ablauf) oder absichtlich (Randfall, Protokollierung,
+Plattformgrenze). Der `vorschlag` sagt, ob `nach` **markiert**, als **Ausnahme** annotiert oder
+**umgebaut** werden sollte (etwa den unmarkierten Teil aus dem markierten Pfad herausziehen), und
+belegt das mit dem Ergebnis von `daidalos aufrufe`. Kurze, nachrangige Einschätzungen sind erlaubt,
+wenn viele Grenzkanten dasselbe Muster zeigen; dann genügt ein Satz je Grenzkante mit Verweis auf
+die priorisierte, die das Muster erklärt. Steht `unsicher` im Beleg, sagst du, dass die Kante nur
+unsicher ist. Über Code, den du nicht gelesen hast, behauptest du nichts.
 
 ## 7. Kanten-Texte
 
@@ -197,3 +217,6 @@ daidalos aufrufe ID --tiefe 3
 (`--rueckwaerts` für die Aufrufer, `--unsicher` auch für unsichere Kanten; Funktions-Ids stehen im
 Arbeitsblatt einer Datei). `daidalos pfad` nimmt auch Funktions-Ids und folgt dann `ruft`-Kanten.
 Unsichere Kanten nennst du immer als unsicher. Die Karte zeigt Funktionen noch nicht.
+
+„Wo verlässt markierter Code die Markierung?“ beantwortest du mit `daidalos markierung`
+(`--datei D` für eine Datei, `--unsicher` auch für Grenzkanten, die nur unsicher sind).

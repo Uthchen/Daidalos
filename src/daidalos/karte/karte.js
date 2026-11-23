@@ -1202,11 +1202,11 @@
   }));
   document.getElementById('k-plugin').addEventListener('change', e => { zustand.plugins = e.target.checked; neuZeichnen(); });
   document.getElementById('u-zyklen').addEventListener('change', e => { zustand.zyklen = e.target.checked; cy.style(stil()); });
-  ['markierung', 'detekt'].forEach(a => document.getElementById('u-' + a).addEventListener('change', e => {
-    zustand[a] = e.target.checked;
+  ['markierung', 'detekt'].forEach(schalter => document.getElementById('u-' + schalter).addEventListener('change', e => {
+    zustand[schalter] = e.target.checked;
     const a = zustand.auswahl;
-    if (!a) uebersicht();
-    else if (a.art === 'knoten') knotenDetails(a.id);
+    if (a && a.art === 'knoten') knotenDetails(a.id);
+    else if (!a || a.art !== 'befund') uebersicht();
   }));
   document.getElementById('einpassen').addEventListener('click', () => passen(cy.elements(), 30));
   document.getElementById('zuruecksetzen').addEventListener('click', async () => {
