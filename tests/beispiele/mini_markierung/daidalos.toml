@@ -1,0 +1,10 @@
+[projekt]
+name = "Markierung"
+
+[markierungen]
+annotationen = ["de.beispiel.Strichpfad", "de.beispiel.Deterministisch"]
+ausnahmen = ["de.beispiel.WeckenOhneDaten"]
+ausgenommen = ["werkzeuge/gegenfaelle/"]
+
+[detekt]
+sarif = ["**/build/reports/detekt/*.sarif"]

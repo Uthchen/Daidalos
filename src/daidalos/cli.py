@@ -27,6 +27,7 @@ from daidalos.konfiguration import (
     KonfigurationsFehler,
     lade_konfiguration,
 )
+from daidalos.markierung_text import markierungs_zeilen
 from daidalos.pfad import (
     EBENEN,
     PfadFehler,
@@ -131,6 +132,19 @@ def _baue_parser() -> argparse.ArgumentParser:
     aufrufe.add_argument("--unsicher", action="store_true", help="auch unsichere Kanten")
     aufrufe.add_argument("--mit-tests", action="store_true", help="auch Test-Kanten verwenden")
     aufrufe.add_argument(
+        "--daten", metavar="DATEI", help="Messung (Standard: ./docs/daidalos/daidalos.json)"
+    )
+
+    markierung = befehle.add_parser(
+        "markierung", help="Grenzkanten der Markierungs-Kette, längste Kette zuerst"
+    )
+    markierung.add_argument(
+        "--datei", metavar="D", help="nur Grenzkanten, deren markierte Funktion in D liegt"
+    )
+    markierung.add_argument(
+        "--unsicher", action="store_true", help="auch Grenzkanten, die nur unsicher sind"
+    )
+    markierung.add_argument(
         "--daten", metavar="DATEI", help="Messung (Standard: ./docs/daidalos/daidalos.json)"
     )
 
@@ -287,6 +301,19 @@ def _befehl_scan(argumente: argparse.Namespace) -> int:
         print(zeile)
     for zeile in _aufrufzeilen(ergebnis.daten, ergebnis.aufrufe):
         print(zeile)
+    if ergebnis.markierung is not None:
+        m = ergebnis.markierung
+        print(
+            f"Markiert:  {m.markiert} Funktionen, {m.ausnahmen} Ausnahmen; Grenzkanten "
+            f"sicher {m.grenzen_sicher}, nur unsicher {m.grenzen_unsicher}"
+        )
+    detekt = ergebnis.daten["ziel"].get("detekt")
+    if detekt is not None:
+        befunde = sum(1 for b in ergebnis.daten["befunde"] if b["quelle"] == "detekt")
+        print(
+            f"detekt:    {detekt['dateien']} SARIF-Dateien, {detekt['ergebnisse']} Ergebnisse, "
+            f"{befunde} Befunde"
+        )
     print(f"Quelle:    {modus}")
     print(f"Ausgabe:   {_anzeigepfad(ausgabe)}")
     print(f"Laufzeit:  {dauer:.2f} s")
@@ -424,6 +451,18 @@ def _befehl_aufrufe(argumente: argparse.Namespace) -> int:
     return EXIT_OK
 
 
+def _befehl_markierung(argumente: argparse.Namespace) -> int:
+    daten_pfad = Path(argumente.daten) if argumente.daten else STANDARD_AUSGABE
+    try:
+        daten = lade_messung(daten_pfad)
+    except RenderFehler as fehler:
+        print(f"Fehler: {fehler}", file=sys.stderr)
+        return EXIT_BEDIENFEHLER
+    for zeile in markierungs_zeilen(daten, argumente.datei, argumente.unsicher):
+        print(zeile)
+    return EXIT_OK
+
+
 def _pfade(argumente: argparse.Namespace) -> tuple[Path, Path, Path]:
     ziel = Path(argumente.ziel)
     daten = Path(argumente.daten) if argumente.daten else ziel / STANDARD_AUSGABE
@@ -536,6 +575,7 @@ BEFEHLE = {
     "render": _befehl_render,
     "pfad": _befehl_pfad,
     "aufrufe": _befehl_aufrufe,
+    "markierung": _befehl_markierung,
     "zusammenfassung": _befehl_zusammenfassung,
     "arbeitsblatt": _befehl_arbeitsblatt,
     "deutung": _befehl_deutung,

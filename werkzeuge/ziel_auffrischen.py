@@ -4,7 +4,9 @@ Nur für die Entwicklung im Daidalos-Repo. Ein Repo, das sich laufend ändert, w
 Arbeitsbaum gescannt, sondern an einem eigenen Klon unter ``lokal/``, der genau einen Commit zeigt.
 Am echten Repo (``quelle``) ändert sich nichts, auch nicht an dessen ``.git``.
 
-Aufruf: ``uv run python werkzeuge/ziel_auffrischen.py NAME [--erzwingen]``.
+Aufruf: ``uv run python werkzeuge/ziel_auffrischen.py NAME [--erzwingen] [--mit-detekt]``.
+Mit ``--mit-detekt`` läuft nach dem Zurücksetzen der Befehl ``detekt`` des Ziels im Klon, damit die
+SARIF-Dateien zum Commit des Klons passen.
 Die Ziele stehen in ``lokal/ziele.toml`` (wird beim ersten Lauf mit einem Beispiel angelegt).
 
 Exit-Codes: 0 Erfolg, 1 offene Deutungen nach dem Render, 2 Fehler (Git, Pfade, Konfiguration).
@@ -14,8 +16,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import subprocess
 import sys
+import time
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
@@ -31,7 +35,7 @@ EXIT_FEHLER = 2
 
 WURZEL = Path(__file__).resolve().parent.parent
 ZIELE = Path("lokal") / "ziele.toml"
-SCHLUESSEL = {"quelle", "klon", "ausgabe", "konfiguration", "zweig"}
+SCHLUESSEL = {"quelle", "klon", "ausgabe", "konfiguration", "zweig", "kopiere", "detekt"}
 PFLICHT = ("quelle", "klon", "ausgabe")
 
 BEISPIEL = """\
@@ -44,6 +48,8 @@ BEISPIEL = """\
 # ausgabe = "lokal/ziele/beispiel/daidalos"          # daidalos.json, deutung.json, Karte
 # konfiguration = "lokal/ziele/beispiel/daidalos.toml"  # optional
 # zweig = "main"                                     # optional, sonst origin/HEAD des Klons
+# kopiere = ["local.properties"]                     # optional: aus der Quelle, nicht in Git
+# detekt = ["gradlew.bat", "detekt"]                 # optional: Befehl für --mit-detekt (im Klon)
 """
 
 
@@ -59,6 +65,10 @@ class Ziel:
     ausgabe: Path
     konfiguration: Path | None
     zweig: str | None
+    # Dateien aus der Quelle, die der Build braucht und die nicht in Git sind (relativ, ohne ``..``)
+    kopiere: tuple[str, ...] = ()
+    # Befehl für ``--mit-detekt``, im Klon ausgeführt; ``None``: keiner eingetragen
+    detekt: tuple[str, ...] | None = None
 
 
 def _pfad(wurzel: Path, wert: object, schluessel: str, name: str) -> Path:
@@ -97,6 +107,16 @@ def lies_ziel(wurzel: Path, name: str) -> Ziel:
     konfiguration = eintrag.get("konfiguration")
     if konfiguration is not None:
         konfiguration = _pfad(wurzel, konfiguration, "konfiguration", name)
+    kopiere = _textliste(eintrag.get("kopiere", []), "kopiere", name)
+    for datei in kopiere:
+        teile = Path(datei).parts
+        if not datei.strip() or datei[0] in "/\\" or ".." in teile or ":" in datei:
+            raise Fehler(f"Ziel {name}: kopiere {datei!r} muss ein relativer Pfad ohne .. sein")
+    detekt = eintrag.get("detekt")
+    if detekt is not None:
+        detekt = _textliste(detekt, "detekt", name)
+        if not detekt:
+            raise Fehler(f"Ziel {name}: detekt darf nicht leer sein")
     return Ziel(
         name=name,
         quelle=_pfad(wurzel, eintrag["quelle"], "quelle", name),
@@ -104,7 +124,53 @@ def lies_ziel(wurzel: Path, name: str) -> Ziel:
         ausgabe=_pfad(wurzel, eintrag["ausgabe"], "ausgabe", name),
         konfiguration=konfiguration,
         zweig=zweig,
+        kopiere=kopiere,
+        detekt=detekt,
     )
+
+
+def _textliste(wert: object, schluessel: str, name: str) -> tuple[str, ...]:
+    if not isinstance(wert, list) or not all(isinstance(t, str) for t in wert):
+        raise Fehler(f"Ziel {name}: {schluessel} muss eine Liste von Texten sein")
+    return tuple(wert)
+
+
+def kopiere_dateien(ziel: Ziel) -> None:
+    """Kopiert die Dateien aus ``kopiere`` von der Quelle in den frisch zurückgesetzten Klon."""
+    for datei in ziel.kopiere:
+        quelle = ziel.quelle / datei
+        if not quelle.is_file():
+            raise Fehler(f"kopiere: {datei} fehlt in der Quelle {ziel.quelle}")
+        nach = ziel.klon / datei
+        nach.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(quelle, nach)
+
+
+def fuehre_detekt_aus(ziel: Ziel) -> float:
+    """Führt den Befehl ``detekt`` im Klon aus; liefert die Laufzeit in Sekunden.
+
+    Bricht der Befehl ab, steht seine Ausgabe in der Fehlermeldung (Exit-Code 2).
+    """
+    if ziel.detekt is None:
+        raise Fehler(f"Ziel {ziel.name}: --mit-detekt braucht detekt = [...] in {ZIELE.as_posix()}")
+    befehl = list(ziel.detekt)
+    # Ein Programm im Klon (etwa gradlew.bat) mit vollem Pfad, sonst sucht Windows nur im PATH.
+    if (ziel.klon / befehl[0]).is_file():
+        befehl[0] = str(ziel.klon / befehl[0])
+    beginn = time.perf_counter()
+    try:
+        lauf = subprocess.run(befehl, cwd=ziel.klon, capture_output=True)
+    except OSError as fehler:
+        befehl_text = " ".join(ziel.detekt)
+        raise Fehler(f"detekt-Befehl {befehl_text} nicht ausführbar: {fehler}") from fehler
+    dauer = time.perf_counter() - beginn
+    if lauf.returncode != 0:
+        ausgabe = (lauf.stdout + lauf.stderr).decode("utf-8", "replace").strip()
+        raise Fehler(
+            f"detekt-Befehl {' '.join(ziel.detekt)} brach ab (Exit-Code {lauf.returncode}) "
+            f"nach {dauer:.1f} s:\n{ausgabe}"
+        )
+    return dauer
 
 
 def _liegt_unter(pfad: Path, ordner: Path) -> bool:
@@ -188,7 +254,8 @@ def frische_auf(ziel: Ziel) -> str:
     commit = git("-C", ziel.klon, "rev-parse", "--verify", "-q", f"{ref}^{{commit}}")
     git("-C", ziel.klon, "checkout", "-q", "--detach", commit)
     git("-C", ziel.klon, "reset", "-q", "--hard", commit)
-    git("-C", ziel.klon, "clean", "-q", "-fdx")
+    # Lange Pfade (Build-Ausgaben unter Windows) sonst nicht löschbar
+    git("-C", ziel.klon, "-c", "core.longPaths=true", "clean", "-q", "-fdx")
     return commit
 
 
@@ -246,14 +313,21 @@ def skill_zeile(ziel: Ziel, wurzel: Path) -> str:
     return " ".join(teile)
 
 
-def lauf(name: str, wurzel: Path, erzwingen: bool) -> int:
+def lauf(name: str, wurzel: Path, erzwingen: bool, mit_detekt: bool = False) -> int:
     wurzel = wurzel.resolve()
     ziel = lies_ziel(wurzel, name)
     pruefe_pfade(wurzel, ziel)
+    if mit_detekt and ziel.detekt is None:
+        raise Fehler(f"Ziel {name}: --mit-detekt braucht detekt = [...] in {ZIELE.as_posix()}")
     commit = frische_auf(ziel)
+    kopiere_dateien(ziel)
     if not erzwingen and _alter_commit(ziel.ausgabe / "daidalos.json") == commit:
         print(f"Stand unverändert: {commit[:7]}")
         return EXIT_OK
+    if mit_detekt:
+        print(f"detekt:    {' '.join(ziel.detekt or ())} im Klon …", flush=True)
+        dauer = fuehre_detekt_aus(ziel)
+        print(f"detekt:    fertig nach {dauer:.1f} s")
     kartiere(ziel)
     betreff = git("-C", ziel.klon, "log", "-1", "--format=%s", commit)
     dateien, offen = zaehle_offen(ziel)
@@ -278,6 +352,11 @@ def main(argv: list[str] | None = None) -> int:
         "--erzwingen", action="store_true", help="auch bei unverändertem Commit scannen"
     )
     parser.add_argument(
+        "--mit-detekt",
+        action="store_true",
+        help="vor dem Scan den Befehl detekt des Ziels im Klon ausführen (SARIF zum Commit)",
+    )
+    parser.add_argument(
         "--wurzel",
         default=str(WURZEL),
         metavar="ORDNER",
@@ -285,7 +364,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     argumente = parser.parse_args(argv)
     try:
-        return lauf(argumente.name, Path(argumente.wurzel), argumente.erzwingen)
+        return lauf(
+            argumente.name, Path(argumente.wurzel), argumente.erzwingen, argumente.mit_detekt
+        )
     except Fehler as fehler:
         print(f"Fehler: {fehler}", file=sys.stderr)
         return EXIT_FEHLER

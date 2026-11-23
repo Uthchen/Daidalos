@@ -16,6 +16,8 @@ from typing import Any, BinaryIO
 from pathspec import GitIgnoreSpec
 
 from daidalos import __version__
+from daidalos.adapter.detekt import lies_detekt
+from daidalos.analysen.markierung import KettenErgebnis
 from daidalos.konfiguration import (
     EINGEBAUTE_AUSSCHLUESSE,
     Konfiguration,
@@ -43,6 +45,8 @@ class ScanErgebnis:
     git_modus: bool
     # Zählung der Aufrufstellen nach Ausgang (nur für stdout und Berichte)
     aufrufe: dict[str, int] = field(default_factory=dict)
+    # Zählung der Markierungs-Kette (nur für stdout)
+    markierung: KettenErgebnis | None = None
 
 
 # ---------------------------------------------------------------- Git
@@ -302,8 +306,13 @@ def scanne(ziel: Path, konfiguration: Konfiguration, warne: Warner = warne_stder
     pfade, git_modus = finde_dateien(ziel, konfiguration, warne)
     fremd = GitIgnoreSpec.from_lines(konfiguration.scan.fremd)
     dateien = [miss_datei(ziel, pfad, fremd, warne) for pfad in pfade]
-    struktur = baue_struktur(ziel, dateien, warne)
+    struktur = baue_struktur(ziel, dateien, warne, konfiguration.markierungen)
     knoten = sorted([*dateien, *struktur.knoten], key=lambda k: k["id"])
+    befunde = struktur.befunde
+    detekt: dict[str, int] | None = None
+    if konfiguration.detekt.sarif:
+        detekt_befunde, detekt = lies_detekt(ziel, konfiguration.detekt.sarif, knoten, warne)
+        befunde = sorted([*befunde, *detekt_befunde], key=lambda b: b["id"])
 
     git_commit: str | None = None
     git_aenderungen: bool | None = None
@@ -324,9 +333,16 @@ def scanne(ziel: Path, konfiguration: Konfiguration, warne: Warner = warne_stder
         },
         "knoten": knoten,
         "kanten": struktur.kanten,
-        "befunde": struktur.befunde,
+        "befunde": befunde,
     }
-    return ScanErgebnis(daten=daten, git_modus=git_modus, aufrufe=struktur.aufrufe or {})
+    if detekt is not None:
+        daten["ziel"]["detekt"] = detekt
+    return ScanErgebnis(
+        daten=daten,
+        git_modus=git_modus,
+        aufrufe=struktur.aufrufe or {},
+        markierung=struktur.markierung,
+    )
 
 
 def zaehle_sprachen(knoten: Iterable[Knoten]) -> list[tuple[str, int]]:

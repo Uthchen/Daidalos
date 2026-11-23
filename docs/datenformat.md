@@ -1,6 +1,6 @@
 # Datenformat
 
-Stand 2026-11-23 (A07). Diese Datei beschreibt `daidalos.json` (Ausgabe des Programms),
+Stand 2026-11-23 (A08). Diese Datei beschreibt `daidalos.json` (Ausgabe des Programms),
 `deutung.json` (Ausgabe des Skills, vom Programm nur gelesen) und `daidalos.toml` (Konfiguration im
 Zielrepo). Jede Änderung am Format wird hier nachgetragen;
 inkompatible Änderungen erhöhen `schema`.
@@ -43,8 +43,9 @@ Ablage: `<zielrepo>/docs/daidalos/daidalos.json`. Die Datei enthält nur Gemesse
 | `ziel.name` | `[projekt].name` aus `daidalos.toml`, sonst Name des Zielordners (nur der letzte Pfadteil, kein absoluter Pfad) |
 | `ziel.git_commit` | HEAD des Zielrepos (volle Länge); `null` ohne Git oder ohne Commit |
 | `ziel.git_aenderungen` | ob eine **erfasste** Datei nicht committete Änderungen hat; nicht getrackte, aber erfasste Dateien zählen als Änderung; `null` ohne Git |
+| `ziel.detekt` | seit A08, nur mit `[detekt].sarif`: `{ "dateien": n, "ergebnisse": m }`, `n` = gültig gelesene SARIF-Dateien (auch leere), `m` = alle Ergebnisse darin (auch verworfene, vor dem Zusammenführen). Keine Zeitstempel, kein Dateialter |
 | `knoten` | Knoten aller Arten, sortiert nach `id` |
-| `kanten` | Kanten, sortiert nach `(von, nach, art, id)` |
+| `kanten` | Kanten, sortiert nach `(von, nach, art, id)`; bei `ruft` gilt die abgeleitete Id |
 | `befunde` | Befunde, sortiert nach `id` |
 
 „Mit Git“ heißt: Das Zielverzeichnis enthält selbst `.git` (Ordner oder Datei) und `git` ist
@@ -86,11 +87,14 @@ Kanten und Befunde haben ebenfalls stabile Ids:
 | Objekt | Id | Beispiel |
 | --- | --- | --- |
 | Kante | `kante:<art>:<von>-><nach>[:<rolle>]` | `kante:gradle-api:modul::core-labor->modul::core` |
-| Kante mit Rolle | Rolle angehängt bei `nutzt` und `jni` | `kante:nutzt:paket::app/de.a->paket::core/de.b:test` |
+| Kante mit Rolle | Rolle angehängt bei `nutzt`, `jni` und `ruft` | `kante:nutzt:paket::app/de.a->paket::core/de.b:test` |
+| Kante `ruft` (seit A08 nicht gespeichert) | `kante:ruft:<von>-><nach>:<rolle>`; jeder Leser bildet sie selbst (`daidalos.ids.kanten_id`) | |
 | Befund `zyklus` | `befund:zyklus:<ebene>[:<kantenart>]:<rolle>:<hash12>` | `befund:zyklus:datei:produktiv:3fa2c81b0d4e` |
 | Befund `unaufgeloest` (Importe) | `befund:unaufgeloest:<pfad>` | |
 | Befund `unaufgeloest` (Aufrufe, seit A07) | `befund:unaufgeloest:aufruf:<pfad>` | |
 | Befund `jni-ohne-gegenstueck` | `befund:jni-ohne-gegenstueck:<pfad>:<name>` | |
+| Befund `markierung-verlassen` (seit A08) | `befund:markierung:<von-id>-><nach-id>` | |
+| Befund aus detekt (seit A08) | `befund:detekt:<regel>:<pfad>:<zeile>` | `befund:detekt:detekt.style.MagicNumber:core/…/A.kt:12` |
 
 `<hash12>` sind die ersten 12 Hex-Zeichen von SHA-256 über die sortierten Mitglieder-Ids, mit
 Zeilenumbruch verbunden.
@@ -230,7 +234,7 @@ veraltete Beschreibungen.
 | `nutzt` | datei → datei | Kotlin-Bezug (Import, gleiches Paket, voll qualifiziert) |
 | `nutzt` | paket → paket, modul/ordner → modul/ordner | Verdichtung der Datei-Kanten, getrennt nach Rolle |
 | `jni` | datei (Kotlin) → datei (C/C++) | `external fun` zu `Java_…` |
-| `enthaelt` | modul/ordner → paket, paket → datei, modul/ordner → datei | Hierarchie; seit A07b **keine** Kante datei → funktion, die Datei steht in `datei` des Funktionsknotens |
+| `enthaelt` | modul/ordner → paket, paket → datei, modul/ordner → datei | Hierarchie; seit A07b **keine** Kante datei → funktion, die Datei steht seit A08 in der Id des Funktionsknotens |
 | `ruft` | funktion → funktion | Aufruf, seit A07; siehe [Funktionsebene](#funktionsebene-seit-a07) |
 | `ueberschreibt` | funktion → funktion | `override fun` → Funktion im internen Obertyp, seit A07 |
 | `actual` | funktion → funktion | `actual fun` → `expect fun`, seit A07 |
@@ -315,9 +319,9 @@ Abgleich über die JNI-Namensregel mit den Escapes `_1`, `_2`, `_3`, `_0xxxx`; �
 | Feld | Bedeutung |
 | --- | --- |
 | `id` | siehe Id-Schema |
-| `quelle` | `"daidalos"` |
-| `regel` | `zyklus`, `jni-ohne-gegenstueck`, `unaufgeloest` |
-| `schwere` | `warnung` (Zyklus) oder `hinweis` |
+| `quelle` | `"daidalos"`; seit A08 `"detekt"` für Ergebnisse aus SARIF |
+| `regel` | `zyklus`, `jni-ohne-gegenstueck`, `unaufgeloest`, seit A08 `markierung-verlassen`; bei `quelle: detekt` die `ruleId` |
+| `schwere` | `warnung` (Zyklus, sichere Grenzkante) oder `hinweis`; bei detekt auch `fehler` |
 | `knoten` | betroffene Knoten-Ids, sortiert |
 | `beleg` | je Regel, siehe unten |
 
@@ -376,6 +380,14 @@ inkompatiblen Änderungen der Funktionsebene. Diese Ausnahme gilt nur für die F
 richten sich bis dahin nach dieser Datei, nicht nach `schema`. Die Strukturansicht ist nicht
 betroffen.
 
+Änderungen in A08 (inkompatibel zu A07b):
+
+- `ruft`-Kanten tragen keine `id` mehr; sie lautet `kante:ruft:<von>-><nach>:<rolle>`;
+- Funktionsknoten tragen kein `datei` mehr; die Datei ist der Teil der Id vor `#` ohne
+  `funktion:` (auch bei C-Knoten);
+- neue Felder `ohne_koerper`, `markiert`, `ausnahme` und `metriken.delegiert_gelesen` (siehe
+  [Markierungs-Kette](#markierungs-kette-seit-a08)).
+
 Änderungen in A07b (inkompatibel zu A07):
 
 - keine `enthaelt`-Kante Datei → Funktion mehr;
@@ -414,7 +426,6 @@ hat den Standardwert aus der Spalte „fehlt →“; „nie“ heißt, das Feld 
 | Feld | fehlt → | Bedeutung |
 | --- | --- | --- |
 | `id`, `art` (`"funktion"`) | nie | siehe Id-Schema |
-| `datei` | nie | Pfad der Datei (relativ, mit `/`); die Zugehörigkeit zur Datei (es gibt keine `enthaelt`-Kante) |
 | `sprache` | nie | `kotlin` oder `c` |
 | `zeile_von`, `zeile_bis` | nie | erste (mit Annotationen und Modifikatoren) und letzte Zeile |
 | `name`, `behaelter`, `stelligkeit` | nie | wie in der Id; `behaelter` auf oberster Ebene `""` |
@@ -430,6 +441,11 @@ hat den Standardwert aus der Spalte „fehlt →“; „nie“ heißt, das Feld 
 | `metriken` | nie | siehe [Metriken je Funktion](#metriken-je-funktion) |
 | `hash` | implizit | `sha256:` über den Text der Funktion nach CRLF→LF; beim primären Konstruktor über seine Teile, mit Zeilenumbruch verbunden; fehlt nur bei impliziten Konstruktoren |
 | `implizit` | `false` | `true` bei impliziten Konstruktoren |
+| `ohne_koerper` | `false` | seit A08: `true` bei `fun` ohne Körper (abstrakt, Schnittstelle, `expect`, `external`) |
+| `markiert` | `false` | seit A08: siehe [Markierungs-Kette](#markierungs-kette-seit-a08) |
+| `ausnahme` | `false` | seit A08: ebenda |
+
+Die Datei einer Funktion ist der Teil der Id vor `#` ohne `funktion:` (seit A08 kein Feld `datei`).
 
 #### Klassen
 
@@ -592,6 +608,80 @@ Datei-Kante, `gewicht` 1.
 | `fan_in`, `fan_out` | Zahl verschiedener Funktionen über **sichere** `ruft`-Kanten der Rolle `produktiv`, ohne die Funktion selbst |
 | `fan_in_unsicher`, `fan_out_unsicher` | dasselbe einschließlich unsicherer Kanten |
 | `externe_aufrufe` | Aufrufstellen mit externem Ziel (Schritt 7) |
+| `delegiert_gelesen` | seit A08, nur an markierten Funktionen: Zahl der verschiedenen delegierten Eigenschaften (`by lazy` u. a.), die die Funktion sicher aufgelöst liest |
+
+### Markierungs-Kette (seit A08)
+
+Nur mit Abschnitt `[markierungen]` in `daidalos.toml`. detekt prüft markierte Funktionen in ihrem
+eigenen Körper; die Kette meldet jede unmarkierte interne Funktion, die von markiertem Code aus
+erreicht wird.
+
+**Was zählt:** produktive Kotlin-Funktionen außerhalb von Fremdcode und außerhalb von
+`[markierungen].ausgenommen`. Nur sichere Annotationen (aufgelöster voller Name) zählen.
+
+- **markiert** (`markiert: true`): Eine Annotation aus `annotationen` steht an der Funktion selbst,
+  an einer umgebenden Klasse, einem Objekt oder Companion (jede Ebene) oder an ihrer Datei
+  (`@file:`). Ausnahme: ein `<init>` ist nur durch eine eigene Annotation markiert, nie durch Klasse
+  oder Datei (`init`-Blöcke und Initialisierer stehen im Konstruktor). Accessoren `<get-x>`/`<set-x>`
+  deckt die Klasse.
+- **Ausnahme** (`ausnahme: true`): Eine Annotation aus `ausnahmen` steht an der Funktion oder einer
+  umgebenden Klasse (nicht an der Datei). Eine Ausnahme ist kein Start, auch wenn sie markiert ist.
+- **ohne Code:** Funktionen mit `ohne_koerper` und implizite Konstruktoren sind nie ein Verstoß.
+
+**Folgen:** Start ist jede markierte Funktion, die keine Ausnahme ist. Gefolgt wird `ruft` (auch
+`lesen`/`schreiben`). Jedes Ziel eines Aufrufs wird erweitert um alle Funktionen, die es über
+`ueberschreibt` (rekursiv) überschreiben, und um die `actual` zu einer `expect`-Funktion (Schritt
+`ueberschrieben-von` bzw. `actual`); das gilt auch, wenn das Ziel selbst markiert ist, denn der
+Aufruf kann bei jeder Umsetzung landen. Eine erreichte Funktion, die zählt, Code hat und weder
+markiert noch Ausnahme ist, ist ein **Verstoß**; von ihr aus wird weiter gefolgt. An markierten
+Funktionen, Ausnahmen, Funktionen, die nicht zählen, und externen Zielen endet die Kette. `jni`-Kanten
+werden nicht verfolgt.
+
+**Grenzkante:** markierte Funktion → erster Verstoß. Je Paar ein Befund `markierung-verlassen`.
+Die Kette läuft zuerst nur über sichere Kanten (`ruft`, `ueberschreibt`, `actual` mit
+`sicher: true`, bei `ruft` nur die sicheren Belege). Grenzkanten, die es nur über unsichere Kanten
+gibt, werden eigene Befunde mit `beleg.unsicher: true` und `schwere: hinweis`.
+
+| Feld im Beleg | Bedeutung |
+| --- | --- |
+| `von`, `von_zeile` | die markierte Funktion und ihre erste Zeile |
+| `nach`, `nach_zeile` | der erste Verstoß und seine erste Zeile |
+| `markierung` | `{ "name": voller Annotationsname, "traeger": "funktion" \| "klasse" \| "datei" }` |
+| `zeilen` | Aufrufstellen in `von`, aufsteigend |
+| `kette` | alle ab `nach` erreichten Verstöße ohne `nach`: `{ "funktion", "tiefe", "von", "zeile", "schritt"?, "ueber"? }`, sortiert nach `tiefe`, dann `funktion`. `tiefe` = kürzester Abstand ab `nach`, `von` = Aufrufer auf diesem Weg, `zeile` = erste Zeile der Funktion; `schritt`/`ueber` nur bei Erreichen über `ueberschrieben-von`/`actual` (mit der überschriebenen bzw. `expect`-Funktion) |
+| `kette_unsicher` | nur bei sicheren Befunden: was zusätzlich nur über unsichere Kanten erreichbar ist, Aufbau wie `kette`; fehlt, wenn leer |
+| `anzahl` | Länge von `kette` plus 1 |
+| `ausnahmen` | Ausnahmen, an denen die Kette endete, sortiert |
+| `ueber_ueberschreiben` | ob die Grenzkante oder ein Schritt der Kette über `ueberschreibt`/`actual` lief |
+| `delegiert_gelesen` | wie die Metrik an `von` (Vermerk, kein Verstoß) |
+| `unsicher` | nur bei Grenzkanten, die es nur unsicher gibt: `true` |
+
+`knoten` des Befunds: `von`, `nach` und die Dateien von `von`, `nach` und `kette`. Lambdas als
+Argument gehören wie überall zum Aufrufer. Konfigurierte Namen, die im Code nirgends sicher
+vorkommen, ergeben eine Warnung.
+
+### detekt-SARIF (seit A08)
+
+Nur mit `[detekt].sarif`. Gesucht wird im ganzen Zielrepo, auch unter Pfaden, die `[scan]`
+ausschließt (detekt schreibt nach `build/`); `.git` und Ordner mit eigenem `.git` (verschachtelte
+Repos, Worktrees) werden nicht betreten. Gelesen wird SARIF 2.1.0: `runs[].results[]` mit `ruleId`,
+`level`, `message.text`, `locations[0].physicalLocation.artifactLocation.uri` und
+`region.startLine`.
+
+- `uri`: absolute `file:`-URI, absoluter Pfad oder Pfad relativ zum Zielrepo; Ergebnisse außerhalb
+  des Zielrepos werden mit Warnung verworfen, Ergebnisse in nicht erfassten Dateien mit einer
+  Sammelwarnung, Ergebnisse in Fremdcode ohne Warnung.
+- `schwere` aus `level`: `error` → `fehler`, `warning` → `warnung`, sonst `hinweis`; ohne `level`
+  gilt wie in SARIF `warning`.
+- `knoten`: die innerste Funktion, deren Zeilen die Zeile enthalten, sonst die Datei.
+- `beleg`: `{ "zeile", "meldung", "sarif" }`, `sarif` = Pfad der SARIF-Datei relativ zum Zielrepo.
+- Gleiche Datei, Zeile und Regel aus mehreren Ergebnissen werden ein Befund: `sarif` wird bei
+  mehreren Dateien eine sortierte Liste, verschiedene Meldungen werden sortiert mit Zeilenumbruch
+  verbunden, `schwere` ist die strengste.
+- Eine leere Datei und eine Datei ohne Ergebnisse sind gültig (keine Verstöße). Eine Datei, die
+  kein JSON mit `runs` ist, ergibt eine Warnung und wird übersprungen.
+
+detekt-Befunde brauchen keine Einschätzung und machen keine Datei wichtig.
 
 
 ### Determinismus
@@ -694,7 +784,7 @@ fremde Dateien, die mindestens eines erfüllen. Gründe in dieser Reihenfolge:
 | Grund | Regel |
 | --- | --- |
 | `fan-in` | unter den 30 mit dem höchsten `metriken.fan_in` (nur Fan-in > 0; Gleichstand nach Id) |
-| `befund` | in `knoten` eines Befunds (außer `unaufgeloest` der Art `aufruf`) |
+| `befund` | in `knoten` eines Befunds (außer `unaufgeloest` der Art `aufruf` und detekt); bei `markierung-verlassen` nur die Dateien von `von` und `nach` |
 | `einstieg` | in `beleg.einstiege` eines Zyklus |
 | `trennstelle` | Ende der `trennstelle` eines Datei-Zyklus; bei Paket- und Modulzyklen die Enden aller Datei-Kanten gleicher Art und Rolle, die die verdichtete Trennstelle tragen |
 | `jni` | Ende einer `jni`-Kante |
@@ -705,7 +795,7 @@ fremde Dateien, die mindestens eines erfüllen. Gründe in dieser Reihenfolge:
 - Beschreibung `fehlt` für Module, Ordner und Pakete (ohne reinen Fremdcode) und wichtige Dateien
   ohne Eintrag mit Text in `beschreibungen`.
 - Beschreibung `veraltet` für jeden beschriebenen Knoten, dessen `hash` vom aktuellen abweicht.
-- Befunde ohne Einschätzung (außer `unaufgeloest` der Art `aufruf`).
+- Befunde ohne Einschätzung (außer `unaufgeloest` der Art `aufruf` und detekt-Befunden).
 - Tote Verweise: Ids in `beschreibungen`, `bereiche[].knoten`, `einschaetzungen[].befund` und
   `kanten`, die es in der Messung nicht gibt.
 
@@ -741,6 +831,12 @@ Zeile und Komplexität (C: `C`, implizite Konstruktoren: `implizit`), nach Zeile
 Ausgabe nennt je Schritt Datei, Zeile und Herkunft des Aufrufs und kennzeichnet unsichere Belege mit
 ihrem Grund. `--mit-tests` wie auf den anderen Ebenen; `--json` hat zusätzlich `unsicher`.
 
+`daidalos markierung [--datei D] [--unsicher] [--daten D]` (seit A08) gibt alle Grenzkanten der
+Markierungs-Kette als Text aus, nach `anzahl` absteigend, dann nach Id: Kopf, markierte Funktion
+mit Markierung und Aufrufzeilen, die Kette als eingerückter Baum (Datei:Zeile), unsichere
+Fortsetzung, Ausnahmen und Befund-Id. Ohne `--unsicher` nur sichere Grenzkanten; `--datei` filtert
+auf die Datei von `von` (voller relativer Pfad oder Endung).
+
 `daidalos aufrufe ID [--rueckwaerts] [--tiefe N] [--unsicher] [--mit-tests]` gibt den Baum der
 erreichbaren Funktionen als Text aus (Tiefensuche, Nachbarn nach Id): je Zeile Funktion, Datei und
 Zeile sowie die Aufrufstellen. Jede Funktion steht einmal voll; spätere Vorkommen sind Verweise
@@ -774,6 +870,12 @@ absoluten Pfade).
 - Auf der Modulebene werden Ordner ohne Dateien der Karte und ohne Kanten zu einem Kasten
   „Weitere Ordner“ (Id `sammel:ordner`) zusammengefasst; `gradle-plugin`-Kanten sind standardmäßig
   ausgeblendet (Vermerk „Plugin für n Module“ am Ziel, Schalter „Plugins“).
+- **Markierungs-Kette und detekt (seit A08):** Befunde `markierung-verlassen` und detekt stehen in
+  der Befundliste; Funktions-Ids in ihren `knoten` zeigt die Karte über ihre Dateien (Dateiebene).
+  Schalter „Markierung“ (Standard an) und „detekt“ (Standard aus) blenden sie in den Listen ein
+  und aus. Die Seitenleiste zeigt die Kette als eingerückte Liste mit Datei:Zeile und Editor-Link,
+  ab 31 Einträgen eingeklappt. `KARTE.md` hat den Abschnitt „Markierungs-Kette“ (eine Zeile je
+  Befund mit Länge und den ersten drei Funktionen) und „detekt“ (Zahl je Regel).
 - **Sprungadressen:** `karte.html#knoten=<id>`, `#befund=<id>`, `#ebene=modul|paket|datei`,
   `#ebene=<e>&kante=<id>` (gemessene Kanten-Id oder Id einer verdichteten Kante der Karte) und
   `#ebene=<e>&von=<id>&nach=<id>` (Pfad-Suche); Ids URL-kodiert (`encodeURIComponent`). Die Adresse
@@ -808,6 +910,18 @@ ausschliessen = [".claude/worktrees/", "build/", "docs/prototypen/daten/"]
 # Fremdcode (eingebundene Bibliotheken): wird erfasst, aber als fremd markiert
 fremd = ["**/src/main/cpp/fremd/"]
 
+[markierungen]
+# volle Namen; markiert: Funktion, umgebende Klasse (jede Ebene) oder Datei (@file:)
+annotationen = ["de.beispiel.Strichpfad", "de.beispiel.Deterministisch"]
+# volle Namen; bewusste Ausnahmen (Funktion oder Klasse): kein Befund, die Kette endet dort
+ausnahmen = ["de.beispiel.WeckenOhneDaten"]
+# gitwildmatch: weder Quelle noch Ziel einer Kette
+ausgenommen = ["werkzeuge/gegenfaelle/"]
+
+[detekt]
+# gitwildmatch, relativ zum Zielrepo; auch unter ausgeschlossenen Pfaden gesucht
+sarif = ["**/build/reports/detekt/*.sarif"]
+
 [editor]
 befehl = "code -g {datei}:{zeile}"
 # Vorlage für „Im Editor öffnen“ in karte.html
@@ -821,6 +935,10 @@ link = "vscode://file/{pfad}:{zeile}"
 | `[scan].fremd` | Liste von Texten | `[]` | Dateien werden erfasst und bekommen `"fremd": true` |
 | `[editor].befehl` | Text | `code -g {datei}:{zeile}` | wird erst später benutzt (`daidalos serve`) |
 | `[editor].link` | Text | `vscode://file/{pfad}:{zeile}` | Editor-Link in `karte.html`; ohne `{pfad}` eine Warnung. `daidalos render` liest ihn (Option `--konfiguration` wie bei `scan`) |
+| `[markierungen].annotationen` | Liste von Texten | `[]` | seit A08; ohne Abschnitt `[markierungen]` gibt es keine Kette |
+| `[markierungen].ausnahmen` | Liste von Texten | `[]` | seit A08 |
+| `[markierungen].ausgenommen` | Liste von Texten | `[]` | seit A08, gitwildmatch |
+| `[detekt].sarif` | Liste von Texten | `[]` | seit A08, gitwildmatch; leer: kein `ziel.detekt` |
 
 - Unbekannte Abschnitte und Schlüssel: Warnung auf stderr, kein Abbruch.
 - Falsche Typen oder ungültiges TOML: Fehlermeldung mit Dateiname und Schlüssel, Exit-Code 2.

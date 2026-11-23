@@ -231,6 +231,8 @@ class FunktionRoh:
     rueckgabe_aufruf: Aufruf | None = None
     # primärer Konstruktor, dessen Initialisierer nur Zugriffe und keine Aufrufe haben
     nur_zugriffe: bool = False
+    # ``fun`` ohne Körper (abstrakt, Schnittstelle, ``expect``, ``external``)
+    koerper: bool = True
 
     @property
     def stelligkeit(self) -> int:
@@ -624,6 +626,10 @@ class _Sammler:
             kinder = knoten.children
             if len(kinder) == 2 and kinder[1].type == "!!":
                 return self._empfaenger(kinder[0], umgebung)
+            # Die Grammatik liest ``!a.f()`` als ``(!a).f()``; gemeint ist ``!(a.f())``. Der
+            # vorangestellte Operator gehört zum ganzen Ausdruck, nicht zum Empfänger (seit A08).
+            if len(kinder) == 2 and kinder[0].type in {"!", "-", "+"}:
+                return self._empfaenger(kinder[1], umgebung)
             return _UNBEKANNT
         if typ == "as_expression":
             ziel = next((k for k in knoten.named_children[1:] if k.type in _TYPKNOTEN), None)
@@ -1183,6 +1189,7 @@ class _Leser:
                 zugriffe=sammler.zugriffe,
                 rueckgabe=rueckgabe,
                 rueckgabe_aufruf=rueckgabe_aufruf,
+                koerper=bool(koerper),
             )
         )
 

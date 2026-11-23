@@ -11,7 +11,15 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from daidalos import __version__
-from daidalos.render import anzeigename, ist_abdeckungsbefund, strukturansicht
+from daidalos.ids import datei_der_funktion
+from daidalos.ids import kanten_id as _kid
+from daidalos.render import (
+    anzeigename,
+    braucht_keine_einschaetzung,
+    ist_abdeckungsbefund,
+    kurz_funktion,
+    strukturansicht,
+)
 
 Knoten = dict[str, Any]
 
@@ -72,7 +80,7 @@ def wichtige_dateien(messung: dict[str, Any]) -> dict[str, list[str]]:
     """
     messung = strukturansicht(messung)
     knoten = {k["id"]: k for k in messung["knoten"]}
-    kanten = {k["id"]: k for k in messung["kanten"]}
+    kanten = {_kid(k): k for k in messung["kanten"]}
     gruende: dict[str, set[str]] = {}
 
     def nimm(knoten_id: str, grund: str) -> None:
@@ -89,6 +97,13 @@ def wichtige_dateien(messung: dict[str, Any]) -> dict[str, list[str]]:
         nimm(k["id"], "fan-in")
 
     for befund in messung["befunde"]:
+        if befund.get("quelle") == "detekt":
+            continue
+        if befund["regel"] == "markierung-verlassen":
+            # nur die Dateien der Grenzkante, nicht die ganze Kette
+            for funktion_id in (befund["beleg"]["von"], befund["beleg"]["nach"]):
+                nimm(f"datei:{datei_der_funktion(funktion_id)}", "befund")
+            continue
         for knoten_id in befund["knoten"]:
             nimm(knoten_id, "befund")
         if befund["regel"] != "zyklus":
@@ -180,10 +195,10 @@ def finde_offenes(
     """Abgleich der rohen ``deutung.json`` (oder ``None``) mit der Messung."""
     deutung = deutung or {}
     knoten = {k["id"]: k for k in messung["knoten"]}
-    # Abdeckungsbefunde brauchen keine Einschätzung.
-    befunde = {b["id"] for b in messung["befunde"] if not ist_abdeckungsbefund(b)}
+    # Abdeckungs- und detekt-Befunde brauchen keine Einschätzung.
+    befunde = {b["id"] for b in messung["befunde"] if not braucht_keine_einschaetzung(b)}
     alle_befunde = {b["id"] for b in messung["befunde"]}
-    kanten = {k["id"] for k in messung["kanten"]}
+    kanten = {_kid(k) for k in messung["kanten"]}
     offen = Offen()
 
     beschreibungen = deutung.get("beschreibungen")
@@ -249,6 +264,19 @@ def befund_kurz(befund: dict[str, Any], kanten: dict[str, dict[str, Any]]) -> st
         return f"JNI ohne Gegenstück ({beleg['seite']}): {beleg['funktion']}"
     if regel == "unaufgeloest":
         return f"{len(beleg['importe'])} unaufgelöste interne Importe"
+    if regel == "markierung-verlassen":
+        text = (
+            f"`{kurz_funktion(beleg['von'])}` ({beleg['markierung']['name']} an "
+            f"{beleg['markierung']['traeger']}) ruft unmarkiert `{kurz_funktion(beleg['nach'])}`, "
+            f"Kette {beleg['anzahl']}"
+        )
+        if beleg.get("kette_unsicher"):
+            text += f" (+{len(beleg['kette_unsicher'])} unsicher)"
+        if beleg.get("unsicher"):
+            text += ", nur über unsichere Kanten"
+        if beleg["ausnahmen"]:
+            text += f", endet an {len(beleg['ausnahmen'])} Ausnahmen"
+        return text
     return regel
 
 
@@ -261,7 +289,7 @@ class Zusammenfassung:
         self.voll = self.messung
         self.messung = strukturansicht(self.messung)
         self.knoten = {k["id"]: k for k in self.messung["knoten"]}
-        self.kanten = {k["id"]: k for k in self.messung["kanten"]}
+        self.kanten = {_kid(k): k for k in self.messung["kanten"]}
         self.wichtig = wichtige_dateien(self.messung)
         self.offen = finde_offenes(self.messung, self.deutung, self.wichtig)
         roh = (self.deutung or {}).get("beschreibungen")
@@ -276,7 +304,7 @@ class Zusammenfassung:
         knoten = self.messung["knoten"]
         dateien = [k for k in knoten if k["art"] == "datei"]
         return {
-            "befunde": len(self.messung["befunde"]),
+            "befunde": len(self.bewertbare()),
             "dateien": len(dateien),
             "dateien_fremd": sum(1 for k in dateien if k.get("fremd")),
             "dateikanten": sum(
@@ -354,6 +382,10 @@ class Zusammenfassung:
         zeilen.sort(key=lambda z: (-z["fan_in"], z["id"]))
         return zeilen
 
+    def bewertbare(self) -> list[dict[str, Any]]:
+        """Befunde, die eine Einschätzung brauchen (ohne detekt)."""
+        return [b for b in self.messung["befunde"] if not braucht_keine_einschaetzung(b)]
+
     def befunde(self) -> list[dict[str, Any]]:
         bewertet = set(self.offen.befunde)
         return [
@@ -362,7 +394,7 @@ class Zusammenfassung:
                 "id": b["id"],
                 "kurz": befund_kurz(b, self.kanten),
             }
-            for b in self.messung["befunde"]
+            for b in self.bewertbare()
         ]
 
     def messung_funktionen(self) -> dict[str, Any]:
@@ -376,7 +408,22 @@ class Zusammenfassung:
                 schluessel = (n["name"], n["grund"])
                 namen[schluessel] = namen.get(schluessel, 0) + n["anzahl"]
         haeufig = sorted(namen.items(), key=lambda e: (-e[1], e[0]))[:10]
+        kette = [b for b in self.voll["befunde"] if b["regel"] == "markierung-verlassen"]
+        detekt: dict[str, int] = {}
+        for b in self.voll["befunde"]:
+            if b.get("quelle") == "detekt":
+                detekt[b["regel"]] = detekt.get(b["regel"], 0) + 1
         return {
+            "ausnahmen": sum(1 for k in funktionen if k.get("ausnahme")),
+            "detekt": {
+                **(self.voll["ziel"].get("detekt") or {"dateien": 0, "ergebnisse": 0}),
+                "regeln": [{"anzahl": n, "regel": r} for r, n in sorted(detekt.items())],
+            }
+            if "detekt" in self.voll["ziel"]
+            else None,
+            "grenzkanten_sicher": sum(1 for b in kette if not b["beleg"].get("unsicher")),
+            "grenzkanten_unsicher": sum(1 for b in kette if b["beleg"].get("unsicher")),
+            "markiert": sum(1 for k in funktionen if k.get("markiert")),
             "funktionen": sum(1 for k in funktionen if k.get("rolle") == "produktiv"),
             "funktionen_test": sum(1 for k in funktionen if k.get("rolle") == "test"),
             "ruft_sicher": sum(1 for k in ruft if k["sicher"]),
@@ -407,6 +454,19 @@ class Zusammenfassung:
             )
         else:
             aus.append("Unaufgelöste Aufrufe: keine.")
+        if m["markiert"] or m["grenzkanten_sicher"] or m["grenzkanten_unsicher"]:
+            aus.append(
+                f"Markierungs-Kette: {m['markiert']} markierte Funktionen, {m['ausnahmen']} "
+                f"Ausnahmen; Grenzkanten {m['grenzkanten_sicher']} sicher, "
+                f"{m['grenzkanten_unsicher']} nur unsicher (Befunde `markierung-verlassen`)."
+            )
+        if m["detekt"] is not None:
+            regeln = ", ".join(f"`{r['regel']}` {r['anzahl']}" for r in m["detekt"]["regeln"])
+            aus.append(
+                f"detekt (eigene Regeln, keine Einschätzung nötig): {m['detekt']['dateien']} "
+                f"SARIF-Dateien, {m['detekt']['ergebnisse']} Ergebnisse; Befunde je Regel: "
+                f"{regeln or 'keine'}."
+            )
         return aus
 
     # ------------------------------------------------------------ Ausgaben
@@ -485,7 +545,7 @@ class Zusammenfassung:
                 f"{', '.join(w['gruende'])} | {w['deutung']} |"
             )
         aus += ["", "## Befunde", ""]
-        if not self.messung["befunde"]:
+        if not self.bewertbare():
             aus.append("Keine.")
         for b in self.befunde():
             marke = "" if b["einschaetzung"] else " · ohne Einschätzung"
@@ -510,7 +570,7 @@ class Zusammenfassung:
         else:
             aus += self._liste("Beschreibung fehlt", fehlt)
         aus += self._liste("Beschreibung veraltet (Hash weicht ab)", veraltet)
-        if offen.befunde and len(offen.befunde) == len(self.messung["befunde"]):
+        if offen.befunde and len(offen.befunde) == len(self.bewertbare()):
             aus.append(f"- Befunde ohne Einschätzung: alle {len(offen.befunde)}")
         else:
             aus += self._liste("Befunde ohne Einschätzung", offen.befunde)

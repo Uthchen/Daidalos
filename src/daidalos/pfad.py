@@ -10,6 +10,8 @@ from dataclasses import dataclass
 from itertools import pairwise
 from typing import Any
 
+from daidalos.ids import datei_der_funktion, kanten_id
+
 Knoten = dict[str, Any]
 Kante = dict[str, Any]
 
@@ -128,9 +130,8 @@ def _belege(daten: dict[str, Any], ebene: str, kanten: list[Kante]) -> list[Any]
                     }
                 )
     if ebene == "funktion":
-        knoten = {k["id"]: k for k in daten["knoten"]}
         for k in kanten:
-            datei = knoten[k["von"]]["datei"]
+            datei = datei_der_funktion(k["von"])
             stellen = []
             for b in k["beleg"]:
                 for zeile in b["zeilen"]:
@@ -195,7 +196,7 @@ def suche_weg(
     kette.reverse()
     schritte = []
     for a, b in pairwise(kette):
-        ks = sorted(nachbarn[a][b], key=lambda k: (k["art"], k["id"]))
+        ks = sorted(nachbarn[a][b], key=lambda k: (k["art"], kanten_id(k)))
         schritte.append(Schritt(a, b, ks, _belege(daten, ebene, ks)))
     return schritte
 
@@ -222,7 +223,7 @@ def weg_als_json(
                     {
                         "art": k["art"],
                         "gewicht": k.get("gewicht"),
-                        "id": k["id"],
+                        "id": kanten_id(k),
                         "sicher": k.get("sicher", True),
                     }
                     for k in s.kanten
@@ -265,7 +266,7 @@ def aufrufbaum(
 
     def ort(knoten_id: str) -> str:
         k = knoten[knoten_id]
-        return f"{k['datei']}:{k['zeile_von']}"
+        return f"{datei_der_funktion(k)}:{k['zeile_von']}"
 
     zeilen = [f"{kurz(start['id'])}  {ort(start['id'])}"]
     gesehen = {start["id"]}
@@ -288,7 +289,7 @@ def aufrufbaum(
             {z for b in kante["beleg"] if unsicher or b["sicher"] for z in b["zeilen"]}
         )
         stellen = ", ".join(str(z) for z in nummern)
-        datei = knoten[aufrufer]["datei"].rsplit("/", 1)[-1]
+        datei = datei_der_funktion(aufrufer).rsplit("/", 1)[-1]
         merkmale = [f"Aufruf {datei}:{stellen}"]
         if not kante["sicher"]:
             gruende = sorted({b.get("grund") or "" for b in kante["beleg"]} - {""})

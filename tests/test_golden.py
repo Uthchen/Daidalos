@@ -13,7 +13,9 @@ from conftest import BEISPIELE, ERWARTET
 from daidalos.cli import main
 
 
-@pytest.mark.parametrize("beispiel", ["mini_gradle", "mini_modulgraph", "mini_aufrufe"])
+@pytest.mark.parametrize(
+    "beispiel", ["mini_gradle", "mini_modulgraph", "mini_aufrufe", "mini_markierung"]
+)
 def test_golden(beispiel: str, tmp_path: Path, aktualisiere_golden: bool) -> None:
     golden = ERWARTET / f"{beispiel}.daidalos.json"
     ausgabe = tmp_path / "daidalos.json"

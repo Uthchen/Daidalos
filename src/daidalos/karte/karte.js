@@ -64,8 +64,17 @@
     b.beleg.kanten.forEach(id => { if (!zyklenVonKante.has(id)) zyklenVonKante.set(id, []); zyklenVonKante.get(id).push(b); });
   });
 
+  // Funktions-Ids stehen nicht in der Strukturansicht; ihre Datei steht in der Id (seit A08).
+  const dateiDerFunktion = id => id.startsWith('funktion:') ? 'datei:' + id.slice(9).split('#')[0] : id;
+  const kurzFunktion = id => id.includes('#') ? id.split('#').slice(1).join('#') : id;
+  // Befunde, die die Schalter „Markierung“ und „detekt“ ein- und ausblenden
+  const istMarkierung = b => b.regel === 'markierung-verlassen';
+  const istDetekt = b => b.quelle === 'detekt';
+  const befundSichtbar = b => (!istMarkierung(b) || zustand.markierung) && (!istDetekt(b) || zustand.detekt);
+
   function name(id) {
     if (id === SAMMEL) return 'Weitere Ordner';
+    if (id.startsWith('funktion:')) return kurzFunktion(id);
     const k = knoten.get(id);
     if (!k) return id;
     if (k.art === 'modul') return k.gradle_pfad;
@@ -82,6 +91,8 @@
     arten: { modul: { gradle: true, nutzt: false, jni: false }, paket: { gradle: false, nutzt: true, jni: false }, datei: { gradle: false, nutzt: true, jni: true } },
     plugins: false,            // gradle-plugin-Kanten zeigen
     zyklen: true,
+    markierung: true,          // Befunde der Markierungs-Kette in den Listen zeigen
+    detekt: false,             // detekt-Befunde zeigen (detekt hat eine eigene Ausgabe)
     offen: new Set(),          // ausgeklappte Module auf der Dateiebene (nur bei großen Projekten)
     zuletztModul: null,
     // Kantenführung: 'elk' (ELKs orthogonale Führung), 'taxi' oder 'bezier'; siehe Bericht A05.
@@ -684,15 +695,19 @@
     }
     if (b.regel === 'jni-ohne-gegenstueck') return 'JNI ohne Gegenstück';
     if (b.regel === 'unaufgeloest') return beleg.importe.length + ' unaufgelöste Importe';
+    if (istMarkierung(b)) return kurzFunktion(beleg.von) + ' ruft unmarkiert ' + kurzFunktion(beleg.nach) + (beleg.kette.length ? ' (+' + beleg.kette.length + ')' : '') + (beleg.unsicher ? ' · unsicher' : '');
+    if (istDetekt(b)) return 'detekt: ' + b.regel;
     return b.regel;
   }
   function befundBeleg(b) {
     if (b.regel === 'zyklus') return b.beleg.knoten.map(name).join(' · ');
     if (b.regel === 'jni-ohne-gegenstueck') return b.beleg.funktion + ' (' + (b.beleg.seite === 'c' ? 'C' : 'Kotlin') + ', Zeile ' + b.beleg.zeile + ')';
     if (b.regel === 'unaufgeloest') return name(b.knoten[0]) + ': ' + b.beleg.importe.map(i => i.import).join(', ');
+    if (istMarkierung(b)) return b.beleg.markierung.name.split('.').pop() + ' (' + b.beleg.markierung.traeger + ') · ' + dateiDerFunktion(b.beleg.von).slice(6).split('/').pop() + ':' + b.beleg.zeilen.join(', ');
+    if (istDetekt(b)) return name(dateiDerFunktion(b.knoten[0])) + ':' + b.beleg.zeile + ' · ' + b.beleg.meldung;
     return b.knoten.map(name).join(', ');
   }
-  const farbe = b => b.regel === 'zyklus' ? 'crit' : 'warn';
+  const farbe = b => b.regel === 'zyklus' || b.schwere === 'fehler' ? 'crit' : 'warn';
 
   function befundKnopf(b, nr) {
     const e = einschaetzung.get(b.id);
@@ -709,10 +724,12 @@
   }
 
   function sortierteBefunde() {
-    const mitDeutung = D.einschaetzungen.map(e => befundNachId.get(e.befund)).filter(Boolean);
-    const rest = M.befunde.filter(b => !einschaetzung.has(b.id));
-    const rang = { zyklus: 0, 'jni-ohne-gegenstueck': 1, unaufgeloest: 2 };
-    rest.sort((a, b) => (rang[a.regel] ?? 3) - (rang[b.regel] ?? 3) ||
+    const mitDeutung = D.einschaetzungen.map(e => befundNachId.get(e.befund)).filter(b => b && befundSichtbar(b));
+    const rest = M.befunde.filter(b => !einschaetzung.has(b.id) && befundSichtbar(b));
+    const rang = { zyklus: 0, 'markierung-verlassen': 1, 'jni-ohne-gegenstueck': 2, unaufgeloest: 3 };
+    const rangVon = b => istDetekt(b) ? 5 : rang[b.regel] ?? 4;
+    rest.sort((a, b) => rangVon(a) - rangVon(b) ||
+      (istMarkierung(a) && istMarkierung(b) ? b.beleg.anzahl - a.beleg.anzahl : 0) ||
       (b.regel === 'zyklus' ? b.knoten.length - a.knoten.length : 0) || (a.id < b.id ? -1 : 1));
     return { mitDeutung, rest };
   }
@@ -793,7 +810,7 @@
     if (k.dateien !== undefined) zeilen.push(['Dateien (eigene)', k.dateien]);
     zeilen.push(['Fan-in · Fan-out', zahl(m.fan_in) + ' · ' + zahl(m.fan_out)]);
     zeilen.push(['Instabilität', zahl(m.instabilitaet)]);
-    const bf = M.befunde.filter(b => b.knoten.includes(id));
+    const bf = M.befunde.filter(b => befundSichtbar(b) && b.knoten.some(x => x === id || dateiDerFunktion(x) === id));
     const symbole = k.art === 'datei' ? `<div class="symbole"><button type="button" disabled title="Code-Ansicht kommt mit daidalos serve">${SVG_CODE}Code</button>${editorKnopf(k.pfad, 1)}</div>` : '';
     seite.innerHTML = `<button type="button" class="zur" data-zurueck>← Übersicht</button>
       <div><div class="kopfzeile"><h2>${esc(name(id))}</h2>${symbole}</div><p class="pfad">${esc(unter)}</p>${chips.length ? `<div class="chips" style="margin-top:6px">${chips.join('')}</div>` : ''}</div>
@@ -822,6 +839,12 @@
     } else if (b.regel === 'jni-ohne-gegenstueck') {
       const d = knoten.get(b.knoten[0]);
       mess += `<table><tr><td>Funktion</td><td>${esc(beleg.funktion)}</td></tr><tr><td>Seite</td><td>${beleg.seite === 'c' ? 'C/C++' : 'Kotlin'}</td></tr><tr><td>Datei</td><td>${kn(b.knoten[0])}</td></tr><tr><td>Zeile</td><td>${beleg.zeile} ${d ? editorKnopf(d.pfad, beleg.zeile, true) : ''}</td></tr></table>`;
+    } else if (istMarkierung(b)) {
+      mess += markierungsBeleg(b);
+    } else if (istDetekt(b)) {
+      const pfad = dateiDerFunktion(b.knoten[0]).slice(6);
+      const quellen = Array.isArray(beleg.sarif) ? beleg.sarif : [beleg.sarif];
+      mess += `<table class="kettenbeleg"><tr><td>Regel</td><td>${esc(b.regel)}</td></tr><tr><td>Schwere</td><td>${esc(b.schwere)}</td></tr><tr><td>Ort</td><td>${kn('datei:' + pfad)}:${beleg.zeile} ${editorKnopf(pfad, beleg.zeile, true)}</td></tr>${b.knoten[0].startsWith('funktion:') ? `<tr><td>Funktion</td><td><code>${esc(kurzFunktion(b.knoten[0]))}</code></td></tr>` : ''}<tr><td>SARIF</td><td>${quellen.map(q => `<code>${esc(q)}</code>`).join('<br>')}</td></tr></table><p style="margin-top:8px">${esc(beleg.meldung)}</p>`;
     } else if (b.regel === 'unaufgeloest') {
       const d = knoten.get(b.knoten[0]);
       mess += `<p>${kn(b.knoten[0])}</p><ul class="liste">${beleg.importe.map(i => `<li><code>${esc(i.import)}</code> <span class="leer">Zeile ${i.zeile}</span> ${d ? editorKnopf(d.pfad, i.zeile, true) : ''}</li>`).join('')}</ul>`;
@@ -829,6 +852,38 @@
     html += `<div><h3 class="quelle-m">Beleg <em>gemessen · daidalos.json</em></h3><div class="mess">${mess}</div></div>`;
     seite.innerHTML = html;
     verdrahte();
+  }
+
+  // Eine Funktion der Kette: Name, Datei:Zeile, Editor-Link.
+  function funktionsZeile(id, zeile, zusatz) {
+    const pfad = dateiDerFunktion(id).slice(6);
+    return `<code>${esc(kurzFunktion(id))}</code> <span class="ort">${esc(pfad.split('/').pop())}:${zeile}</span> ${editorKnopf(pfad, zeile, true)}${zusatz ? ` <span class="leer">${esc(zusatz)}</span>` : ''}`;
+  }
+  // Kette als eingerückte Liste: jede Funktion unter ihrem Aufrufer (Vorgänger im kürzesten Weg).
+  function ketteHtml(wurzel, wurzelZeile, eintraege, mitWurzel) {
+    const kinder = new Map();
+    eintraege.forEach(e => { if (!kinder.has(e.von)) kinder.set(e.von, []); kinder.get(e.von).push(e); });
+    const zeilen = [];
+    const gezeigt = new Set();
+    const gehe = (id, zeile, tiefe, zusatz) => {
+      gezeigt.add(id);
+      zeilen.push(`<li style="padding-left:${tiefe * 14}px">${tiefe ? '↳ ' : ''}${funktionsZeile(id, zeile, zusatz)}</li>`);
+      (kinder.get(id) || []).forEach(e => gehe(e.funktion, e.zeile, tiefe + 1, e.schritt ? 'über ' + kurzFunktion(e.ueber) + ' (' + e.schritt + ')' : ''));
+    };
+    if (mitWurzel) gehe(wurzel, wurzelZeile, 0, '');
+    else (kinder.get(wurzel) || []).forEach(e => gehe(e.funktion, e.zeile, 0, ''));
+    // Einträge, deren Aufrufer nicht in dieser Liste steht (kette_unsicher hängt an der sicheren Kette)
+    eintraege.filter(e => !gezeigt.has(e.funktion)).forEach(e => gehe(e.funktion, e.zeile, 0, 'aufgerufen von ' + kurzFunktion(e.von)));
+    const liste = `<ul class="liste kette">${zeilen.join('')}</ul>`;
+    return eintraege.length > 30 ? `<details><summary>${zeilen.length} Funktionen zeigen</summary>${liste}</details>` : liste;
+  }
+  function markierungsBeleg(b) {
+    const beleg = b.beleg;
+    let mess = `<table class="kettenbeleg"><tr><td>markiert</td><td>${funktionsZeile(beleg.von, beleg.von_zeile)}</td></tr><tr><td>Markierung</td><td><code>${esc(beleg.markierung.name)}</code> an ${esc({ funktion: 'der Funktion', klasse: 'der Klasse', datei: 'der Datei' }[beleg.markierung.traeger])}</td></tr><tr><td>Aufrufstellen</td><td>Zeile ${beleg.zeilen.join(', ')}</td></tr><tr><td>Länge der Kette</td><td>${beleg.anzahl}</td></tr><tr><td>über ueberschreibt/actual</td><td>${beleg.ueber_ueberschreiben ? 'ja' : 'nein'}</td></tr><tr><td>nur unsicher</td><td>${beleg.unsicher ? 'ja' : 'nein'}</td></tr>${beleg.delegiert_gelesen ? `<tr><td>delegierte Eigenschaften gelesen</td><td>${beleg.delegiert_gelesen}</td></tr>` : ''}</table>`;
+    mess += `<p style="margin-top:8px"><b>Unmarkiert erreicht</b> <span class="leer">${beleg.anzahl}</span></p>${ketteHtml(beleg.nach, beleg.nach_zeile, beleg.kette, true)}`;
+    if (beleg.kette_unsicher) mess += `<p style="margin-top:8px"><b>Zusätzlich nur über unsichere Kanten</b> <span class="leer">${beleg.kette_unsicher.length}</span></p>${ketteHtml(beleg.nach, beleg.nach_zeile, beleg.kette_unsicher, false)}`;
+    if (beleg.ausnahmen.length) mess += `<p style="margin-top:8px"><b>Endet an Ausnahmen</b></p><ul class="liste">${beleg.ausnahmen.map(id => `<li><code>${esc(kurzFunktion(id))}</code></li>`).join('')}</ul>`;
+    return mess;
   }
 
   // ---- Kanten-Details
@@ -1008,6 +1063,19 @@
       }
       if (neu || veraltet()) await zeichne();
       hebeZyklusHervor(b);
+    } else if (istMarkierung(b) || istDetekt(b)) {
+      // Funktionen gibt es auf der Karte erst mit A09: hervorgehoben werden ihre Dateien.
+      const dateien = [...new Set(b.knoten.map(dateiDerFunktion))].filter(id => knoten.has(id));
+      if (istMarkierung(b) && !zustand.markierung) { zustand.markierung = true; document.getElementById('u-markierung').checked = true; }
+      if (istDetekt(b) && !zustand.detekt) { zustand.detekt = true; document.getElementById('u-detekt').checked = true; }
+      let neu = zustand.ebene !== 'datei';
+      zustand.ebene = 'datei';
+      if (dateien.some(id => knoten.get(id).rolle === 'test') && !zustand.mitTests) { zustand.mitTests = true; neu = true; }
+      if (gross) dateien.forEach(id => { const g = behaelter(knoten.get(id)); if (!zustand.offen.has(g)) { zustand.offen.add(g); neu = true; } });
+      if (neu || veraltet()) await zeichne();
+      const sichtbar = [...new Set(dateien.map(sichtbarerKnoten).filter(Boolean))];
+      if (sichtbar.length) fokus(sichtbar, { titel: befundTitel(b), ohneFluss: true });
+      else leeren();
     } else {
       const ziel = b.knoten[0];
       const k = knoten.get(ziel);
@@ -1134,6 +1202,12 @@
   }));
   document.getElementById('k-plugin').addEventListener('change', e => { zustand.plugins = e.target.checked; neuZeichnen(); });
   document.getElementById('u-zyklen').addEventListener('change', e => { zustand.zyklen = e.target.checked; cy.style(stil()); });
+  ['markierung', 'detekt'].forEach(schalter => document.getElementById('u-' + schalter).addEventListener('change', e => {
+    zustand[schalter] = e.target.checked;
+    const a = zustand.auswahl;
+    if (a && a.art === 'knoten') knotenDetails(a.id);
+    else if (!a || a.art !== 'befund') uebersicht();
+  }));
   document.getElementById('einpassen').addEventListener('click', () => passen(cy.elements(), 30));
   document.getElementById('zuruecksetzen').addEventListener('click', async () => {
     loeschePositionen(zustand.ebene);

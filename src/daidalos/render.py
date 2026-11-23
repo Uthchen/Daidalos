@@ -13,6 +13,7 @@ from typing import Any
 from urllib.parse import quote
 
 from daidalos import __version__
+from daidalos.ids import kanten_id as _kid
 from daidalos.konfiguration import STANDARD_EDITOR_LINK
 from daidalos.scanner import SCHEMA
 
@@ -66,6 +67,28 @@ def ist_abdeckungsbefund(befund: dict[str, Any]) -> bool:
         and isinstance(beleg, dict)
         and beleg.get("art") == "aufruf"
     )
+
+
+def braucht_keine_einschaetzung(befund: dict[str, Any]) -> bool:
+    """Abdeckungsbefunde und detekt-Befunde brauchen keine Einschätzung.
+
+    detekt-Befunde haben schon eine Regel mit eigener Begründung; die Zusammenfassung zählt sie
+    nur je Regel.
+    """
+    return ist_abdeckungsbefund(befund) or befund.get("quelle") == "detekt"
+
+
+def kurz_funktion(funktion_id: str) -> str:
+    """Teil einer Funktions-Id hinter ``#``."""
+    return funktion_id.split("#", 1)[1] if "#" in funktion_id else funktion_id
+
+
+def markierungs_titel(befund: dict[str, Any]) -> str:
+    beleg = befund["beleg"]
+    titel = f"{kurz_funktion(beleg['von'])} ruft unmarkiert {kurz_funktion(beleg['nach'])}"
+    if beleg["kette"]:
+        titel += f" (+{len(beleg['kette'])})"
+    return titel + (" · unsicher" if beleg.get("unsicher") else "")
 
 
 def strukturansicht(messung: dict[str, Any]) -> dict[str, Any]:
@@ -227,7 +250,7 @@ class _MdBauer:
             "kanten": {},
         }
         self.knoten = {k["id"]: k for k in messung["knoten"]}
-        self.kanten = {k["id"]: k for k in messung["kanten"]}
+        self.kanten = {_kid(k): k for k in messung["kanten"]}
         self.befunde = {b["id"]: b for b in messung["befunde"]}
 
     def kn(self, knoten_id: str) -> str:
@@ -262,6 +285,10 @@ class _MdBauer:
             return f"JNI ohne Gegenstück: {beleg['funktion']}"
         if befund["regel"] == "unaufgeloest":
             return f"{len(beleg['importe'])} unaufgelöste Importe"
+        if befund["regel"] == "markierung-verlassen":
+            return markierungs_titel(befund)
+        if befund.get("quelle") == "detekt":
+            return f"detekt: {befund['regel']}"
         return befund["regel"]
 
     def baue(self) -> str:
@@ -315,6 +342,17 @@ class _MdBauer:
         z.append(f"| Zeilen | {sum(d.get('zeilen', 0) for d in dateien)} |")
         z.append(f"| `nutzt`-Kanten zwischen Dateien | {len(datei_kanten)} |")
         z.append(f"| Zyklen | {len(zyklen)} |")
+        kette = [b for b in self.messung["befunde"] if b["regel"] == "markierung-verlassen"]
+        if kette:
+            unsicher = sum(1 for b in kette if b["beleg"].get("unsicher"))
+            z.append(
+                f"| Markierungs-Kette: Grenzkanten (davon nur unsicher) | {len(kette)} "
+                f"({unsicher}) |"
+            )
+        detekt = self.messung["ziel"].get("detekt")
+        if detekt is not None:
+            anzahl = sum(1 for b in self.messung["befunde"] if b.get("quelle") == "detekt")
+            z.append(f"| detekt: SARIF-Dateien · Befunde | {detekt['dateien']} · {anzahl} |")
         return z
 
     def _gruppentabelle(self, art: str) -> list[str]:
@@ -417,9 +455,11 @@ class _MdBauer:
             z += ["", f"#### {_EBENEN_TITEL[ebene]}"]
             for b in auf_ebene:
                 z += ["", *self.zyklus(b)]
+        z += self.markierungs_kette()
+        z += self.detekt()
         uebrige: dict[str, int] = {}
         for b in self.messung["befunde"]:
-            if b["regel"] != "zyklus":
+            if b["regel"] not in ("zyklus", "markierung-verlassen") and b["quelle"] != "detekt":
                 uebrige[b["regel"]] = uebrige.get(b["regel"], 0) + 1
         namen = {
             "jni-ohne-gegenstueck": "JNI-Funktionen ohne Gegenstück",
@@ -430,6 +470,53 @@ class _MdBauer:
             z.append("Keine.")
         for regel, anzahl in sorted(uebrige.items()):
             z.append(f"- {namen.get(regel, regel)}: {anzahl}")
+        return z
+
+    def markierungs_kette(self) -> list[str]:
+        """Je Grenzkante eine Zeile: Länge und die ersten drei Funktionen der Kette."""
+        kette = [b for b in self.messung["befunde"] if b["regel"] == "markierung-verlassen"]
+        if not kette:
+            return []
+        z = ["", "### Markierungs-Kette", ""]
+        z.append(
+            "Markierte Funktionen, die eine unmarkierte interne Funktion aufrufen; die Kette "
+            "zählt alle von dort aus erreichten unmarkierten Funktionen. Längste zuerst."
+        )
+        z.append("")
+        kette.sort(
+            key=lambda b: (b["beleg"].get("unsicher", False), -b["beleg"]["anzahl"], b["id"])
+        )
+        for b in kette:
+            beleg = b["beleg"]
+            erste = [kurz_funktion(beleg["nach"])] + [
+                kurz_funktion(e["funktion"]) for e in beleg["kette"]
+            ]
+            mehr = " …" if len(erste) > 3 else ""
+            namen = ", ".join(f"`{n}`" for n in erste[:3])
+            z.append(
+                f"- {self.bf(b['id'], markierungs_titel(b))} · Kette {beleg['anzahl']}: "
+                f"{namen}{mehr}"
+            )
+        return z
+
+    def detekt(self) -> list[str]:
+        detekt = self.messung["ziel"].get("detekt")
+        if detekt is None:
+            return []
+        regeln: dict[str, int] = {}
+        for b in self.messung["befunde"]:
+            if b.get("quelle") == "detekt":
+                regeln[b["regel"]] = regeln.get(b["regel"], 0) + 1
+        z = ["", "### detekt", ""]
+        z.append(
+            f"Aus {detekt['dateien']} SARIF-Dateien ({detekt['ergebnisse']} Ergebnisse); "
+            "Einzelheiten in der Karte (Schalter „detekt“) und in der Ausgabe von detekt."
+        )
+        z.append("")
+        if not regeln:
+            z.append("Keine Befunde.")
+        for regel, anzahl in sorted(regeln.items()):
+            z.append(f"- `{_md(regel)}`: {anzahl}")
         return z
 
     def zyklus(self, befund: dict[str, Any]) -> list[str]:

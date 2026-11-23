@@ -15,10 +15,12 @@ from daidalos.adapter.gradle import GradleErgebnis, lies_gradle
 from daidalos.adapter.jni import CFunktion, dekodiere, finde_c_funktionen
 from daidalos.adapter.kotlin import KotlinDatei, lies_kotlin
 from daidalos.adapter.kotlin_funktionen import FunktionenDatei, lies_funktionen
+from daidalos.analysen.markierung import KettenErgebnis, markierungs_kette
 from daidalos.analysen.zyklen import GraphKante, zyklus_befunde
 from daidalos.aufloeser import PRODUKTIV, TEST, Quelldatei, loese_auf
 from daidalos.aufrufgraph import CQuelle, Quelle, miss
-from daidalos.konfiguration import Warner, warne_stderr
+from daidalos.ids import kanten_id as kanten_id_von
+from daidalos.konfiguration import MarkierungsKonfiguration, Warner, warne_stderr
 
 Knoten = dict[str, Any]
 Kante = dict[str, Any]
@@ -36,6 +38,8 @@ class Struktur:
     befunde: list[Befund]
     # Zählung der Aufrufstellen (nur für Berichte, nicht in daidalos.json)
     aufrufe: dict[str, int] | None = None
+    # Zählung der Markierungs-Kette (nur für stdout); ``None`` ohne [markierungen]
+    markierung: KettenErgebnis | None = None
 
 
 # ---------------------------------------------------------------- Ids
@@ -111,7 +115,12 @@ def _ist_c(datei: Knoten) -> bool:
     return datei.get("sprache") in _C_SPRACHEN and datei["pfad"].lower().endswith(_C_ENDUNGEN)
 
 
-def baue_struktur(ziel: Path, dateien: list[Knoten], warne: Warner = warne_stderr) -> Struktur:
+def baue_struktur(
+    ziel: Path,
+    dateien: list[Knoten],
+    warne: Warner = warne_stderr,
+    markierungen: MarkierungsKonfiguration | None = None,
+) -> Struktur:
     """Ergänzt die Datei-Knoten (in place) und liefert alle weiteren Knoten, Kanten und Befunde."""
     erfasst = {d["pfad"] for d in dateien}
     gradle = lies_gradle(ziel, erfasst, warne)
@@ -240,10 +249,17 @@ def baue_struktur(ziel: Path, dateien: list[Knoten], warne: Warner = warne_stder
     for pfad, felder in messung.datei_felder.items():
         nach_pfad[pfad].update(felder)
 
-    kanten.sort(key=lambda k: (k["von"], k["nach"], k["art"], k["id"]))
+    kette: KettenErgebnis | None = None
+    if markierungen is not None:
+        kette = markierungs_kette(
+            [*dateien, *messung.knoten], messung.kanten, markierungen, messung.delegiert, warne
+        )
+        befunde.extend(kette.befunde)
+
+    kanten.sort(key=lambda k: (k["von"], k["nach"], k["art"], kanten_id_von(k)))
     knoten.sort(key=lambda k: k["id"])
     befunde.sort(key=lambda b: b["id"])
-    return Struktur(knoten, kanten, befunde, dict(messung.statistik))
+    return Struktur(knoten, kanten, befunde, dict(messung.statistik), kette)
 
 
 def _abhaengigkeiten(kanten: list[Kante]) -> dict[str, set[str]]:

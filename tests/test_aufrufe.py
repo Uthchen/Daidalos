@@ -438,3 +438,26 @@ def test_aufrufe_mehrdeutig_ist_bedienfehler(capsys: pytest.CaptureFixture[str])
     daten = str(ERWARTET / "mini_aufrufe.daidalos.json")
     assert main(["aufrufe", "plattformName", "--daten", daten]) == 2
     assert "mehrdeutig" in capsys.readouterr().err
+
+
+def test_vorangestellter_operator_gehoert_nicht_zum_empfaenger(tmp_path: Path) -> None:
+    """``!Art.f(x)`` liest die Grammatik als ``(!Art).f(x)``; der Empfänger ist trotzdem ``Art``
+    (A08, Entscheidung 3 zu A07b)."""
+    paket = tmp_path / "src" / "de" / "a"
+    paket.mkdir(parents=True)
+    (paket / "Art.kt").write_text(
+        "package de.a\n\nobject Art {\n    fun ist(x: Int): Boolean = x > 2\n"
+        "    fun wert(): Int = 1\n}\n",
+        encoding="utf-8",
+    )
+    (paket / "Nutzer.kt").write_text(
+        "package de.a\n\nclass Nutzer {\n    fun f(x: Int) {\n"
+        '        require(!Art.ist(x)) { "nein" }\n    }\n\n    fun g(): Int = -Art.wert()\n}\n',
+        encoding="utf-8",
+    )
+    ausgabe = tmp_path / "daidalos.json"
+    assert main(["scan", str(tmp_path), "--ausgabe", str(ausgabe)]) == 0
+    daten = json.loads(ausgabe.read_text(encoding="utf-8"))
+    ruft = [k for k in daten["kanten"] if k["art"] == "ruft"]
+    assert len(ruft) == 2
+    assert all(k["sicher"] and k["beleg"][0]["herkunft"] == "objekt" for k in ruft)

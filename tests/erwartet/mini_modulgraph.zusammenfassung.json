@@ -107,8 +107,13 @@
     }
   ],
   "messung": {
+    "ausnahmen": 0,
+    "detekt": null,
     "funktionen": 27,
     "funktionen_test": 2,
+    "grenzkanten_sicher": 0,
+    "grenzkanten_unsicher": 0,
+    "markiert": 0,
     "ruft_sicher": 15,
     "ruft_unsicher": 0,
     "unaufgeloeste_aufrufe": 0,

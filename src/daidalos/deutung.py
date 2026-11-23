@@ -11,6 +11,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from daidalos.ids import kanten_id as _kid
 from daidalos.konfiguration import Warner, warne_stderr
 
 SCHEMA_DEUTUNG = 1
@@ -46,7 +47,7 @@ def gleiche_ab(
     """Bereinigte Deutung: nur gültige Verweise, Beschreibungen mit ``veraltet``."""
     knoten = {k["id"]: k for k in messung["knoten"]}
     befunde = {b["id"] for b in messung["befunde"]}
-    kanten = {k["id"] for k in messung["kanten"]}
+    kanten = {_kid(k) for k in messung["kanten"]}
 
     for schluessel in sorted(set(deutung) - _BEKANNT):
         warne(f"deutung.json: unbekannter Schlüssel {schluessel!r} wird ignoriert")
@@ -259,7 +260,7 @@ def pruefe_entwurf(entwurf: Any, messung: dict[str, Any]) -> list[str]:
     _pruefe_einschaetzungen(
         entwurf.get("einschaetzungen", []), {b["id"] for b in messung["befunde"]}, p
     )
-    _pruefe_kanten(entwurf.get("kanten", {}), {k["id"] for k in messung["kanten"]}, p)
+    _pruefe_kanten(entwurf.get("kanten", {}), {_kid(k) for k in messung["kanten"]}, p)
     entfernen = entwurf.get("entfernen", [])
     if not isinstance(entfernen, list) or not all(isinstance(i, str) for i in entfernen):
         p.append("entfernen: keine Liste von Ids")

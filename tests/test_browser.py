@@ -884,3 +884,85 @@ def test_editor_ohne_file_ausgegraut(seite: tuple[Any, list[str]], karte: Path) 
     assert s.is_disabled(knopf)
     assert "file://" in s.get_attribute(knopf, "title")
     assert fehler == []
+
+
+# ---------------------------------------------------------------- A08: Markierungs-Kette
+
+
+@pytest.fixture(scope="module")
+def markierungs_karte(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    """mini_markierung mit einer SARIF-Datei; Karte im Standardordner."""
+    ziel = tmp_path_factory.mktemp("markierung") / "mini_markierung"
+    shutil.copytree(BEISPIELE / "mini_markierung", ziel)
+    rechnen = (ziel / "kern/src/main/kotlin/de/beispiel/kette/Rechnen.kt").resolve().as_uri()
+    berichte = ziel / "kern" / "build" / "reports" / "detekt"
+    berichte.mkdir(parents=True)
+    ergebnis = {
+        "ruleId": "detekt.style.MagicNumber",
+        "level": "warning",
+        "message": {"text": "Zahl ohne Namen"},
+        "locations": [
+            {
+                "physicalLocation": {
+                    "artifactLocation": {"uri": rechnen},
+                    "region": {"startLine": 19},
+                }
+            }
+        ],
+    }
+    (berichte / "main.sarif").write_text(
+        json.dumps({"version": "2.1.0", "runs": [{"results": [ergebnis]}]}), encoding="utf-8"
+    )
+    assert main(["scan", str(ziel)]) == 0
+    assert main(["render", str(ziel)]) == 0
+    return ziel / "docs" / "daidalos" / "karte.html"
+
+
+def test_markierung_kette_in_der_seitenleiste(
+    seite: tuple[Any, list[str]], markierungs_karte: Path
+) -> None:
+    s, fehler = seite
+    oeffne(s, markierungs_karte)
+    liste = s.locator("#seite").inner_text()
+    assert "zeichne/1 ruft unmarkiert glaette/1 (+2)" in liste
+    # detekt ist standardmäßig ausgeblendet
+    assert "detekt: detekt.style.MagicNumber" not in liste
+    s.locator("#seite [data-befund*='zeichne']").first.click()
+    warte(s, 400)
+    text = s.locator("#seite").inner_text()
+    assert "Unmarkiert erreicht" in text
+    assert "runde/1" in text and "zurueck/1" in text
+    assert "Zusätzlich nur über unsichere Kanten" in text
+    assert "Endet an Ausnahmen" in text and "wecke/0" in text
+    # eingerückt: zurueck steht tiefer als runde
+    einzug = s.evaluate(
+        "[...document.querySelectorAll('#seite .kette li')]"
+        ".map(li => [li.innerText, li.style.paddingLeft])"
+    )
+    tiefe = {t.split()[1] if t.startswith("↳") else t.split()[0]: p for t, p in einzug}
+    assert tiefe["glaette/1"] == "0px" and tiefe["runde/1"] == "14px"
+    assert tiefe["zurueck/1"] == "28px"
+    # die Dateien der Kette sind auf der Dateiebene hervorgehoben
+    assert s.evaluate("window.daidalos.zustand.ebene") == "datei"
+    hl = s.evaluate("window.daidalos.cy.nodes('.hl').map(n => n.id())")
+    assert "datei:kern/src/main/kotlin/de/beispiel/kette/Rechnen.kt" in hl
+    assert fehler == []
+
+
+def test_markierung_und_detekt_schalter(
+    seite: tuple[Any, list[str]], markierungs_karte: Path
+) -> None:
+    s, fehler = seite
+    oeffne(s, markierungs_karte)
+    s.locator("#u-markierung").uncheck()
+    warte(s)
+    assert "ruft unmarkiert" not in s.locator("#seite").inner_text()
+    s.locator("#u-detekt").check()
+    warte(s)
+    text = s.locator("#seite").inner_text()
+    assert "detekt: detekt.style.MagicNumber" in text
+    s.locator("#seite [data-befund^='befund:detekt']").first.click()
+    warte(s, 400)
+    text = s.locator("#seite").inner_text()
+    assert "Zahl ohne Namen" in text and "rechneSicher/1" in text
+    assert fehler == []
