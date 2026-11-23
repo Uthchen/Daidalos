@@ -18,7 +18,11 @@ from daidalos.adapter.baum import alle, parse, text, zeile
 from daidalos.adapter.kotlin import lies_kotlin
 from daidalos.ids import datei_der_funktion
 from daidalos.render import anzeigename
-from daidalos.zusammenfassung import stand_der_beschreibung, wichtige_dateien
+from daidalos.zusammenfassung import (
+    stand_der_beschreibung,
+    wichtige_dateien,
+    wichtige_funktionen,
+)
 
 Knoten = dict[str, Any]
 
@@ -174,6 +178,7 @@ class Arbeitsblatt:
         self.max_zeilen = max_zeilen
         self.knoten = {k["id"]: k for k in messung["knoten"]}
         self.wichtig = wichtige_dateien(messung)
+        self.wichtig_funktionen = wichtige_funktionen(messung)
         roh = (deutung or {}).get("beschreibungen")
         self.beschreibungen = roh if isinstance(roh, dict) else {}
         self.funktionen: dict[str, list[Knoten]] = {}
@@ -262,7 +267,10 @@ class Arbeitsblatt:
             merkmal = f"Komplexität {komplex}" if komplex is not None else "C"
             if f.get("implizit"):
                 merkmal = "implizit"
-            z.append(f"  - `{f['id']}` (Z. {f['zeile_von']}, {merkmal})")
+            if f["id"] in self.wichtig_funktionen:
+                merkmal += f", wichtig, Deutung {self.stand(f['id'])}"
+            bis = f"–{f['zeile_bis']}" if f["zeile_bis"] != f["zeile_von"] else ""
+            z.append(f"  - `{f['id']}` (Z. {f['zeile_von']}{bis}, {merkmal})")
         return z
 
     def datei_voll(self, k: Knoten, mit_funktionen: bool = False) -> list[str]:

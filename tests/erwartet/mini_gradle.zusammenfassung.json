@@ -76,6 +76,18 @@
         "stand": "fehlt"
       },
       {
+        "id": "funktion:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt#Strich.<init>/0",
+        "stand": "fehlt"
+      },
+      {
+        "id": "funktion:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt#Strich.fuegeHinzu/1",
+        "stand": "fehlt"
+      },
+      {
+        "id": "funktion:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt#Strich.laenge/0",
+        "stand": "fehlt"
+      },
+      {
         "id": "modul::app",
         "stand": "fehlt"
       },
@@ -148,6 +160,47 @@
       "zeilen": 11
     }
   ],
+  "wichtige_funktionen": [
+    {
+      "datei": "core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt",
+      "deutung": "fehlt",
+      "fan_in": 1,
+      "gruende": [
+        "fan-in"
+      ],
+      "id": "funktion:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt#Strich.<init>/0",
+      "komplexitaet": 1,
+      "markiert": false,
+      "zeile_bis": 4,
+      "zeile_von": 3
+    },
+    {
+      "datei": "core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt",
+      "deutung": "fehlt",
+      "fan_in": 1,
+      "gruende": [
+        "fan-in"
+      ],
+      "id": "funktion:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt#Strich.fuegeHinzu/1",
+      "komplexitaet": 1,
+      "markiert": false,
+      "zeile_bis": 8,
+      "zeile_von": 6
+    },
+    {
+      "datei": "core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt",
+      "deutung": "fehlt",
+      "fan_in": 1,
+      "gruende": [
+        "fan-in"
+      ],
+      "id": "funktion:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt#Strich.laenge/0",
+      "komplexitaet": 1,
+      "markiert": false,
+      "zeile_bis": 10,
+      "zeile_von": 10
+    }
+  ],
   "zahlen": {
     "befunde": 0,
     "dateien": 13,
@@ -157,6 +210,7 @@
     "ordner": 3,
     "pakete": 2,
     "wichtige_dateien": 2,
+    "wichtige_funktionen": 3,
     "zeilen": 56
   },
   "ziel": {

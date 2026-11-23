@@ -5,7 +5,7 @@
 - deklariert:
   - ohne KDoc: class Strich (Z. 4)
   - Funktionen:
-    - `funktion:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt#Strich.<init>/0` (Z. 4, Komplexität 1)
+    - `funktion:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt#Strich.<init>/0` (Z. 4–5, Komplexität 1, wichtig, Deutung fehlt)
     - `funktion:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt#Strich.schiebe/1` (Z. 7, Komplexität 1)
 - nutzt:
   - kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt (Gewicht 1): beispiel.kern.Punkt Z. 5
