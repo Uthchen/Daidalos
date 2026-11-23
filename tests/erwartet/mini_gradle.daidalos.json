@@ -37,18 +37,6 @@
       "von": "datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt"
     },
     {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt->funktion:app/src/main/kotlin/de/beispiel/app/Haupt.kt#main/0",
-      "nach": "funktion:app/src/main/kotlin/de/beispiel/app/Haupt.kt#main/0",
-      "von": "datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt"
-    },
-    {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:core/src/main/kotlin/de/beispiel/zeichnen/Punkt.kt->funktion:core/src/main/kotlin/de/beispiel/zeichnen/Punkt.kt#Punkt.<init>/2",
-      "nach": "funktion:core/src/main/kotlin/de/beispiel/zeichnen/Punkt.kt#Punkt.<init>/2",
-      "von": "datei:core/src/main/kotlin/de/beispiel/zeichnen/Punkt.kt"
-    },
-    {
       "art": "nutzt",
       "beleg": [
         {
@@ -66,30 +54,14 @@
       "von": "datei:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt"
     },
     {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt->funktion:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt#Strich.<init>/0",
-      "nach": "funktion:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt#Strich.<init>/0",
-      "von": "datei:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt"
-    },
-    {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt->funktion:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt#Strich.fuegeHinzu/1",
-      "nach": "funktion:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt#Strich.fuegeHinzu/1",
-      "von": "datei:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt"
-    },
-    {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt->funktion:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt#Strich.laenge/0",
-      "nach": "funktion:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt#Strich.laenge/0",
-      "von": "datei:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt"
-    },
-    {
       "art": "ruft",
       "beleg": [
         {
           "herkunft": "konstruktor",
           "sicher": true,
-          "zeile": 8
+          "zeilen": [
+            8
+          ]
         }
       ],
       "gewicht": 1,
@@ -105,7 +77,9 @@
         {
           "herkunft": "konstruktor",
           "sicher": true,
-          "zeile": 7
+          "zeilen": [
+            7
+          ]
         }
       ],
       "gewicht": 1,
@@ -121,7 +95,9 @@
         {
           "herkunft": "lokal",
           "sicher": true,
-          "zeile": 8
+          "zeilen": [
+            8
+          ]
         }
       ],
       "gewicht": 1,
@@ -137,7 +113,9 @@
         {
           "herkunft": "lokal",
           "sicher": true,
-          "zeile": 9
+          "zeilen": [
+            9
+          ]
         }
       ],
       "gewicht": 1,
@@ -353,6 +331,7 @@
       "annotationen": [],
       "art": "datei",
       "bytes": 202,
+      "eigenschaften": [],
       "funktionen": 1,
       "hash": "sha256:21b3a725e4a017ace961133974734f49a48b74cd0a3d36e301f0faa1ebb06ecd",
       "id": "datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt",
@@ -374,6 +353,7 @@
       "annotationen": [],
       "art": "datei",
       "bytes": 67,
+      "eigenschaften": [],
       "funktionen": 0,
       "hash": "sha256:5d5dee1e960a03f4269c1ef30dc2185d6e438f6752ecf99ee5e014ef35f05207",
       "id": "datei:app/src/main/kotlin/de/beispiel/app/Leiste-crlf.kt",
@@ -381,6 +361,13 @@
         {
           "annotationen": [],
           "art": "klasse",
+          "eigenschaften": [
+            {
+              "delegiert": false,
+              "name": "knoepfe",
+              "zeile": 4
+            }
+          ],
           "name": "Leiste",
           "obertypen": [],
           "zeile": 3
@@ -437,6 +424,7 @@
       "annotationen": [],
       "art": "datei",
       "bytes": 75,
+      "eigenschaften": [],
       "funktionen": 1,
       "hash": "sha256:69afec09ba4ba129fac3dec89bf7ba4b4d30863deb65a24ae08abc919985a930",
       "id": "datei:core/src/main/kotlin/de/beispiel/zeichnen/Punkt.kt",
@@ -444,6 +432,18 @@
         {
           "annotationen": [],
           "art": "klasse",
+          "eigenschaften": [
+            {
+              "delegiert": false,
+              "name": "x",
+              "zeile": 3
+            },
+            {
+              "delegiert": false,
+              "name": "y",
+              "zeile": 3
+            }
+          ],
           "name": "Punkt",
           "obertypen": [],
           "zeile": 3
@@ -466,6 +466,7 @@
       "annotationen": [],
       "art": "datei",
       "bytes": 200,
+      "eigenschaften": [],
       "funktionen": 3,
       "hash": "sha256:a4ef0c17fe2abe04686d6fa0fc0ea6f48e3096ffe90ff6c8bffd5d5598ff6a75",
       "id": "datei:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt",
@@ -473,6 +474,13 @@
         {
           "annotationen": [],
           "art": "klasse",
+          "eigenschaften": [
+            {
+              "delegiert": false,
+              "name": "punkte",
+              "zeile": 4
+            }
+          ],
           "name": "Strich",
           "obertypen": [],
           "zeile": 3
@@ -555,7 +563,6 @@
       "zeilen": 4
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "",
       "datei": "app/src/main/kotlin/de/beispiel/app/Haupt.kt",
@@ -571,9 +578,7 @@
         "komplexitaet": 1,
         "zeilen": 5
       },
-      "modifikatoren": [],
       "name": "main",
-      "parameter": [],
       "quellsatz": "main",
       "rolle": "produktiv",
       "sichtbarkeit": "public",
@@ -583,7 +588,6 @@
       "zeile_von": 6
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "Punkt",
       "datei": "core/src/main/kotlin/de/beispiel/zeichnen/Punkt.kt",
@@ -599,21 +603,10 @@
         "komplexitaet": 1,
         "zeilen": 0
       },
-      "modifikatoren": [],
       "name": "<init>",
       "parameter": [
-        {
-          "name": "x",
-          "typ": "Float",
-          "vararg": false,
-          "vorgabe": false
-        },
-        {
-          "name": "y",
-          "typ": "Float",
-          "vararg": false,
-          "vorgabe": false
-        }
+        "Float",
+        "Float"
       ],
       "quellsatz": "main",
       "rolle": "produktiv",
@@ -624,7 +617,6 @@
       "zeile_von": 3
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "Strich",
       "datei": "core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt",
@@ -640,9 +632,7 @@
         "komplexitaet": 1,
         "zeilen": 1
       },
-      "modifikatoren": [],
       "name": "<init>",
-      "parameter": [],
       "quellsatz": "main",
       "rolle": "produktiv",
       "sichtbarkeit": "public",
@@ -652,7 +642,6 @@
       "zeile_von": 3
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "Strich",
       "datei": "core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt",
@@ -668,15 +657,9 @@
         "komplexitaet": 1,
         "zeilen": 3
       },
-      "modifikatoren": [],
       "name": "fuegeHinzu",
       "parameter": [
-        {
-          "name": "punkt",
-          "typ": "Punkt",
-          "vararg": false,
-          "vorgabe": false
-        }
+        "Punkt"
       ],
       "quellsatz": "main",
       "rolle": "produktiv",
@@ -687,7 +670,6 @@
       "zeile_von": 6
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "Strich",
       "datei": "core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt",
@@ -703,9 +685,7 @@
         "komplexitaet": 1,
         "zeilen": 1
       },
-      "modifikatoren": [],
       "name": "laenge",
-      "parameter": [],
       "quellsatz": "main",
       "rolle": "produktiv",
       "sichtbarkeit": "public",

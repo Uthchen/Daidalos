@@ -9,7 +9,7 @@ import de.beispiel.marken.Strichpfad
 
 // Oberste Ebene: gleiches Paket, Alias- und Stern-Import, nachgestelltes Lambda, Lambda,
 // lokale Funktion, Funktionsreferenz, Rekursion, Kommentar und String, Interpolation,
-// object, externer Aufruf, Erweiterung mit bekanntem und unbekanntem Empfänger
+// object, externer Aufruf, Erweiterung mit bekanntem und unbekanntem Empfänger (A07b: Rückgabe)
 object Zaehler {
     fun erhoehe(): Int = 1
 }
@@ -32,6 +32,7 @@ fun zeichneAlles(strich: Strich) {
     halbiere(4)
     strich.laenge()
     liefereStrich().laenge()
+    holeStrich().laenge()
 }
 
 fun fakultaet(n: Int): Int = if (n <= 1) 1 else n * fakultaet(n - 1)

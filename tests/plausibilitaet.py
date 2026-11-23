@@ -3,7 +3,9 @@
 - Jede modulübergreifende ``nutzt``-Kante muss durch Gradle gedeckt sein.
 - Jede sichere ``ruft``-Kante zwischen zwei Dateien braucht eine ``nutzt``-Kante zwischen diesen
   Dateien (seit A07). Ausnahme: Kommt der Typ des Empfängers aus einer Deklaration (Eigenschaft,
-  Parameter, lokal, ``this``, ``super``), genügt ein Weg über höchstens drei ``nutzt``-Kanten.
+  Parameter, lokal, ``this``, ``super``; seit A07b auch Rückgabetyp, Konstruktor-Ergebnis,
+  Initialisierer, Cast und Zugriffe ``lesen``/``schreiben``), genügt ein Weg über höchstens drei
+  ``nutzt``-Kanten.
   So erreichen Eigenschaftsketten wie ``q.index.f()`` und geerbte Mitglieder Dateien, deren Namen
   in der aufrufenden Datei nicht vorkommen. Diese Fälle zählt ``indirekte_ruft_kanten``.
 - Jede ``ueberschreibt``-Kante zeigt in einen Obertyp der Klasse (seit A07).
@@ -76,7 +78,22 @@ def _klassen(daten: dict[str, Any]) -> dict[tuple[str, str], set[str]]:
     return ergebnis
 
 
-_UEBER_TYP = frozenset({"eigenschaft", "lokal", "parameter", "this", "super"})
+_UEBER_TYP = frozenset(
+    {
+        "eigenschaft",
+        "lokal",
+        "parameter",
+        "this",
+        "super",
+        # seit A07b
+        "rueckgabe",
+        "konstruktor-ergebnis",
+        "initialisierer",
+        "cast",
+        "lesen",
+        "schreiben",
+    }
+)
 INDIREKT_HOECHSTENS = 3
 
 

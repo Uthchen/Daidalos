@@ -1,4 +1,4 @@
-"""Funktionen und Aufrufgraph (A07) am erfundenen Beispiel ``mini_aufrufe``."""
+"""Funktionen und Aufrufgraph (A07, A07b) am erfundenen Beispiel ``mini_aufrufe``."""
 
 from __future__ import annotations
 
@@ -50,17 +50,24 @@ def knoten(daten: dict[str, Any], knoten_id: str) -> dict[str, Any]:
     return next(k for k in daten["knoten"] if k["id"] == knoten_id)
 
 
+def stellen(k: dict[str, Any]) -> set[tuple[int, bool, str]]:
+    """(Zeile, sicher, Herkunft) je Aufruf- oder Zugriffsstelle einer ruft-Kante."""
+    return {(z, b["sicher"], b["herkunft"]) for b in k["beleg"] for z in b["zeilen"]}
+
+
 STRICH = f"{KERN}/Strich.kt"
 WERKZEUG = f"{KERN}/Werkzeug.kt"
 VIELE = f"{KERN}/Viele.kt"
 FORMEN = f"{KERN}/Formen.kt"
 HILFEN = f"{KERN}/hilfe/Hilfen.kt"
+ZUGRIFFE = f"{KERN}/Zugriffe.kt"
+TYPEN = f"{KERN}/Typen.kt"
 
 
 def test_ueberladung_nach_stelligkeit(daten: dict[str, Any]) -> None:
     zeichne = f(STRICH, "Strich.zeichne/1")
     k = ruft(daten, zeichne, f(STRICH, "Strich.setze/1"))
-    assert k["sicher"] and k["beleg"] == [{"herkunft": "this", "sicher": True, "zeile": 39}]
+    assert k["sicher"] and k["beleg"] == [{"herkunft": "this", "sicher": True, "zeilen": [39]}]
 
 
 def test_ueberladung_gleicher_stelligkeit(daten: dict[str, Any]) -> None:
@@ -78,9 +85,13 @@ def test_vorgabewert_und_vararg(daten: dict[str, Any]) -> None:
     assert ruft(daten, zeichne, f(STRICH, "Strich.male/2"))["sicher"]
     assert ruft(daten, zeichne, f(STRICH, "Strich.sammle/1"))["sicher"]
     sammle = knoten(daten, f(STRICH, "Strich.sammle/1"))
-    assert sammle["parameter"] == [
-        {"name": "punkte", "typ": "Punkt", "vararg": True, "vorgabe": False}
-    ]
+    assert sammle["parameter"] == ["Punkt"]
+    assert sammle["parameter_vararg"] == [0]
+    assert "parameter_vorgabe" not in sammle
+    male = knoten(daten, f(STRICH, "Strich.male/2"))
+    assert male["parameter"] == ["Int", "Float"]
+    assert male["parameter_vorgabe"] == [1]
+    assert "parameter_vararg" not in male
 
 
 def test_nachgestelltes_lambda_und_aufruf_im_lambda(daten: dict[str, Any]) -> None:
@@ -101,9 +112,11 @@ def test_lokale_funktion_gehoert_zur_umgebenden(daten: dict[str, Any]) -> None:
 def test_erweiterung_bekannt_und_unbekannt(daten: dict[str, Any]) -> None:
     alles = f(WERKZEUG, "zeichneAlles/1")
     strich = ruft(daten, alles, f(HILFEN, "[Strich]laenge/0"))
-    assert {(b["zeile"], b["sicher"], b["herkunft"]) for b in strich["beleg"]} == {
+    # Zeile 34 über den Rückgabetyp von liefereStrich (A07b), Zeile 35 externer Rückgabewert
+    assert stellen(strich) == {
         (33, True, "erweiterung"),
-        (34, False, "unbekannter-empfaenger"),
+        (34, True, "erweiterung"),
+        (35, False, "unbekannter-empfaenger"),
     }
     punkt = ruft(daten, alles, f(HILFEN, "[Punkt]laenge/0"))
     assert not punkt["sicher"]
@@ -180,15 +193,15 @@ def test_ketten_unsicher_oder_unaufgeloest(daten: dict[str, Any]) -> None:
 def test_kommentar_string_interpolation(daten: dict[str, Any]) -> None:
     alles = f(WERKZEUG, "zeichneAlles/1")
     assert f(STRICH, "Strich.pruefe/0") not in ziele(daten, alles)
-    assert ruft(daten, alles, f(WERKZEUG, "fakultaet/1"))["beleg"][0]["zeile"] == 30
+    assert ruft(daten, alles, f(WERKZEUG, "fakultaet/1"))["beleg"][0]["zeilen"] == [30]
 
 
 def test_testcode_unsichtbar_und_extern(daten: dict[str, Any]) -> None:
     testlos = knoten(daten, f(WERKZEUG, "testlos/0"))
     assert ziele(daten, testlos["id"]) == set()
     assert testlos["metriken"]["externe_aufrufe"] == 1
-    # println, listOf, map: extern
-    assert knoten(daten, f(WERKZEUG, "zeichneAlles/1"))["metriken"]["externe_aufrufe"] == 4
+    # println (zweimal), listOf, map, holeStrich: extern
+    assert knoten(daten, f(WERKZEUG, "zeichneAlles/1"))["metriken"]["externe_aufrufe"] == 5
 
 
 def test_eigenschaftskette_und_enum(daten: dict[str, Any]) -> None:
@@ -241,6 +254,132 @@ def test_plausibilitaet(daten: dict[str, Any]) -> None:
     assert funktions_verstoesse(daten) == []
     # bediene: Strich kommt in Bedienung.kt nicht vor
     assert len(indirekte_ruft_kanten(daten)) == 1
+
+
+# ---------------------------------------------------------------- A07b: Accessoren
+
+
+def test_getter_ueber_this_parameter_und_kette(daten: dict[str, Any]) -> None:
+    getter = f(ZUGRIFFE, "Konto.<get-voll>/0")
+    selbst = ruft(daten, f(ZUGRIFFE, "Konto.pruefeSelbst/0"), getter)
+    # ``voll && this.voll``: zwei Lesestellen in einer Zeile, eine Kante mit Gewicht 2
+    assert selbst["sicher"] and selbst["gewicht"] == 2
+    assert selbst["beleg"] == [{"herkunft": "lesen", "sicher": True, "zeilen": [23, 23]}]
+    buche = ruft(daten, f(ZUGRIFFE, "buche/2"), getter)
+    # ``konto.voll`` (Parameter) und ``bank.konto.voll`` (Kette)
+    assert stellen(buche) == {(32, True, "lesen"), (36, True, "lesen")}
+
+
+def test_setter_bei_zuweisung_und_plus_gleich(daten: dict[str, Any]) -> None:
+    setter = f(ZUGRIFFE, "Konto.<set-stand>/1")
+    k = ruft(daten, f(ZUGRIFFE, "Konto.pruefeSelbst/0"), setter)
+    assert k["beleg"] == [{"herkunft": "schreiben", "sicher": True, "zeilen": [21, 22]}]
+    assert stellen(ruft(daten, f(ZUGRIFFE, "buche/2"), setter)) == {(33, True, "schreiben")}
+    assert knoten(daten, setter)["parameter"] == [None]
+    # der Setter ruft selbst weiter
+    assert ruft(daten, setter, f(ZUGRIFFE, "Konto.maximal/1"))["sicher"]
+
+
+def test_ohne_accessor_und_delegiert_keine_kante(daten: dict[str, Any]) -> None:
+    # ``konto.einfach``, ``konto.stand`` (nur Setter) und ``konto.faul`` (by lazy)
+    assert ziele(daten, f(ZUGRIFFE, "buche/2")) == {
+        f(ZUGRIFFE, "Konto.<get-voll>/0"),
+        f(ZUGRIFFE, "Konto.<set-stand>/1"),
+    }
+    datei = knoten(daten, f"datei:{ZUGRIFFE}")
+    konto = next(k for k in datei["klassen"] if k["name"] == "Konto")
+    assert konto["eigenschaften"] == [
+        {"delegiert": False, "name": "start", "zeile": 5},
+        {"delegiert": False, "name": "stand", "zeile": 6},
+        {"delegiert": False, "name": "voll", "zeile": 11},
+        {"delegiert": False, "name": "einfach", "zeile": 14},
+        {"delegiert": True, "name": "faul", "zeile": 16},
+    ]
+    assert datei["eigenschaften"] == [{"delegiert": False, "name": "GRENZE", "zeile": 27}]
+
+
+# ---------------------------------------------------------------- A07b: Typen durch Nachschlagen
+
+
+def test_typen_durch_nachschlagen(daten: dict[str, Any]) -> None:
+    male = ruft(daten, f(TYPEN, "typen/2"), f(TYPEN, "Pinsel.male/0"))
+    assert stellen(male) == {
+        # neuerPinsel().male(), neuerPinsel().naechster().male(), bauePinsel().male()
+        (25, True, "rueckgabe"),
+        (26, True, "rueckgabe"),
+        (27, True, "rueckgabe"),
+        # irgendein() = neuerPinsel(): Ausdrucksfunktion ohne Konstruktor
+        (28, False, "unbekannter-empfaenger"),
+        (29, True, "konstruktor-ergebnis"),
+        # val k = neuerPinsel(); val kopie = k
+        (31, True, "initialisierer"),
+        (33, True, "initialisierer"),
+        # as, as?
+        (34, True, "cast"),
+        (35, True, "cast"),
+        # listOf(k).first(): Rückgabetyp extern, unverändert unsicher
+        (37, False, "unbekannter-empfaenger"),
+    }
+    naechster = ruft(daten, f(TYPEN, "typen/2"), f(TYPEN, "Pinsel.naechster/0"))
+    assert stellen(naechster) == {(26, True, "rueckgabe")}
+    # ``atelier!!.benutze()``: ``!!`` ist durchsichtig
+    assert stellen(ruft(daten, f(TYPEN, "typen/2"), f(TYPEN, "Atelier.benutze/0"))) == {
+        (36, True, "parameter")
+    }
+    # Eigenschaft ``val pinsel = neuerPinsel()``
+    benutze = ruft(daten, f(TYPEN, "Atelier.benutze/0"), f(TYPEN, "Pinsel.male/0"))
+    assert stellen(benutze) == {(21, True, "initialisierer")}
+
+
+def test_ketten_ueber_unbekannte_ausdrucksfunktion_bleiben_unsicher(
+    daten: dict[str, Any],
+) -> None:
+    # ``fun irgendwas() = liefere()``: kein Konstruktor, also kein Typ
+    ketten = f(VIELE, "ketten/0")
+    assert stellen(ruft(daten, ketten, f(VIELE, "Eins.teil/0"))) == {
+        (25, False, "unbekannter-empfaenger")
+    }
+
+
+# ---------------------------------------------------------------- A07b: kleinere Ausgabe
+
+
+def test_keine_enthaelt_kante_zu_funktionen(daten: dict[str, Any]) -> None:
+    assert not [
+        k for k in daten["kanten"] if k["art"] == "enthaelt" and k["nach"].startswith("funktion:")
+    ]
+    # Funktionsknoten ohne leere Listen und ohne ``false``
+    for k in daten["knoten"]:
+        if k["art"] != "funktion":
+            continue
+        for feld in ("annotationen", "modifikatoren", "parameter"):
+            assert k.get(feld, [None]) != [], (k["id"], feld)
+        assert k.get("implizit", True) is True
+        for b in (b for x in daten["kanten"] if x["art"] == "ruft" for b in x["beleg"]):
+            assert b["zeilen"] == sorted(b["zeilen"])
+
+
+def test_leser_ohne_enthaelt_kante(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str], daten: dict[str, Any]
+) -> None:
+    """render, zusammenfassung, arbeitsblatt, pfad und aufrufe kommen ohne die Kante aus."""
+    ziel = tmp_path / "ziel"
+    ausgabe = ziel / "docs" / "daidalos"
+    ausgabe.mkdir(parents=True)
+    pfad = ausgabe / "daidalos.json"
+    pfad.write_text(json.dumps(daten), encoding="utf-8")
+    assert main(["render", str(ziel)]) == 0
+    assert (ausgabe / "karte.html").exists()
+    assert main(["zusammenfassung", str(ziel)]) == 0
+    assert "Funktionen:" in capsys.readouterr().out
+    assert main(["arbeitsblatt", ZUGRIFFE, str(ziel)]) == 0
+    blatt = capsys.readouterr().out
+    assert "Konto.<get-voll>/0" in blatt and "Konto.<set-stand>/1" in blatt
+    assert main(["pfad", "buche", "Konto.maximal", "--daten", str(pfad)]) == 0
+    weg = capsys.readouterr().out
+    assert "Konto.<set-stand>/1" in weg and "Zugriffe.kt:33  schreiben" in weg
+    assert main(["aufrufe", "Konto.maximal", "--rueckwaerts", "--daten", str(pfad)]) == 0
+    assert "← Konto.<set-stand>/1" in capsys.readouterr().out
 
 
 def test_zwei_laeufe_byte_gleich(tmp_path: Path) -> None:

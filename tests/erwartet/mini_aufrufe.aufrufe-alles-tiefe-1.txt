@@ -3,11 +3,11 @@ zeichneAlles/1  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt:23
   → Strich.zeichne/1  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt:37  (Aufruf Werkzeug.kt:24)
     … Tiefe erreicht, 5 Funktionen nicht gezeigt
   → Zaehler.erhoehe/0  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt:14  (Aufruf Werkzeug.kt:25)
-  → fakultaet/1  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt:37  (Aufruf Werkzeug.kt:30)
+  → fakultaet/1  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt:38  (Aufruf Werkzeug.kt:30)
     … Tiefe erreicht, 1 Funktion nicht gezeigt
-  → liefereStrich/0  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt:39  (Aufruf Werkzeug.kt:34)
+  → liefereStrich/0  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt:40  (Aufruf Werkzeug.kt:34)
     … Tiefe erreicht, 1 Funktion nicht gezeigt
   → wiederhole/2  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt:17  (Aufruf Werkzeug.kt:24)
-  → [Strich]laenge/0  kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt:11  (Aufruf Werkzeug.kt:33)
+  → [Strich]laenge/0  kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt:11  (Aufruf Werkzeug.kt:33, 34)
   → halbiere/1  kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt:9  (Aufruf Werkzeug.kt:32)
   → verdopple/1  kern/src/commonMain/kotlin/de/beispiel/aufrufe/hilfe/Hilfen.kt:7  (Aufruf Werkzeug.kt:27)
