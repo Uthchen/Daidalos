@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import hashlib
 from collections import Counter, defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any
 
 from daidalos.adapter.jni import CFunktion
@@ -19,9 +19,11 @@ from daidalos.adapter.kotlin_funktionen import (
     Empfaenger,
     FunktionenDatei,
     FunktionRoh,
+    Herleitung,
     KlasseRoh,
     Parameter,
     Rahmen,
+    Zugriff,
     typ_basis,
 )
 
@@ -148,6 +150,9 @@ class Typ:
     basis: str | None = None  # bei extern: Name wie geschrieben
     objekt: bool = False  # Empfänger ist der Klassenname selbst (Objekt, Companion)
     voll: str | None = None  # bei extern über Import: voller Name
+    # woher der letzte Schritt seinen Typ hat, wenn nicht aus einer Typangabe:
+    # ``rueckgabe``, ``konstruktor-ergebnis``, ``initialisierer`` oder ``cast``
+    ueber: str | None = None
 
 
 def _ist_test_quellsatz(quellsatz: str | None) -> bool:
@@ -206,6 +211,14 @@ class Aufrufgraph:
         self.typaliase: set[str] = set()
         self.pakete: set[str] = set()
         self.je_datei: dict[str, list[FInfo]] = defaultdict(list)
+        # Namen der Eigenschaften mit eigenem ``get()`` bzw. ``set()``
+        self.accessoren: dict[str, set[str]] = {"get": set(), "set": set()}
+        # Zwischenergebnisse je Aufruf bzw. Herleitung (Schlüssel: ``id``)
+        self._loesungen: dict[int, Ergebnis] = {}
+        self._ergebnis_typen: dict[int, Typ] = {}
+        self._herleitung_typen: dict[int, Typ] = {}
+        self._in_arbeit: set[int] = set()
+        self._kontexte: dict[tuple[str, str], FInfo] = {}
         self._baue_index()
 
     # ------------------------------------------------------------ Index
@@ -239,6 +252,10 @@ class Aufrufgraph:
                 )
                 if f.name == "<init>" and f.zeile_von != self._klassenzeile(q, f.behaelter):
                     sekundaer.add(f.behaelter)
+                if f.nur_zugriffe:
+                    info_f.benutzt = False  # erst bei einem Aufruf oder einer eigenen Kante
+                if f.name.startswith(("<get-", "<set-")):
+                    self.accessoren[f.name[1:4]].add(f.name[5:-1])
                 self._nimm_funktion(info_f)
             # implizite primäre Konstruktoren (erst bei Bedarf ausgegeben)
             for k in q.inhalt.klassen:
@@ -550,9 +567,16 @@ class Aufrufgraph:
                 if f.name == name and f.erweiterung is not None and not f.behaelter
             ]
         )
+        # Accessoren einer Erweiterungseigenschaft heißen ``<get-x>``, importiert wird ``x``
+        accessor = name[1:4] if name.startswith(("<get-", "<set-")) else None
+        kurzname = name[5:-1] if accessor else name
         for imp in q.importe:
-            if not imp.stern and imp.sichtbarer_name == name:
-                nimm([f for f in self.je_voll.get(imp.name, []) if f.erweiterung is not None])
+            if not imp.stern and imp.sichtbarer_name == kurzname:
+                voll = imp.name
+                if accessor:
+                    paket, _, kurz = imp.name.rpartition(".")
+                    voll = f"{paket}.<{accessor}-{kurz}>" if paket else f"<{accessor}-{kurz}>"
+                nimm([f for f in self.je_voll.get(voll, []) if f.erweiterung is not None])
         nimm(self.erweiterungen_paket.get((q.container, q.paket), {}).get(name, []))
         for imp in q.importe:
             if imp.stern and imp.name in self.pakete:
@@ -683,11 +707,20 @@ class Aufrufgraph:
         """Typ des Empfängers einer Kette; ``objekt`` bei Klassen- oder Objektnamen."""
         if e.art == "this":
             return self._this_typ(e.name, q, f, rahmen or self._rahmen_von(f))
-        if e.art != "kette" or e.name is None:
-            return Typ(_UNBEKANNT)
         typ: Typ
-        if e.herkunft in {"lokal", "parameter"}:
-            typ = self.loese_typ(e.typ, q, f.behaelter) if e.typ else Typ(_UNBEKANNT)
+        if e.art == "ergebnis" and e.aufruf is not None:
+            typ = self._ergebnis_typ(e.aufruf, f)
+        elif e.art == "cast" and e.typ is not None:
+            typ = replace(self.loese_typ(e.typ, q, f.behaelter), ueber="cast")
+        elif e.art != "kette" or e.name is None:
+            return Typ(_UNBEKANNT)
+        elif e.herkunft in {"lokal", "parameter"}:
+            if e.typ:
+                typ = self.loese_typ(e.typ, q, f.behaelter)
+            elif e.quelle is not None:
+                typ = self._herleitung_typ(e.quelle, q, f.behaelter)
+            else:
+                typ = Typ(_UNBEKANNT)
         elif e.herkunft == "this":
             klasse = self._innerste_klasse(rahmen or self._rahmen_von(f), q)
             typ = self._eigenschafts_typ(klasse, e.name) if klasse else Typ(_UNBEKANNT)
@@ -714,10 +747,114 @@ class Aufrufgraph:
 
     def _eigenschafts_typ(self, klassen: list[KInfo], name: str) -> Typ:
         gefunden, typ, klasse = self.eigenschaft(klassen, name)
-        if not gefunden or typ is None or klasse is None:
+        if not gefunden or klasse is None:
             return Typ(_UNBEKANNT)
+        if typ is None:
+            herleitung = klasse.roh.herleitungen.get(name)
+            if herleitung is None:
+                return Typ(_UNBEKANNT)
+            return self._herleitung_typ(herleitung, klasse.quelle, klasse.kette)
         umgebend = klasse.kette
         return self.loese_typ(typ, klasse.quelle, umgebend)
+
+    # ------------------------------------------------------------ Typen durch Nachschlagen
+
+    def _kontext(self, q: Quelle, behaelter: str) -> FInfo:
+        """Ein Platzhalter für Ausdrücke außerhalb einer Funktion (Initialisierer)."""
+        schluessel = (q.pfad, behaelter)
+        if schluessel not in self._kontexte:
+            self._kontexte[schluessel] = FInfo(
+                quelle=q,
+                behaelter=behaelter,
+                name="",
+                parameter=[],
+                erweiterung=None,
+                sichtbarkeit="private",
+                modifikatoren=[],
+                roh=None,
+            )
+        return self._kontexte[schluessel]
+
+    def _herleitung_typ(self, h: Herleitung, q: Quelle, behaelter: str) -> Typ:
+        """Typ der rechten Seite eines Initialisierers ohne Typangabe."""
+        schluessel = id(h)
+        if schluessel not in self._herleitung_typen:
+            if schluessel in self._in_arbeit:
+                return Typ(_UNBEKANNT)
+            self._in_arbeit.add(schluessel)
+            typ = self._empfaenger_typ(h.empfaenger, q, self._kontext(q, behaelter), h.rahmen)
+            self._in_arbeit.discard(schluessel)
+            if typ.art in {"intern", _EXTERN}:
+                typ = replace(typ, ueber="initialisierer")
+            else:
+                typ = Typ(_UNBEKANNT)
+            self._herleitung_typen[schluessel] = typ
+        return replace(self._herleitung_typen[schluessel])
+
+    def _loesung(self, a: Aufruf, f: FInfo) -> Ergebnis:
+        schluessel = id(a)
+        if schluessel not in self._loesungen:
+            self._loesungen[schluessel] = self.loese(a, f)
+        return self._loesungen[schluessel]
+
+    def _ergebnis_typ(self, a: Aufruf, f: FInfo) -> Typ:
+        """Typ des Ergebnisses eines Aufrufs: Konstruktor oder erklärter Rückgabetyp."""
+        schluessel = id(a)
+        if schluessel not in self._ergebnis_typen:
+            if schluessel in self._in_arbeit:
+                return Typ(_UNBEKANNT)
+            self._in_arbeit.add(schluessel)
+            typ = self._berechne_ergebnis_typ(a, f)
+            self._in_arbeit.discard(schluessel)
+            self._ergebnis_typen[schluessel] = typ
+        return replace(self._ergebnis_typen[schluessel])
+
+    def _berechne_ergebnis_typ(self, a: Aufruf, f: FInfo) -> Typ:
+        q = f.quelle
+        assert isinstance(q, Quelle)
+        if a.referenz:
+            return Typ(_UNBEKANNT)
+        ergebnis = self._loesung(a, f)
+        if ergebnis.art == "intern" and ergebnis.treffer:
+            ziele = [t.ziel for t in ergebnis.treffer]
+            if all(z.name == "<init>" for z in ziele):
+                # Die Klasse steht fest, auch wenn die Überladung des Konstruktors offen ist.
+                klassen = {(z.quelle.pfad, z.behaelter) for z in ziele}
+                sicher = all(t.sicher or t.grund == "ueberladung" for t in ergebnis.treffer)
+                info = self.klassen_je_datei.get(next(iter(klassen)))
+                if len(klassen) == 1 and sicher and info is not None:
+                    return Typ("intern", klassen=[info], ueber="konstruktor-ergebnis")
+                return Typ(_UNBEKANNT)
+            if len(ziele) != 1 or not ergebnis.treffer[0].sicher:
+                return Typ(_UNBEKANNT)
+            ziel = ziele[0]
+            roh = ziel.roh
+            if roh is None or not isinstance(ziel.quelle, Quelle):
+                return Typ(_UNBEKANNT)
+            if roh.rueckgabe is not None:
+                typ = self.loese_typ(roh.rueckgabe, ziel.quelle, ziel.behaelter)
+            elif roh.rueckgabe_aufruf is not None:
+                # Ausdrucksfunktion ohne Rückgabetyp: nur, wenn der Ausdruck ein Konstruktor ist
+                typ = self._ergebnis_typ(roh.rueckgabe_aufruf, ziel)
+                if typ.ueber != "konstruktor-ergebnis":
+                    return Typ(_UNBEKANNT)
+            else:
+                return Typ(_UNBEKANNT)
+            if typ.art not in {"intern", _EXTERN}:
+                return Typ(_UNBEKANNT)
+            return replace(typ, objekt=False, ueber="rueckgabe")
+        if (
+            ergebnis.art == "extern"
+            and a.empfaenger.art == "ohne"
+            and a.name[:1].isupper()
+            and not a.lokal
+            and not a.wert
+        ):
+            # externer Konstruktor (wie ``val x = Klasse()`` in A07)
+            typ = self.loese_typ(a.name, q, f.behaelter)
+            if typ.art == _EXTERN:
+                return replace(typ, ueber="konstruktor-ergebnis")
+        return Typ(_UNBEKANNT)
 
     def _this_typ(self, label: str | None, q: Quelle, f: FInfo, rahmen: tuple[Rahmen, ...]) -> Typ:
         for r in rahmen:
@@ -752,19 +889,18 @@ class Aufrufgraph:
                 return Typ(_UNBEKANNT)
         # Eigenschaften der obersten Ebene
         if name in q.inhalt.eigenschaften:
-            return self._oberste_eigenschaft(q, q.inhalt.eigenschaften[name])
+            return self._oberste_eigenschaft(q, name)
         for imp in q.importe:
             if not imp.stern and imp.sichtbarer_name == name:
                 paket, _, kurz = imp.name.rpartition(".")
                 for (_, p), werte in self.eigenschaften_paket.items():
                     if p == paket and kurz in werte:
-                        quelle, typ_text = werte[kurz]
+                        quelle = werte[kurz][0]
                         if self.sichtbar(q, quelle):
-                            return self._oberste_eigenschaft(quelle, typ_text)
+                            return self._oberste_eigenschaft(quelle, kurz)
         eigene = self.eigenschaften_paket.get((q.container, q.paket), {})
         if name in eigene and self.sichtbar(q, eigene[name][0]):
-            quelle, typ_text = eigene[name]
-            return self._oberste_eigenschaft(quelle, typ_text)
+            return self._oberste_eigenschaft(eigene[name][0], name)
         # Klassen- oder Objektname
         typ = self.loese_typ(name, q, f.behaelter)
         if typ.art == "intern":
@@ -777,9 +913,13 @@ class Aufrufgraph:
             return typ  # extern, z. B. ``Math`` oder ``Log``
         return Typ(_UNBEKANNT)
 
-    def _oberste_eigenschaft(self, quelle: Quelle, typ_text: str | None) -> Typ:
+    def _oberste_eigenschaft(self, quelle: Quelle, name: str) -> Typ:
+        typ_text = quelle.inhalt.eigenschaften.get(name)
         if typ_text is None:
-            return Typ(_UNBEKANNT)
+            herleitung = quelle.inhalt.herleitungen.get(name)
+            if herleitung is None:
+                return Typ(_UNBEKANNT)
+            return self._herleitung_typ(herleitung, quelle, "")
         return self.loese_typ(typ_text, quelle, "")
 
     def _weiter(self, typ: Typ, teil: str, q: Quelle) -> Typ:
@@ -847,6 +987,8 @@ class Aufrufgraph:
         elif e.art == "kette" and e.herkunft == "frei" and e.name is not None:
             erster = typ if not e.rest else self._freier_name(e.name, q, f, a.rahmen)
             herkunft = "objekt" if erster.objekt or erster.art == "paket" else "eigenschaft"
+        if typ.ueber is not None:
+            herkunft = typ.ueber  # Herkunft des letzten Schritts
         return self._auf_typ(typ, a, q, herkunft)
 
     def _auf_typ(self, typ: Typ, a: Aufruf, q: Quelle, herkunft: str) -> Ergebnis:
@@ -1030,10 +1172,153 @@ class Aufrufgraph:
             return ergebnis
         return Ergebnis(art="extern")
 
+    # ------------------------------------------------------------ Zugriffe auf Eigenschaften
+
+    def loese_zugriff(self, z: Zugriff, f: FInfo) -> Ergebnis | None:
+        """Lesen oder Schreiben einer Eigenschaft mit eigenem Accessor; ``None``: keine Kante.
+
+        Die Empfänger folgen denselben Regeln wie bei Aufrufen. Eigenschaften ohne eigenen
+        Accessor (auch delegierte) ergeben keine Kante; unaufgelöst wird nichts gezählt.
+        """
+        art = "set" if z.schreiben else "get"
+        if z.name not in self.accessoren[art]:
+            return None
+        q = f.quelle
+        assert isinstance(q, Quelle)
+        acc = f"<{art}-{z.name}>"
+        herkunft = "schreiben" if z.schreiben else "lesen"
+        e = z.empfaenger
+        if e.art == "ohne":
+            ergebnis = self._zugriff_ohne(z, acc, q, f)
+        elif e.art == "unbekannt":
+            ergebnis = self._zugriff_unbekannt(q, acc)
+        elif e.art == "super":
+            klasse = self._innerste_klasse(z.rahmen, q)
+            obertypen = self.obertypen(klasse[0]) if klasse else []
+            ergebnis = (
+                self._zugriff_typ(Typ("intern", klassen=obertypen), z.name, acc, q)
+                if obertypen
+                else None
+            )
+        else:
+            typ = self._empfaenger_typ(e, q, f, z.rahmen)
+            ergebnis = self._zugriff_typ(typ, z.name, acc, q)
+        if ergebnis is None or not ergebnis.treffer:
+            return None
+        return Ergebnis([replace(t, herkunft=herkunft) for t in ergebnis.treffer])
+
+    def _accessor(self, klasse: KInfo, acc: str, q: Quelle) -> list[FInfo]:
+        return [
+            x
+            for x in klasse.funktionen.get(acc, [])
+            if x.erweiterung is None and self._f_sichtbar(q, x)
+        ]
+
+    def _zugriff_unbekannt(self, q: Quelle, acc: str) -> Ergebnis | None:
+        ergebnis = self._unbekannt(q, acc, None, False)
+        return ergebnis if ergebnis.art == "intern" else None
+
+    def _zugriff_typ(self, typ: Typ, name: str, acc: str, q: Quelle) -> Ergebnis | None:
+        if typ.art == _UNBEKANNT or typ.art == "paket":
+            return self._zugriff_unbekannt(q, acc)
+        if typ.art == _EXTERN:
+            return self._erweiterung(q, acc, None, typ)
+        ziele = typ.klassen
+        if typ.objekt:
+            ziele = []
+            for k in typ.klassen:
+                if k.roh.art in {"objekt", "companion", "enum-eintrag"}:
+                    ziele.append(k)
+                elif (c := self.companion(k)) is not None:
+                    ziele.append(c)
+        if not ziele:
+            return None
+        zwang = "unbekannter-empfaenger" if len(ziele) > 1 else None
+        gefunden, _, besitzer = self.eigenschaft(ziele, name)
+        if gefunden and besitzer is not None:
+            return self._entscheide(self._accessor(besitzer, acc, q), None, "lesen", zwang)
+        return self._erweiterung(q, acc, None, Typ("intern", klassen=ziele))
+
+    def _zugriff_ohne(self, z: Zugriff, acc: str, q: Quelle, f: FInfo) -> Ergebnis | None:
+        name = z.name
+        offen = False
+        unbekannt = False
+        for r in z.rahmen:
+            if r.art == "lambda":
+                mit = self._lambda_mit_empfaenger(r.wert)
+                if mit is None:
+                    offen = True
+                elif mit:
+                    unbekannt = True
+                continue
+            typ = self._rahmen_typ(r, q, f)
+            if typ is None:
+                continue
+            if typ.art == _UNBEKANNT:
+                unbekannt = True
+                continue
+            if typ.art == _EXTERN:
+                offen = True
+                continue
+            zwang = "unbekannter-empfaenger" if unbekannt else None
+            stufen = [typ.klassen]
+            if r.art == "klasse" and typ.klassen and (c := self.companion(typ.klassen[0])):
+                stufen.append([c])
+            for klassen in stufen:
+                gefunden, _, besitzer = self.eigenschaft(klassen, name)
+                if gefunden and besitzer is not None:
+                    return self._entscheide(self._accessor(besitzer, acc, q), None, "lesen", zwang)
+            erweiterung = self._erweiterung(q, acc, None, typ)
+            if erweiterung is not None and any(t.sicher for t in erweiterung.treffer):
+                if zwang is None:
+                    return erweiterung
+                return Ergebnis(
+                    [replace(t, sicher=False, grund=zwang) for t in erweiterung.treffer]
+                )
+            if self.ist_offen(typ.klassen):
+                offen = True
+        zwang = (
+            "unbekannter-empfaenger"
+            if unbekannt
+            else ("kleingeschrieben" if offen and name[:1].islower() else None)
+        )
+
+        def oberste(liste: list[FInfo]) -> list[FInfo]:
+            return [
+                x
+                for x in liste
+                if not x.behaelter and x.erweiterung is None and self._f_sichtbar(q, x)
+            ]
+
+        # dieselbe Datei
+        if name in q.inhalt.eigenschaften:
+            kandidaten = oberste([x for x in self.je_datei.get(q.pfad, []) if x.name == acc])
+            return self._entscheide(kandidaten, None, "lesen", zwang)
+        # Importe
+        for imp in q.importe:
+            if imp.stern or imp.sichtbarer_name != name:
+                continue
+            paket, _, kurz = imp.name.rpartition(".")
+            voll = f"{paket}.<{acc[1:4]}-{kurz}>" if paket else f"<{acc[1:4]}-{kurz}>"
+            return self._entscheide(oberste(self.je_voll.get(voll, [])), None, "lesen", zwang)
+        # gleiches Paket im selben Modul
+        eigene = self.eigenschaften_paket.get((q.container, q.paket), {})
+        if name in eigene and self.sichtbar(q, eigene[name][0]):
+            kandidaten = oberste(self.oberste.get((q.container, q.paket), {}).get(acc, []))
+            return self._entscheide(kandidaten, None, "lesen", zwang)
+        # Stern-Importe
+        for imp in q.importe:
+            if imp.stern and imp.name in self.pakete:
+                kandidaten = oberste(self.oberste_paket.get(imp.name, {}).get(acc, []))
+                ergebnis = self._entscheide(kandidaten, None, "lesen", zwang)
+                if ergebnis is not None:
+                    return ergebnis
+        return None
+
     # ------------------------------------------------------------ Ausgabe
 
     def baue(self) -> AufrufErgebnis:
-        kanten_belege: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
+        kanten_belege: dict[tuple[str, str], list[Beleg]] = defaultdict(list)
         extern: Counter[str] = Counter()
         unaufgeloest: dict[str, Counter[tuple[str, str]]] = defaultdict(Counter)
         statistik: Counter[str] = Counter()
@@ -1042,18 +1327,13 @@ class Aufrufgraph:
             if f.roh is None or not isinstance(f.quelle, Quelle):
                 continue
             for a in f.roh.aufrufe:
-                ergebnis = self.loese(a, f)
+                ergebnis = self._loesung(a, f)
                 if ergebnis.art == "intern" and ergebnis.treffer:
                     for t in ergebnis.treffer:
                         t.ziel.benutzt = True
-                        beleg: dict[str, Any] = {
-                            "herkunft": t.herkunft,
-                            "sicher": t.sicher,
-                            "zeile": a.zeile,
-                        }
-                        if t.grund is not None:
-                            beleg["grund"] = t.grund
-                        kanten_belege[(f.id, t.ziel.id)].append(beleg)
+                        kanten_belege[(f.id, t.ziel.id)].append(
+                            (t.herkunft, t.sicher, t.grund, a.zeile)
+                        )
                     sicher = any(t.sicher for t in ergebnis.treffer)
                     statistik["intern-sicher" if sicher else "intern-unsicher"] += 1
                     if not sicher:
@@ -1067,14 +1347,32 @@ class Aufrufgraph:
                 else:
                     extern[f.id] += 1
                     statistik["extern"] += 1
+            for z in f.roh.zugriffe:
+                treffer = self.loese_zugriff(z, f)
+                if treffer is None:
+                    continue
+                art = "schreiben" if z.schreiben else "lesen"
+                for t in treffer.treffer:
+                    t.ziel.benutzt = True
+                    beleg = (t.herkunft, t.sicher, t.grund, z.zeile)
+                    kanten_belege[(f.id, t.ziel.id)].append(beleg)
+                sicher = any(t.sicher for t in treffer.treffer)
+                statistik[f"{art}-{'sicher' if sicher else 'unsicher'}"] += 1
+        # Konstruktoren mit nur Zugriffen: sichtbar, sobald sie eine Kante haben
+        for von, _ in kanten_belege:
+            nach_id[von].benutzt = True
         return AufrufErgebnis(self, nach_id, kanten_belege, extern, unaufgeloest, statistik)
+
+
+# (Herkunft, sicher, Grund, Zeile) einer Aufruf- oder Zugriffsstelle
+Beleg = tuple[str, bool, str | None, int]
 
 
 @dataclass
 class AufrufErgebnis:
     graph: Aufrufgraph
     nach_id: dict[str, FInfo]
-    kanten_belege: dict[tuple[str, str], list[dict[str, Any]]]
+    kanten_belege: dict[tuple[str, str], list[Beleg]]
     extern: Counter[str]
     unaufgeloest: dict[str, Counter[tuple[str, str]]]
     statistik: Counter[str]
@@ -1130,8 +1428,28 @@ def _obertyp_json(graph: Aufrufgraph, k: KInfo, ober: str) -> dict[str, Any]:
     return {"name": ober, "voll": voll}
 
 
-def _parameter_json(p: Parameter) -> dict[str, Any]:
-    return {"name": p.name, "typ": p.typ, "vararg": p.vararg, "vorgabe": p.vorgabe}
+def _belege_json(belege: list[Beleg]) -> list[dict[str, Any]]:
+    """Je (Herkunft, sicher, Grund) ein Eintrag mit sortierten Zeilen, nach erster Zeile."""
+    gruppen: dict[tuple[str, bool, str | None], list[int]] = defaultdict(list)
+    for herkunft, sicher, grund, zeile in belege:
+        gruppen[(herkunft, sicher, grund)].append(zeile)
+    ergebnis = []
+    for (herkunft, sicher, grund), zeilen in gruppen.items():
+        eintrag: dict[str, Any] = {"herkunft": herkunft, "sicher": sicher, "zeilen": sorted(zeilen)}
+        if grund is not None:
+            eintrag["grund"] = grund
+        ergebnis.append(eintrag)
+    ergebnis.sort(
+        key=lambda b: (b["zeilen"][0], b["herkunft"], not b["sicher"], b.get("grund", ""))
+    )
+    return ergebnis
+
+
+def _eigenschaften_json(liste: list[Any]) -> list[dict[str, Any]]:
+    return [
+        {"delegiert": e.delegiert, "name": e.name, "zeile": e.zeile}
+        for e in sorted(liste, key=lambda e: (e.zeile, e.name))
+    ]
 
 
 def _hash_text(text: str) -> str:
@@ -1171,12 +1489,11 @@ def miss(
     for (von, nach), belege in sorted(ergebnis.kanten_belege.items()):
         quelle = ergebnis.nach_id[von].quelle
         rolle = quelle.rolle
-        belege.sort(key=lambda b: (b["zeile"], b["herkunft"], not b["sicher"], b.get("grund", "")))
-        sicher = any(b["sicher"] for b in belege)
+        sicher = any(b[1] for b in belege)
         kanten.append(
             {
                 "art": "ruft",
-                "beleg": belege,
+                "beleg": _belege_json(belege),
                 "gewicht": len(belege),
                 "id": _kanten_id("ruft", von, nach, rolle),
                 "nach": nach,
@@ -1243,20 +1560,31 @@ def miss(
             "datei": q.pfad,
             "erweiterung": f.erweiterung,
             "id": f.id,
-            "modifikatoren": f.modifikatoren,
             "name": f.name,
-            "parameter": [_parameter_json(p) for p in f.parameter],
             "rolle": q.rolle,
             "sichtbarkeit": f.sichtbarkeit,
             "stelligkeit": f.stelligkeit,
             "zeile_bis": f.zeile_bis,
             "zeile_von": f.zeile_von,
         }
+        # leere Listen und ``false`` entfallen (Standardwerte in docs/datenformat.md)
+        if f.modifikatoren:
+            k["modifikatoren"] = f.modifikatoren
+        if f.parameter:
+            k["parameter"] = [p.typ for p in f.parameter]
+        vorgabe = [i for i, p in enumerate(f.parameter) if p.vorgabe]
+        if vorgabe:
+            k["parameter_vorgabe"] = vorgabe
+        vararg = [i for i, p in enumerate(f.parameter) if p.vararg]
+        if vararg:
+            k["parameter_vararg"] = vararg
         if q.quellsatz is not None:
             k["quellsatz"] = q.quellsatz
         if isinstance(q, Quelle):
             k["sprache"] = "kotlin"
-            k["annotationen"] = _annotationen(graph, q, f.roh.annotationen if f.roh else [])
+            annotationen = _annotationen(graph, q, f.roh.annotationen if f.roh else [])
+            if annotationen:
+                k["annotationen"] = annotationen
             if f.roh is not None:
                 k["hash"] = f.roh.hash
                 metriken["zeilen"] = f.roh.zeilen
@@ -1268,7 +1596,6 @@ def miss(
                 k["implizit"] = True
         else:
             k["sprache"] = "c"
-            k["annotationen"] = []
             c = next(x for x in q.funktionen if x.name == f.name)
             k["hash"] = _hash_text(c.text)
             metriken["zeilen"] = len(
@@ -1277,15 +1604,7 @@ def miss(
             metriken["komplexitaet"] = None
         k["metriken"] = metriken
         knoten.append(k)
-        datei_id = datei_ids[q.pfad]
-        kanten.append(
-            {
-                "art": "enthaelt",
-                "id": _kanten_id("enthaelt", datei_id, f.id),
-                "nach": f.id,
-                "von": datei_id,
-            }
-        )
+        # Die Datei steht in ``datei``; eine ``enthaelt``-Kante Datei → Funktion gibt es nicht.
         felder = datei_felder[q.pfad]
         felder["funktionen"] = felder.get("funktionen", 0) + 1
 
@@ -1294,6 +1613,7 @@ def miss(
         felder = datei_felder[q.pfad]
         felder.setdefault("funktionen", 0)
         felder["annotationen"] = _annotationen(graph, q, q.inhalt.datei_annotationen)
+        felder["eigenschaften"] = _eigenschaften_json(q.inhalt.eigenschaften_liste)
         klassen = []
         for kr in q.inhalt.klassen:
             info = graph.klassen_je_datei[(q.pfad, kr.name)]
@@ -1301,6 +1621,7 @@ def miss(
                 {
                     "annotationen": _annotationen(graph, q, kr.annotationen),
                     "art": kr.art,
+                    "eigenschaften": _eigenschaften_json(kr.liste),
                     "name": kr.name,
                     "obertypen": [_obertyp_json(graph, info, o) for o in kr.obertypen],
                     "zeile": kr.zeile,
