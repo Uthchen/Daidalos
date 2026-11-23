@@ -127,7 +127,7 @@ def test_deutung_veraltet_und_tote_verweise() -> None:
     assert beschreibungen["modul::anwendung"]["veraltet"] is True
     assert "modul::gibt-es-nicht" not in beschreibungen
     assert deutung["bereiche"][0]["knoten"] == ["modul::kern", "modul::kern-labor"]
-    assert [e["prioritaet"] for e in deutung["einschaetzungen"]] == [1]
+    assert [e["prioritaet"] for e in deutung["einschaetzungen"]] == [1, None]
     assert len(deutung["kanten"]) == 1
     assert len(warnungen) == 4
     assert any("modul::gibt-es-nicht" in w for w in warnungen)
@@ -234,3 +234,12 @@ def test_wurzel_relativ(tmp_path: Path) -> None:
     assert wurzel_relativ(tmp_path, tmp_path / "docs" / "daidalos") == "../.."
     assert wurzel_relativ(tmp_path, tmp_path) == "."
     assert wurzel_relativ(tmp_path / "a", tmp_path / "b") is None
+
+
+def test_karte_md_nachrangig_ohne_zahl(tmp_path: Path) -> None:
+    text = (rendere("mini_modulgraph", tmp_path) / "KARTE.md").read_text(encoding="utf-8")
+    zeilen = text.splitlines()
+    nachrangig = [z for z in zeilen if "Fehlende Brücke der Insel" in z]
+    assert len(nachrangig) == 1
+    assert nachrangig[0].startswith("- <sub>nachrangig</sub> **Fehlende Brücke der Insel**")
+    assert any(z.startswith("1. **Ring im Kern auflösen**") for z in zeilen)

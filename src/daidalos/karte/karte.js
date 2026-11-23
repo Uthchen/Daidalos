@@ -699,7 +699,13 @@
     const titel = e ? e.titel : befundTitel(b);
     const unter = e ? (e.vorschlag || e.begruendung) : '';
     const aktuell = zustand.auswahl && zustand.auswahl.art === 'befund' && zustand.auswahl.id === b.id;
-    return `<li><button type="button" data-befund="${esc(b.id)}"${aktuell ? ' aria-current="true"' : ''}><span class="prio ${farbe(b)}">${esc(nr)}</span><span class="bt">${esc(titel)}</span><span class="bm">${esc(befundBeleg(b))}</span>${unter ? `<span class="bd">${esc(unter)}</span>` : '<span></span>'}</button></li>`;
+    // Einschätzung ohne Priorität: gedämpftes Zeichen „nachrangig“ statt einer Zahl.
+    const nachrangig = e && e.prioritaet == null;
+    const prio = nr === null
+      ? '<span class="prio nachrangig" aria-hidden="true"></span>'
+      : `<span class="prio ${farbe(b)}">${esc(nr)}</span>`;
+    const marke = nachrangig ? ' <span class="nachrangig-marke">nachrangig</span>' : '';
+    return `<li><button type="button" data-befund="${esc(b.id)}"${aktuell ? ' aria-current="true"' : ''}>${prio}<span class="bt">${esc(titel)}${marke}</span><span class="bm">${esc(befundBeleg(b))}</span>${unter ? `<span class="bd">${esc(unter)}</span>` : '<span></span>'}</button></li>`;
   }
 
   function sortierteBefunde() {
@@ -719,7 +725,7 @@
     M.befunde.forEach(b => { if (b.regel === 'zyklus') zyklen[b.beleg.ebene]++; });
     let html = `<div><h2>Überblick</h2><p class="leer">Klick auf einen Befund hebt ihn hervor, Klick auf einen Knoten oder eine Verbindung zeigt Details. Doppelklick wechselt in die nächste Ebene${gross ? ' bzw. klappt auf der Dateiebene ein Modul aus oder ein' : ''}. Schlösser oben rechts an jedem Kasten geben ihn zum Verschieben frei.</p></div>`;
     if (mitDeutung.length) {
-      html += `<div><h3 class="quelle-d">Befunde, gewichtet <em>gedeutet · deutung.json</em></h3><ol class="befunde">${mitDeutung.map(b => befundKnopf(b, einschaetzung.get(b.id).prioritaet ?? '·')).join('')}</ol></div>`;
+      html += `<div><h3 class="quelle-d">Befunde, gewichtet <em>gedeutet · deutung.json</em></h3><ol class="befunde">${mitDeutung.map(b => befundKnopf(b, einschaetzung.get(b.id).prioritaet ?? null)).join('')}</ol></div>`;
     }
     html += `<div><h3 class="quelle-m">Befunde <em>gemessen · daidalos.json</em></h3>${rest.length ? `<ol class="befunde">${rest.map(b => befundKnopf(b, b.regel === 'zyklus' ? b.knoten.length : '!')).join('')}</ol>` : '<p class="leer">Keine Befunde.</p>'}</div>`;
     html += `<div><h3 class="quelle-m">Auf einen Blick <em>gemessen · daidalos.json</em></h3><table>
@@ -802,7 +808,7 @@
     const e = einschaetzung.get(b.id);
     let html = `<button type="button" class="zur" data-zurueck>← Übersicht</button><div><h2>${esc(e ? e.titel : befundTitel(b))}</h2><p class="pfad">${esc(b.id)}</p></div>`;
     if (e) {
-      html += `<div><h3 class="quelle-d">Einschätzung <em>gedeutet · deutung.json</em></h3><div class="deut">${e.prioritaet !== null ? `<p><b>Priorität ${esc(e.prioritaet)}</b></p>` : ''}${e.begruendung ? `<p>${esc(e.begruendung)}</p>` : ''}${e.vorschlag ? `<p style="margin-top:6px"><b>Vorschlag:</b> ${esc(e.vorschlag)}</p>` : ''}</div></div>`;
+      html += `<div><h3 class="quelle-d">Einschätzung <em>gedeutet · deutung.json</em></h3><div class="deut">${e.prioritaet != null ? `<p><b>Priorität ${esc(e.prioritaet)}</b></p>` : '<p><span class="nachrangig-marke">nachrangig</span></p>'}${e.begruendung ? `<p>${esc(e.begruendung)}</p>` : ''}${e.vorschlag ? `<p style="margin-top:6px"><b>Vorschlag:</b> ${esc(e.vorschlag)}</p>` : ''}</div></div>`;
     }
     const beleg = b.beleg;
     let mess = '';

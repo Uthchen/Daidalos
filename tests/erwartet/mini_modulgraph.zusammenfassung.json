@@ -1,7 +1,7 @@
 {
   "befunde": [
     {
-      "einschaetzung": false,
+      "einschaetzung": true,
       "id": "befund:jni-ohne-gegenstueck:nativ/src/main/kotlin/beispiel/nativ/Insel.kt:beispiel.nativ.Insel.fehlt",
       "kurz": "JNI ohne Gegenstück (kotlin): beispiel.nativ.Insel.fehlt"
     },
@@ -108,7 +108,6 @@
   ],
   "offen": {
     "befunde_ohne_einschaetzung": [
-      "befund:jni-ohne-gegenstueck:nativ/src/main/kotlin/beispiel/nativ/Insel.kt:beispiel.nativ.Insel.fehlt",
       "befund:unaufgeloest:kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt",
       "befund:zyklus:datei:produktiv:c55399e18586",
       "befund:zyklus:paket:produktiv:99e6584ba329"

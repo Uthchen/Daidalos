@@ -13,6 +13,10 @@ Texte schreibst du.
 Ziel ist das Argument, sonst das aktuelle Verzeichnis (Zielrepo). Alle Ausgaben liegen in
 `docs/daidalos/` des Zielrepos.
 
+> **Nur für die Entwicklung im Daidalos-Repo:** Nennt der Benutzer ein Ziel aus `lokal/ziele.toml`,
+> zuerst `uv run python werkzeuge/ziel_auffrischen.py NAME` laufen lassen und die Pfade aus dessen
+> letzter Zeile verwenden (Klon als Ziel, `--daten`, `--deutung`, `--ausgabe`, `--konfiguration`).
+
 ## Feste Regeln
 
 - **Keine Zahl erfinden.** Zahlen stammen aus Zusammenfassung, Arbeitsblatt oder `daidalos pfad`

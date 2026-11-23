@@ -410,7 +410,10 @@ Programm setzt nur Hashes ein, prüft und speichert.
 
 **Einschätzung ohne Priorität (seit A06):** Jeder Befund braucht eine Einschätzung, sonst gilt er
 als offen. 3 bis 10 Befunde bekommen eine `prioritaet`; die übrigen eine Einschätzung ohne
-`prioritaet` (nachrangig, `vorschlag` freiwillig). Die Karte zeigt sie nach den priorisierten.
+`prioritaet` (nachrangig, `vorschlag` freiwillig). Die Karte zeigt sie nach den priorisierten,
+seit A06b mit einem kleinen, gedämpften Zeichen „nachrangig“ statt einer Prioritätszahl (in
+Befundliste und Seitenleiste); `KARTE.md` führt sie als Aufzählung `- <sub>nachrangig</sub> …` nach
+der nummerierten Liste.
 
 ## Zusammenfassung (`daidalos zusammenfassung`, seit A06)
 

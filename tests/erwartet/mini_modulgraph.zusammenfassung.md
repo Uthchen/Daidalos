@@ -78,7 +78,7 @@ Auswahlregel: produktiv, nicht fremd und mindestens eines: unter den 30 mit dem 
 
 ## Befunde
 
-- `befund:jni-ohne-gegenstueck:nativ/src/main/kotlin/beispiel/nativ/Insel.kt:beispiel.nativ.Insel.fehlt`: JNI ohne Gegenstück (kotlin): beispiel.nativ.Insel.fehlt · ohne Einschätzung
+- `befund:jni-ohne-gegenstueck:nativ/src/main/kotlin/beispiel/nativ/Insel.kt:beispiel.nativ.Insel.fehlt`: JNI ohne Gegenstück (kotlin): beispiel.nativ.Insel.fehlt
 - `befund:unaufgeloest:kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt`: 1 unaufgelöste interne Importe · ohne Einschätzung
 - `befund:zyklus:datei:produktiv:c55399e18586`: Zyklus, Ebene datei, produktiv, 2 Knoten, Trennstelle `kante:nutzt:datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt->datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt:produktiv` (Gewicht 1) · ohne Einschätzung
 - `befund:zyklus:datei:produktiv:f45327fbce97`: Zyklus, Ebene datei, produktiv, 3 Knoten, Trennstelle `kante:nutzt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt:produktiv` (Gewicht 1)
@@ -112,8 +112,7 @@ Auswahlregel: produktiv, nicht fremd und mindestens eines: unter den 30 mit dem 
   - `paket:ordner:werkzeug/werkzeug`
 - Beschreibung veraltet (Hash weicht ab): 1
   - `modul::anwendung`
-- Befunde ohne Einschätzung: 4
-  - `befund:jni-ohne-gegenstueck:nativ/src/main/kotlin/beispiel/nativ/Insel.kt:beispiel.nativ.Insel.fehlt`
+- Befunde ohne Einschätzung: 3
   - `befund:unaufgeloest:kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt`
   - `befund:zyklus:datei:produktiv:c55399e18586`
   - `befund:zyklus:paket:produktiv:99e6584ba329`

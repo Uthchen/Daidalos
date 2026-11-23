@@ -70,6 +70,38 @@ oder ohne Sitzung `claude plugin marketplace add Uthchen/Daidalos` und
 erstellen“, „Codebase-Karte aktualisieren“, „was hängt woran“. Der Skill schreibt nur in
 `docs/daidalos/` und committet nicht.
 
+## Ein Repo in Bewegung kartieren
+
+Ändert sich ein Zielrepo laufend (parallele Entwicklung, Commits im Minutentakt), scannt man
+besser nicht dessen Arbeitsbaum: Halbfertiges würde mitgemessen, und die Deutung liefe einem
+wandernden Stand hinterher. Für die Entwicklung im Daidalos-Repo gibt es dafür
+`werkzeuge/ziel_auffrischen.py`. Es hält je Ziel einen eigenen Git-Klon unter `lokal/`, der genau
+einen Commit zeigt; am echten Repo ändert sich nichts.
+
+Die Ziele stehen in `lokal/ziele.toml` (beim ersten Lauf mit einem Beispiel angelegt):
+
+```toml
+[beispiel]
+quelle = "../MeinProjekt"                    # echtes Repo, wird nur gelesen
+klon = "lokal/ziele/beispiel/klon"           # muss unter lokal/ liegen
+ausgabe = "lokal/ziele/beispiel/daidalos"    # Messung, Deutung, Karte
+konfiguration = "lokal/ziele/beispiel/daidalos.toml"  # optional
+zweig = "main"                               # optional, sonst origin/HEAD des Klons
+```
+
+Auffrischen:
+
+```
+uv run python werkzeuge/ziel_auffrischen.py beispiel
+```
+
+Beim ersten Lauf entsteht der Klon (`git clone --no-hardlinks`), danach holt `git fetch` den neuen
+Stand und der Klon wird hart auf `origin/<zweig>` gesetzt (vorher wird geprüft, dass er unter
+`lokal/` liegt und `origin` die Quelle ist). Ist der Commit unverändert, endet das Werkzeug mit
+„Stand unverändert“ (`--erzwingen` scannt trotzdem). Sonst laufen `scan` und `render`; am Ende stehen
+Commit, Zahl der Dateien, Zahl der offenen Deutungen und die Zeile für den Skill. Der Skill deutet
+danach nur, was sich geändert hat. Exit-Code 0 ohne Offenes, 1 mit offenen Deutungen, 2 bei Fehlern.
+
 ## Dokumentation
 
 - [docs/architektur.md](docs/architektur.md): verbindliche Architektur
