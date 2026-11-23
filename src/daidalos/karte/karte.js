@@ -6,7 +6,8 @@
    1. Daten und Index      5. Stil                  9. Bedienung und Start
    2. Zustand              6. Hervorheben, Fokus    10. Sperren und Positionen
    3. Elemente je Ebene    7. Seitenleiste          11. Pfad-Suche
-   4. Zeichnen und Layout  8. Sprungadressen        12. Editor-Links */
+   4. Zeichnen und Layout  8. Sprungadressen        12. Editor-Links
+                                                    13. Funktionsebene (seit A09) */
 (function () {
   'use strict';
 
@@ -97,9 +98,21 @@
     zuletztModul: null,
     // Kantenführung: 'elk' (ELKs orthogonale Führung), 'taxi' oder 'bezier'; siehe Bericht A05.
     kantenfuehrung: 'elk',
-    auswahl: null              // { art: 'knoten' | 'befund' | 'kante' | 'pfad', … }
+    auswahl: null,             // { art: 'knoten' | 'befund' | 'kante' | 'pfad' | 'funktion' | 'fdatei' | 'grenze', … }
+    // Funktionsebene (A09): gezeigte Datei, Wegmodus, Schalter, aufgeklappte Nachbardateien
+    fDatei: null,
+    zuletztDatei: null,
+    weg: null,                 // { art: 'weg', start, richtung: 'vor' | 'rueck', tiefe } | { art: 'pfad', von, nach }
+    wegErgebnis: null,
+    fTiefe: 3,
+    fLesen: false,             // Lesezugriffe (lesen/schreiben) zeigen und folgen
+    fUnsicher: true,           // unsichere Kanten zeigen und folgen
+    fAuf: new Set(),           // einzeln aufgeklappte Nachbardateien
+    fZu: new Set(),
+    fKaesten: 0
   };
-  const ARTEN_JE_EBENE = { modul: ['gradle', 'nutzt'], paket: ['nutzt'], datei: ['nutzt', 'jni'] };
+  zustand.arten.funktion = {};
+  const ARTEN_JE_EBENE = { modul: ['gradle', 'nutzt'], paket: ['nutzt'], datei: ['nutzt', 'jni'], funktion: [] };
 
   function sichtbareDatei(d) { return !d.fremd && (zustand.mitTests || d.rolle !== 'test'); }
   function sichtbaresPaket(p) {
@@ -181,6 +194,7 @@
   }
 
   function elemente() {
+    if (zustand.ebene === 'funktion') return funktionsElemente();
     const els = [];
     const kanten = sammler();
     const art = zustand.arten[zustand.ebene];
@@ -305,6 +319,12 @@
   const ROUTEN_STIL = ['curve-style', 'edge-distances', 'source-endpoint', 'target-endpoint', 'segment-weights', 'segment-distances'];
 
   function layoutSchluessel() {
+    if (zustand.ebene === 'funktion') {
+      const w = zustand.weg;
+      const weg = !w ? '' : w.art === 'weg' ? [w.start, w.richtung, w.tiefe].join('~') : ['pfad', w.von, w.nach].join('~');
+      return ['funktion', zustand.fDatei, weg, zustand.fLesen ? 'l' : '', zustand.fUnsicher ? 'u' : '', zustand.mitTests ? 't' : 'p',
+        zustand.markierung ? 'm' : '', [...zustand.fAuf].sort().join(','), zustand.kantenfuehrung].join('|');
+    }
     const a = zustand.arten[zustand.ebene];
     return [zustand.ebene, zustand.mitTests ? 't' : 'p', a.gradle ? 'g' : '', a.nutzt ? 'n' : '', a.jni ? 'j' : '',
       zustand.ebene === 'modul' && zustand.plugins ? 'pl' : '', zustand.kantenfuehrung,
@@ -348,8 +368,13 @@
         if (nr !== lauf) return fertig(false);
         wendePositionenAn();
         sperren();
-        if (zustand.ebene === 'datei' && !zustand.auswahl) startAnsicht(); else einpassen(cy.elements(), 30);
+        fKlassen();
+        if (zustand.ebene === 'datei' && !zustand.auswahl) startAnsicht();
+        else if (zustand.ebene === 'funktion') fStartAnsicht();
+        else einpassen(cy.elements(), 30);
         if (!gespeichert) zeiten[schluessel] = Math.round(performance.now() - beginn);
+        // Startzeit: vom Beginn der Navigation bis zur ersten fertigen Ansicht (A09).
+        if (zeiten.bereit === undefined) zeiten.bereit = Math.round(performance.now());
         document.getElementById('lade').hidden = true;
         document.documentElement.dataset.zustand = 'bereit';
         fertig(true);
@@ -363,10 +388,13 @@
       }
       document.getElementById('lade').hidden = false;
       const elk = zustand.kantenfuehrung === 'elk';
-      const layout = cy.layout({
+      // Funktionsebene: Aufrufer links, Gerufene rechts; Kanten innerhalb einer Spalte des
+      // Wirkungswegs (ueberschreibt/actual) zählen nicht für das Layout.
+      const funktion = zustand.ebene === 'funktion';
+      const layout = cy.elements().not('.ohneLayout').layout({
         name: 'elk', fit: false, animate: false, nodeDimensionsIncludeLabels: false,
         useElkEdgeGeometry: elk,
-        elk: Object.assign({}, ELK, elk ? { 'elk.edgeRouting': 'ORTHOGONAL' } : {}),
+        elk: Object.assign({}, ELK, elk ? { 'elk.edgeRouting': 'ORTHOGONAL' } : {}, funktion ? { 'elk.direction': 'RIGHT' } : {}),
         nodeLayoutOptions: n => n.isParent() ? Object.assign({}, BEHAELTER_OPTIONEN) : undefined
       });
       layout.one('layoutstop', () => {
@@ -413,6 +441,10 @@
   const SCHLOSS_AUF = c => `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='3' y='7' width='10' height='8' rx='1.5' fill='${c}'/><path d='M5.2 7V4.6a2.8 2.8 0 0 1 5.5-.8' fill='none' stroke='${c}' stroke-width='1.6'/></svg>`;
   const SYMBOL_CODE = c => `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M5.5 4L1.5 8l4 4M10.5 4l4 4-4 4' fill='none' stroke='${c}' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>`;
   const SYMBOL_EDITOR = c => `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M9 2.5h4.5V7M13.5 2.5L7.5 8.5M12 9.5v3.5a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3.5' fill='none' stroke='${c}' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/></svg>`;
+  // Funktionsebene: Schild (markiert), Ausnahme, Punkt (detekt-Fund)
+  const SCHILD = c => `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M8 1.2l5.6 2.1v4.3c0 3.5-2.4 5.9-5.6 7.1-3.2-1.2-5.6-3.6-5.6-7.1V3.3z' fill='${c}'/></svg>`;
+  const AUSNAHME = c => `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><circle cx='8' cy='8' r='5.6' fill='none' stroke='${c}' stroke-width='1.9'/><path d='M4.1 11.9l7.8-7.8' stroke='${c}' stroke-width='1.9'/></svg>`;
+  const PUNKT = c => `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><circle cx='8' cy='8' r='5' fill='${c}'/></svg>`;
   const SVG_ZU = SCHLOSS_ZU('currentColor'), SVG_AUF = SCHLOSS_AUF('currentColor');
   const SVG_CODE = SYMBOL_CODE('currentColor'), SVG_EDITOR = SYMBOL_EDITOR('currentColor');
   const bild = svg => 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
@@ -452,6 +484,7 @@
       { selector: 'edge.verdichtet', style: { 'line-style': 'dashed', 'line-dash-pattern': [2, 4] } }
     ];
     if (zustand.zyklen) regeln.push({ selector: 'edge.zyk', style: { 'line-color': tok('--crit'), 'target-arrow-color': tok('--crit'), opacity: 1 } });
+    regeln.push(...funktionsStil(f, mono));
     regeln.push(
       // Abgestufter Fokus: Knoten und Kanten; Behälter ohne Fokus-Inhalt nur Rand und Schrift.
       { selector: '.n1', style: { opacity: o('--o-n1') } },
@@ -470,7 +503,42 @@
       { selector: 'edge.einstieg', style: { 'line-color': tok('--warn'), 'target-arrow-color': tok('--warn'), width: 2.4, opacity: 1, label: 'Einstieg', color: tok('--warn') } }
     );
     if (zustand.zyklen) regeln.push({ selector: 'edge.zyk.hl', style: { 'line-color': tok('--crit'), 'target-arrow-color': tok('--crit'), width: 3 } });
+    // Grenzkanten behalten ihre Farbe auch im Fokus.
+    regeln.push({ selector: 'edge.grenze.hl, edge.grenze.rein, edge.grenze.raus, edge.grenze.kgewaehlt', style: { 'line-color': tok('--warn'), 'target-arrow-color': tok('--warn') } });
     regeln.push({ selector: 'edge.trenn', style: { 'line-color': tok('--crit'), 'target-arrow-color': tok('--crit'), width: 6, opacity: 1, label: 'data(trennText)', color: tok('--crit'), 'font-weight': 700, 'font-size': 12 } });
+    return regeln;
+  }
+
+  // Funktionsebene: Rahmen für Dateien und Klassen, Kästen für Funktionen mit Symbolen je
+  // Kombination aus markiert (1), Ausnahme (2) und detekt-Fund (4); Linienarten je Kante.
+  function funktionsStil(f, mono) {
+    const regeln = [
+      { selector: 'node[typ="fdatei"]', style: { 'background-color': tok('--mod'), 'border-width': 1.5, 'font-size': 13, 'font-weight': 600, 'text-valign': 'top', 'text-margin-y': -5, padding: 16, 'min-zoomed-font-size': 3 } },
+      { selector: 'node[typ="fnachbar"]', style: { 'background-color': tok('--pkg'), 'border-style': 'dashed', 'border-color': tok('--line'), 'font-size': 11.5, color: tok('--muted'), 'text-valign': 'top', 'text-margin-y': -4, padding: 12, 'min-zoomed-font-size': 4 } },
+      { selector: 'node[typ="fklasse"]', style: { 'background-color': tok('--pkg'), 'border-color': tok('--line'), 'font-family': mono, 'font-size': 11, color: tok('--muted'), 'text-valign': 'top', 'text-margin-y': -4, padding: 12, 'min-zoomed-font-size': 4 } },
+      { selector: 'node[typ="fzu"]', style: { 'background-color': tok('--mod'), 'border-width': 1.5, 'border-style': 'dashed', 'font-weight': 600 } },
+      { selector: 'node[typ="funktion"]', style: { 'font-family': f, 'min-zoomed-font-size': 6 } },
+      { selector: 'node[typ="funktion"].ohneKoerper', style: { 'background-opacity': 0.35, 'border-style': 'dashed', color: tok('--muted') } }
+    ];
+    const bild1 = { 'background-fit': 'none', 'background-clip': 'none', 'background-width': 11, 'background-height': 11 };
+    for (let sym = 0; sym < 8; sym++) {
+      [false, true].forEach(offen => {
+        const b = [[offen ? SCHLOSS_AUF(tok('--accent')) : SCHLOSS_ZU(tok('--muted')), '100%', -5, '0%', 5, offen ? 1 : 0.7]];
+        if (sym & 1) b.push([SCHILD(tok('--warn')), '0%', 5, '0%', 5, 1]);
+        if (sym & 2) b.push([AUSNAHME(tok('--adr')), '0%', sym & 1 ? 19 : 5, '0%', 5, 1]);
+        if (sym & 4) b.push([PUNKT(tok('--crit')), '100%', -5, '100%', -4, 1]);
+        const spalte = i => b.map(x => x[i]);
+        const st = { 'background-image': spalte(0).map(bild), 'background-position-x': spalte(1), 'background-offset-x': spalte(2), 'background-position-y': spalte(3), 'background-offset-y': spalte(4), 'background-image-opacity': spalte(5) };
+        Object.keys(bild1).forEach(s => { st[s] = b.map(() => bild1[s]); });
+        regeln.push({ selector: `node[typ="funktion"][sym=${sym}]${offen ? '.offen' : ''}`, style: st });
+      });
+    }
+    regeln.push(
+      { selector: 'edge.zugriff', style: { 'line-color': tok('--muted'), 'target-arrow-color': tok('--muted'), 'arrow-scale': 0.6, opacity: 0.7 } },
+      { selector: 'edge.punkt', style: { 'line-style': 'dotted', 'line-dash-pattern': [1, 3], 'target-arrow-shape': 'triangle-backcurve' } },
+      { selector: 'node.grenzziel', style: { 'border-color': tok('--warn'), 'border-width': 3 } },
+      { selector: 'edge.grenze', style: { 'line-color': tok('--warn'), 'target-arrow-color': tok('--warn'), width: 2.6, opacity: 1 } }
+    );
     return regeln;
   }
 
@@ -811,7 +879,8 @@
     zeilen.push(['Fan-in · Fan-out', zahl(m.fan_in) + ' · ' + zahl(m.fan_out)]);
     zeilen.push(['Instabilität', zahl(m.instabilitaet)]);
     const bf = M.befunde.filter(b => befundSichtbar(b) && b.knoten.some(x => x === id || dateiDerFunktion(x) === id));
-    const symbole = k.art === 'datei' ? `<div class="symbole"><button type="button" disabled title="Code-Ansicht kommt mit daidalos serve">${SVG_CODE}Code</button>${editorKnopf(k.pfad, 1)}</div>` : '';
+    const mitFunktionen = k.art === 'datei' && (k.sprache === 'kotlin' || k.sprache === 'c');
+    const symbole = k.art === 'datei' ? `<div class="symbole">${mitFunktionen ? `<button type="button" data-funktionen-datei="${esc(k.pfad)}" title="Funktionsebene dieser Datei öffnen">Funktionen</button>` : ''}<button type="button" disabled title="Code-Ansicht kommt mit daidalos serve">${SVG_CODE}Code</button>${editorKnopf(k.pfad, 1)}</div>` : '';
     seite.innerHTML = `<button type="button" class="zur" data-zurueck>← Übersicht</button>
       <div><div class="kopfzeile"><h2>${esc(name(id))}</h2>${symbole}</div><p class="pfad">${esc(unter)}</p>${chips.length ? `<div class="chips" style="margin-top:6px">${chips.join('')}</div>` : ''}</div>
       ${beschreibungHtml(id)}
@@ -840,8 +909,10 @@
       const d = knoten.get(b.knoten[0]);
       mess += `<table><tr><td>Funktion</td><td>${esc(beleg.funktion)}</td></tr><tr><td>Seite</td><td>${beleg.seite === 'c' ? 'C/C++' : 'Kotlin'}</td></tr><tr><td>Datei</td><td>${kn(b.knoten[0])}</td></tr><tr><td>Zeile</td><td>${beleg.zeile} ${d ? editorKnopf(d.pfad, beleg.zeile, true) : ''}</td></tr></table>`;
     } else if (istMarkierung(b)) {
+      mess += `<p style="margin-bottom:8px"><button type="button" class="btn" data-grenze="${esc(b.id)}">Auf Funktionsebene zeigen</button></p>`;
       mess += markierungsBeleg(b);
     } else if (istDetekt(b)) {
+      if (b.knoten[0].startsWith('funktion:')) mess += `<p style="margin-bottom:8px"><button type="button" class="btn" data-funktion="${esc(b.knoten[0])}">Auf Funktionsebene zeigen</button></p>`;
       const pfad = dateiDerFunktion(b.knoten[0]).slice(6);
       const quellen = Array.isArray(beleg.sarif) ? beleg.sarif : [beleg.sarif];
       mess += `<table class="kettenbeleg"><tr><td>Regel</td><td>${esc(b.regel)}</td></tr><tr><td>Schwere</td><td>${esc(b.schwere)}</td></tr><tr><td>Ort</td><td>${kn('datei:' + pfad)}:${beleg.zeile} ${editorKnopf(pfad, beleg.zeile, true)}</td></tr>${b.knoten[0].startsWith('funktion:') ? `<tr><td>Funktion</td><td><code>${esc(kurzFunktion(b.knoten[0]))}</code></td></tr>` : ''}<tr><td>SARIF</td><td>${quellen.map(q => `<code>${esc(q)}</code>`).join('<br>')}</td></tr></table><p style="margin-top:8px">${esc(beleg.meldung)}</p>`;
@@ -857,7 +928,7 @@
   // Eine Funktion der Kette: Name, Datei:Zeile, Editor-Link.
   function funktionsZeile(id, zeile, zusatz) {
     const pfad = dateiDerFunktion(id).slice(6);
-    return `<code>${esc(kurzFunktion(id))}</code> <span class="ort">${esc(pfad.split('/').pop())}:${zeile}</span> ${editorKnopf(pfad, zeile, true)}${zusatz ? ` <span class="leer">${esc(zusatz)}</span>` : ''}`;
+    return `<button type="button" class="zur" data-funktion="${esc(id)}"><code>${esc(kurzFunktion(id))}</code></button> <span class="ort">${esc(pfad.split('/').pop())}:${zeile}</span> ${editorKnopf(pfad, zeile, true)}${zusatz ? ` <span class="leer">${esc(zusatz)}</span>` : ''}`;
   }
   // Kette als eingerückte Liste: jede Funktion unter ihrem Aufrufer (Vorgänger im kürzesten Weg).
   function ketteHtml(wurzel, wurzelZeile, eintraege, mitWurzel) {
@@ -1005,6 +1076,9 @@
     seite.querySelectorAll('[data-befund]').forEach(b => b.addEventListener('click', () => zeigeBefund(b.dataset.befund)));
     seite.querySelectorAll('[data-knoten]').forEach(b => b.addEventListener('click', () => zeigeKnoten(b.dataset.knoten)));
     seite.querySelectorAll('[data-kante]').forEach(b => b.addEventListener('click', () => zeigeKante(b.dataset.kante)));
+    seite.querySelectorAll('[data-funktion]').forEach(b => b.addEventListener('click', () => zeigeFunktion(b.dataset.funktion)));
+    seite.querySelectorAll('[data-funktionen-datei]').forEach(b => b.addEventListener('click', () => zeigeFunktionsDatei(b.dataset.funktionenDatei)));
+    seite.querySelectorAll('[data-grenze]').forEach(b => b.addEventListener('click', () => zeigeGrenze(b.dataset.grenze)));
     seite.querySelectorAll('[data-zurueck]').forEach(b => b.addEventListener('click', () => { zustand.auswahl = null; leeren(); uebersicht(); schreibeAdresse(); }));
     seite.querySelectorAll('a[data-editor]').forEach(a => a.addEventListener('click', ev => { ev.preventDefault(); oeffneEditor(a.getAttribute('href')); }));
   }
@@ -1032,7 +1106,7 @@
     }
     if (k.art === 'paket' && !k.fremd && !sichtbaresPaket(k)) { zustand.mitTests = true; neu = true; }
     if (k.art === 'modul' || k.art === 'ordner') zustand.zuletztModul = k.id;
-    else if (k.art === 'datei') zustand.zuletztModul = behaelter(k);
+    else if (k.art === 'datei') { zustand.zuletztModul = behaelter(k); zustand.zuletztDatei = k.pfad; }
     else zustand.zuletztModul = k.modul || k.ordner;
     zustand.ebene = ebene;
     setzeAuswahl({ art: 'knoten', id });
@@ -1125,7 +1199,13 @@
     if (!a) hash = 'ebene=' + zustand.ebene;
     else if (a.art === 'kante') hash = 'ebene=' + a.ebene + '&kante=' + encodeURIComponent(a.id);
     else if (a.art === 'pfad') hash = 'ebene=' + a.ebene + '&von=' + encodeURIComponent(a.von) + '&nach=' + encodeURIComponent(a.nach);
-    else hash = a.art + '=' + encodeURIComponent(a.id);
+    else if (a.art === 'fdatei') hash = 'datei-funktionen=' + encodeURIComponent(a.id);
+    else if (a.art === 'funktion') {
+      hash = 'funktion=' + encodeURIComponent(a.id);
+      const w = zustand.weg;
+      if (w && w.art === 'weg') hash = 'funktion=' + encodeURIComponent(w.start) + '&weg=' + w.richtung + '&tiefe=' + w.tiefe + (w.start !== a.id ? '&gewaehlt=' + encodeURIComponent(a.id) : '');
+      else if (zustand.fDatei && fn(a.id) && fn(a.id).pfad !== zustand.fDatei) hash += '&datei-funktionen=' + encodeURIComponent(zustand.fDatei);
+    } else hash = a.art + '=' + encodeURIComponent(a.id);
     if (location.hash === '#' + hash) return;
     try {
       // Jede neue Auswahl wird ein Eintrag im Verlauf, damit „Zurück“ zur vorherigen führt.
@@ -1139,8 +1219,30 @@
     try {
       const p = new URLSearchParams(location.hash.replace(/^#/, ''));
       const ebene = p.get('ebene');
-      if (ebene && ARTEN_JE_EBENE[ebene]) zustand.ebene = ebene;
+      if (ebene && ARTEN_JE_EBENE[ebene] && ebene !== 'funktion') zustand.ebene = ebene;
+      // Adressen ohne Funktion verlassen den Wegmodus.
+      if (!p.get('funktion')) zustand.weg = null;
       if (p.get('befund') && befundNachId.has(p.get('befund'))) { await zeigeBefund(p.get('befund')); return; }
+      if (p.get('grenze') && befundNachId.has(p.get('grenze'))) { await zeigeGrenze(p.get('grenze')); return; }
+      if (p.get('funktion') && fn(p.get('funktion'))) {
+        const id = p.get('funktion'), weg = p.get('weg');
+        if (weg === 'vor' || weg === 'rueck') {
+          const tiefe = Math.min(5, Math.max(1, parseInt(p.get('tiefe'), 10) || 3));
+          await zeigeWeg(id, weg, tiefe);
+          const gewaehlt = p.get('gewaehlt');
+          if (gewaehlt && cy.getElementById(gewaehlt).nonempty()) { setzeAuswahl({ art: 'funktion', id: gewaehlt }); hebeFunktionHervor(gewaehlt); funktionsDetails(gewaehlt); }
+          return;
+        }
+        zustand.weg = null;
+        const datei = p.get('datei-funktionen');
+        if (datei && hatFunktionen(datei)) { if (datei !== zustand.fDatei) zustand.fAuf = new Set(); zustand.fDatei = datei; }
+        else if (fn(id).pfad !== zustand.fDatei) { zustand.fAuf = new Set(); zustand.fDatei = fn(id).pfad; }
+        await zeigeFunktion(id);
+        return;
+      }
+      if (p.get('datei-funktionen')) { await zeigeFunktionsDatei(p.get('datei-funktionen')); return; }
+      if (ebene === 'funktion' && p.get('von') && p.get('nach') && fn(p.get('von')) && fn(p.get('nach'))) { await zeigeFunktionsPfad(p.get('von'), p.get('nach')); return; }
+      if (ebene === 'funktion') { await oeffneFunktionsebene(); return; }
       if (p.get('knoten') && (knoten.has(p.get('knoten')) || p.get('knoten') === SAMMEL)) { await zeigeKnoten(p.get('knoten')); return; }
       if (p.get('kante')) { await zeigeKante(p.get('kante'), ebene); return; }
       if (p.get('von') && p.get('nach')) { await zeigePfad(p.get('von'), p.get('nach')); uebersicht(); return; }
@@ -1163,6 +1265,13 @@
       c.checked = moeglich && zustand.arten[zustand.ebene][a];
       c.closest('label').classList.toggle('aus', !moeglich);
     });
+    ['lesen', 'unsicher'].forEach(a => {
+      const c = document.getElementById('k-' + a);
+      const moeglich = zustand.ebene === 'funktion';
+      c.disabled = !moeglich;
+      c.checked = a === 'lesen' ? zustand.fLesen : zustand.fUnsicher;
+      c.closest('label').classList.toggle('aus', !moeglich);
+    });
     const pl = document.getElementById('k-plugin');
     const plMoeglich = zustand.ebene === 'modul' && zustand.arten.modul.gradle;
     pl.disabled = !plMoeglich;
@@ -1177,7 +1286,11 @@
     if (a.art === 'befund') await zeigeBefund(a.id);
     else if (a.art === 'knoten') { if (sichtbarerKnoten(a.id)) hebeKnotenHervor(a.id); }
     else if (a.art === 'kante') { const e = cy.getElementById(a.id); if (e.nonempty()) hebeKanteHervor(e); }
+    else if (a.art === 'pfad' && a.ebene === 'funktion') await zeigeFunktionsPfad(a.von, a.nach);
     else if (a.art === 'pfad') await zeigePfad(a.von, a.nach);
+    else if (a.art === 'funktion') { if (cy.getElementById(a.id).nonempty() || zustand.ebene === 'funktion') { hebeFunktionHervor(a.id); funktionsDetails(a.id); } }
+    else if (a.art === 'fdatei') dateiFunktionenSeite(a.id);
+    else if (a.art === 'grenze') await zeigeGrenze(a.id);
   }
 
   async function neuZeichnen() {
@@ -1185,7 +1298,28 @@
     await wendeAuswahlAn();
   }
 
+  // Ebenenwahl „Funktionen“: zuletzt gewählte Datei, sonst um eine Datei bitten.
+  async function oeffneFunktionsebene() {
+    const fd = fdaten();
+    const kandidat = [zustand.fDatei, zustand.zuletztDatei].find(p => p && fd.nachDatei.has(p));
+    if (kandidat) { await zeigeFunktionsDatei(kandidat); return; }
+    zustand.ebene = 'funktion';
+    zustand.fDatei = null;
+    zustand.weg = null;
+    zustand.auswahl = null;
+    schreibeAdresse();
+    fluss.stopp();
+    leeren();
+    cy.elements().remove();
+    gezeichnet = layoutSchluessel();
+    zeigeSchalter();
+    zeigeWegInfo();
+    document.documentElement.dataset.zustand = 'bereit';
+    bitteUmDatei();
+  }
   document.querySelectorAll('#ebenen button').forEach(b => b.addEventListener('click', async () => {
+    if (b.dataset.ebene === 'funktion') { await oeffneFunktionsebene(); return; }
+    zustand.weg = null;
     zustand.ebene = b.dataset.ebene;
     zustand.auswahl = null;
     schreibeAdresse();
@@ -1201,16 +1335,25 @@
     neuZeichnen();
   }));
   document.getElementById('k-plugin').addEventListener('change', e => { zustand.plugins = e.target.checked; neuZeichnen(); });
+  document.getElementById('k-lesen').addEventListener('change', e => { zustand.fLesen = e.target.checked; neuZeichnen(); });
+  document.getElementById('k-unsicher').addEventListener('change', e => { zustand.fUnsicher = e.target.checked; neuZeichnen(); });
   document.getElementById('u-zyklen').addEventListener('change', e => { zustand.zyklen = e.target.checked; cy.style(stil()); });
   ['markierung', 'detekt'].forEach(schalter => document.getElementById('u-' + schalter).addEventListener('change', e => {
     zustand[schalter] = e.target.checked;
     const a = zustand.auswahl;
+    if (zustand.ebene === 'funktion') {
+      // Ersatzkanten der Markierung gehören zum Layout; sonst genügen die Klassen.
+      if (schalter === 'markierung' && veraltet()) { neuZeichnen(); return; }
+      fKlassen();
+      if (a && a.art === 'funktion') funktionsDetails(a.id);
+      return;
+    }
     if (a && a.art === 'knoten') knotenDetails(a.id);
     else if (!a || a.art !== 'befund') uebersicht();
   }));
   document.getElementById('einpassen').addEventListener('click', () => passen(cy.elements(), 30));
   document.getElementById('zuruecksetzen').addEventListener('click', async () => {
-    loeschePositionen(zustand.ebene);
+    loeschePositionen(positionsEbene());
     await neuZeichnen();
   });
 
@@ -1237,6 +1380,7 @@
   cy.on('tap', 'node', e => {
     const n = e.target;
     if (symbolTippen(n, e.position)) return;
+    if (zustand.ebene === 'funktion') { funktionTippen(n); return; }
     const ref = n.data('ref');
     if (!ref) return;
     zustand.zuletztModul = istGruppe(ref) ? ref : zustand.zuletztModul;
@@ -1250,6 +1394,13 @@
     const p = e.position;
     const darunter = cy.nodes().filter(n => { const bb = n.boundingBox({ includeLabels: false }); return p.x >= bb.x1 - 2 && p.x <= bb.x2 + 2 && p.y >= bb.y1 - 2 && p.y <= bb.y1 + 22; });
     for (const n of darunter.toArray().reverse()) if (symbolTippen(n, p)) return;
+    if (zustand.ebene === 'funktion') {
+      // Kanten der Funktionsebene haben keine eigene Sprungadresse.
+      zustand.auswahl = { art: 'fkante', id: k.id() };
+      hebeKanteHervor(k);
+      fKanteDetails(k);
+      return;
+    }
     setzeAuswahl({ art: 'kante', id: k.id(), ebene: zustand.ebene });
     hebeKanteHervor(k);
     kanteDetails(k);
@@ -1257,6 +1408,21 @@
   cy.on('dbltap', 'node', async e => {
     const n = e.target, ref = n.data('ref'), typ = n.data('typ');
     if (symbolGetroffen(n, e.position)) return;
+    if (zustand.ebene === 'datei' && typ === 'datei') {
+      const d = knoten.get(ref);
+      if (d && hatFunktionen(d.pfad)) await zeigeFunktionsDatei(d.pfad);
+      else zeigeHinweis('Diese Datei hat keine Funktionen auf der Funktionsebene.');
+      return;
+    }
+    if (zustand.ebene === 'funktion') {
+      // Doppelklick auf eine fremde Funktion oder Datei öffnet deren Datei.
+      const pfad = n.data('pfad');
+      if (!pfad || (pfad === zustand.fDatei && !zustand.weg)) return;
+      zustand.weg = null;
+      if (typ === 'funktion') { zustand.fAuf = new Set(); zustand.fDatei = pfad; await zeigeFunktion(ref); }
+      else await zeigeFunktionsDatei(pfad);
+      return;
+    }
     if (zustand.ebene === 'modul' && istGruppe(ref)) {
       zustand.zuletztModul = ref;
       zustand.ebene = 'paket';
@@ -1280,7 +1446,32 @@
       hebeKnotenHervor(ref);
     }
   });
-  function aufheben() { zustand.auswahl = null; leeren(); uebersicht(); schreibeAdresse(); }
+  function aufheben() {
+    if (zustand.ebene === 'funktion' && zustand.fDatei) {
+      leeren();
+      zeigeWegInfo();
+      if (zustand.weg && zustand.weg.art === 'weg') { setzeAuswahl({ art: 'funktion', id: zustand.weg.start }); funktionsDetails(zustand.weg.start); return; }
+      if (!zustand.weg) { setzeAuswahl({ art: 'fdatei', id: zustand.fDatei }); dateiFunktionenSeite(zustand.fDatei); return; }
+    }
+    zustand.auswahl = null; leeren(); uebersicht(); schreibeAdresse();
+  }
+  // Klick auf der Funktionsebene: Funktion wählen, zusammengefasste Datei aufklappen, Rahmen zeigen.
+  async function funktionTippen(n) {
+    const typ = n.data('typ'), ref = n.data('ref');
+    if (typ === 'funktion') {
+      setzeAuswahl({ art: 'funktion', id: ref });
+      hebeFunktionHervor(ref);
+      funktionsDetails(ref);
+    } else if (typ === 'fzu') {
+      zustand.fAuf.add(n.data('pfad'));
+      await neuZeichnen();
+    } else if (ref) {
+      fokus([n.id()], { titel: dateiName(n.data('pfad') || ref) });
+      zeigeWegInfo();
+      if (typ === 'fdatei' && !zustand.weg) { setzeAuswahl({ art: 'fdatei', id: zustand.fDatei }); dateiFunktionenSeite(zustand.fDatei); }
+      else knotenDetails(ref);
+    }
+  }
   cy.on('tap', e => { if (e.target === cy) aufheben(); });
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && !(e.target instanceof HTMLInputElement)) aufheben();
@@ -1375,8 +1566,15 @@
   function ohneRoute(blaetter) {
     blaetter.connectedEdges().forEach(e => { if (e.style('curve-style') !== 'bezier' && zustand.kantenfuehrung === 'elk') e.removeStyle(ROUTEN_WEG); });
   }
+  // Funktionsebene: Schlüssel je Datei (Wirkungswege je Start, Richtung und Tiefe).
+  function positionsEbene() {
+    if (zustand.ebene !== 'funktion') return zustand.ebene;
+    const w = zustand.weg;
+    if (!w) return 'funktion:' + zustand.fDatei;
+    return w.art === 'weg' ? 'funktion-weg:' + w.start + ':' + w.richtung + ':' + w.tiefe : 'funktion-pfad:' + w.von + ':' + w.nach;
+  }
   function wendePositionenAn() {
-    const pos = lesePositionen(zustand.ebene);
+    const pos = lesePositionen(positionsEbene());
     let verschoben = cy.collection();
     cy.batch(() => cy.nodes().forEach(n => {
       const p = pos[n.id()];
@@ -1402,9 +1600,9 @@
   cy.on('free', 'node', e => {
     const n = e.target;
     if (n.locked()) return;
-    const pos = lesePositionen(zustand.ebene);
+    const pos = lesePositionen(positionsEbene());
     blattVon(n).forEach(x => { if (!vorZiehen || !vorZiehen.has(x.id())) { const p = x.position(); pos[x.id()] = [Math.round(p.x * 10) / 10, Math.round(p.y * 10) / 10]; } });
-    schreibePositionen(zustand.ebene, pos);
+    schreibePositionen(positionsEbene(), pos);
     vorZiehen = null;
   });
 
@@ -1451,6 +1649,11 @@
     if (pfadListeEbene === zustand.ebene) return;
     pfadListeEbene = zustand.ebene;
     pfadListe = new Map();
+    if (zustand.ebene === 'funktion') {
+      fdaten().fn.forEach(f => { if (!f.implizit) pfadListe.set(f.kurz + ' · ' + dateiName(f.pfad), f.id); });
+      document.getElementById('pfad-liste').innerHTML = [...pfadListe.keys()].sort().map(t => `<option value="${esc(t)}"></option>`).join('');
+      return;
+    }
     M.knoten.forEach(k => { if (ART_EBENE[k.art] === zustand.ebene && !k.fremd && (k.art !== 'datei' || aufKarte.has(k.id))) pfadListe.set(pfadText(k), k.id); });
     const dl = document.getElementById('pfad-liste');
     dl.innerHTML = [...pfadListe.keys()].sort().map(t => `<option value="${esc(t)}"></option>`).join('');
@@ -1461,9 +1664,15 @@
     if (pfadListe.has(t)) return { id: pfadListe.get(t) };
     if (knoten.has(t) && ART_EBENE[knoten.get(t).art] === zustand.ebene) return { id: t };
     const klein = t.toLowerCase();
-    const treffer = [...pfadListe.entries()].filter(([s]) => s.toLowerCase().includes(klein));
+    const treffer = zustand.ebene === 'funktion' ? [] : [...pfadListe.entries()].filter(([s]) => s.toLowerCase().includes(klein));
     if (treffer.length === 1) return { id: treffer[0][1] };
-    return { fehler: treffer.length ? '„' + t + '“ passt auf ' + treffer.length + ' Knoten' : 'kein Knoten passt zu „' + t + '“' };
+    if (treffer.length) return { fehler: '„' + t + '“ passt auf ' + treffer.length + ' Knoten' };
+    // Funktionen: Id oder Suchbegriff wie bei `daidalos pfad` (Teil hinter #, auch ohne /n).
+    const fd = fdaten();
+    if (fd.nachId.has(t)) return { id: t };
+    const passend = fd.fn.filter(f => f.kurz === t || f.kurz.startsWith(t + '/'));
+    if (passend.length === 1) return { id: passend[0].id };
+    return { fehler: passend.length ? '„' + t + '“ passt auf ' + passend.length + ' Funktionen' : 'kein Knoten und keine Funktion passt zu „' + t + '“' };
   }
 
   async function zeigePfad(von, nach) {
@@ -1521,6 +1730,15 @@
       pfadinfo.hidden = false;
       return;
     }
+    const vf = v.id.startsWith('funktion:'), nf = n.id.startsWith('funktion:');
+    if (vf || nf) {
+      if (vf && nf) { await zeigeFunktionsPfad(v.id, n.id); return; }
+      leeren();
+      pfadinfo.textContent = 'Warum hängt …: Von und Nach müssen beide Funktionen sein oder beide Knoten derselben Ebene.';
+      pfadinfo.hidden = false;
+      return;
+    }
+    zustand.weg = null;
     await zeigePfad(v.id, n.id);
     uebersicht();
   });
@@ -1569,6 +1787,631 @@
     zeigeHinweis('Öffne im Editor: ' + link);
   }
 
+  // ------------------------------------------------------------ 13. Funktionsebene (seit A09)
+  // Fokus-Ansicht: eine Datei mit ihren Klassen und Funktionen und den Nachbarn, die hierher
+  // rufen oder von hier gerufen werden; dazu der Wirkungsweg vorwärts und rückwärts. Der Block
+  // id="funktionen" wird erst beim ersten Öffnen gelesen, damit die Karte schnell startet.
+  const GRENZE_KAESTEN = 150;
+  const KLASSEN_ART = { klasse: 'Klasse', schnittstelle: 'Schnittstelle', objekt: 'Objekt', companion: 'Companion', enum: 'Enum', annotation: 'Annotation', 'enum-eintrag': 'Eintrag' };
+  const HOCH = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+  const hoch = n => String(n).split('').map(c => HOCH[c] || c).join('');
+  const ART_TEXT = { ruft: 'ruft', lesen: 'liest', schreiben: 'schreibt', ueberschreibt: 'überschreibt', actual: 'actual zu', jni: 'JNI', grenze: 'Grenzkante' };
+  let FD = null;
+
+  function fdaten() {
+    if (FD) return FD;
+    const beginn = performance.now();
+    const roh = JSON.parse(document.getElementById('funktionen').textContent);
+    FD = { da: !!roh, fn: [], nachId: new Map(), nachDatei: new Map(), kanten: [], raus: [], rein: [], klassen: new Map(), detekt: new Map() };
+    if (roh) {
+      const f = {};
+      roh.felder.forEach((n, i) => { f[n] = i; });
+      const mk = roh.merkmale;
+      roh.funktionen.forEach((z, i) => {
+        const pfad = roh.dateien[z[f.datei]];
+        const kurz = z[f.kurz], beh = z[f.behaelter], m = z[f.merkmale];
+        const o = {
+          i, id: 'funktion:' + pfad + '#' + kurz, pfad, kurz, behaelter: beh,
+          name: beh && kurz.startsWith(beh + '.') ? kurz.slice(beh.length + 1) : kurz,
+          von: z[f.zeile_von], bis: z[f.zeile_bis],
+          markiert: !!(m & mk.markiert), ausnahme: !!(m & mk.ausnahme), ohneKoerper: !!(m & mk.ohne_koerper),
+          implizit: !!(m & mk.implizit), test: !!(m & mk.test), c: !!(m & mk.c),
+          komplex: z[f.komplexitaet], zeilen: z[f.zeilen], fanIn: z[f.fan_in], fanInU: z[f.fan_in_unsicher],
+          fanOut: z[f.fan_out], fanOutU: z[f.fan_out_unsicher], extern: z[f.externe_aufrufe], delegiert: z[f.delegiert_gelesen],
+          sicht: z[f.sichtbarkeit], mods: z[f.modifikatoren], params: z[f.parameter], vorgabe: z[f.parameter_vorgabe],
+          vararg: z[f.parameter_vararg], annot: z[f.annotationen], erw: z[f.erweiterung], markierung: z[f.markierung]
+        };
+        FD.fn.push(o);
+        FD.nachId.set(o.id, o);
+        if (!FD.nachDatei.has(pfad)) FD.nachDatei.set(pfad, []);
+        FD.nachDatei.get(pfad).push(i);
+        FD.raus.push([]); FD.rein.push([]);
+      });
+      roh.kanten.forEach(([v, n, a, s, g, zeile, h, gr], e) => {
+        const k = { e, id: 'fe:' + e, v, n, art: roh.arten[a], sicher: !!s, gewicht: g, zeile, herkunft: h >= 0 ? roh.texte[h] : null, grund: gr >= 0 ? roh.texte[gr] : null };
+        FD.kanten.push(k); FD.raus[v].push(k); FD.rein[n].push(k);
+      });
+      roh.dateien.forEach((p, i) => FD.klassen.set(p, new Map(roh.klassen[i].map(([name, art, zeile]) => [name, { art, zeile }]))));
+    }
+    M.befunde.forEach(b => {
+      if (!istDetekt(b) || !b.knoten[0].startsWith('funktion:')) return;
+      if (!FD.detekt.has(b.knoten[0])) FD.detekt.set(b.knoten[0], []);
+      FD.detekt.get(b.knoten[0]).push(b);
+    });
+    zeiten.funktionenLesen = Math.round(performance.now() - beginn);
+    return FD;
+  }
+  const fn = id => fdaten().nachId.get(id);
+  const hatFunktionen = pfad => (fdaten().nachDatei.get(pfad) || []).length > 0;
+  // Grenzkanten der Markierungs-Kette, die der Schalter zeigt: Paar "von|nach" → Befund.
+  function grenzPaare() {
+    const paare = new Map();
+    if (!zustand.markierung) return paare;
+    M.befunde.forEach(b => { if (istMarkierung(b)) paare.set(b.beleg.von + '|' + b.beleg.nach, b); });
+    return paare;
+  }
+
+  // Kanten der Funktionsebene nach den Schaltern „Lesezugriffe“, „unsicher“ und „mit Tests“.
+  function fKanteSichtbar(k) {
+    if ((k.art === 'lesen' || k.art === 'schreiben') && !zustand.fLesen) return false;
+    if (!k.sicher && !zustand.fUnsicher) return false;
+    if (!zustand.mitTests && FD.fn[k.v].test) return false;
+    return true;
+  }
+
+  function signaturKurz(f) { return f.name; }
+  function symbolCode(f) {
+    return (f.markiert ? 1 : 0) | (f.ausnahme ? 2 : 0) | (zustand.detekt && FD.detekt.has(f.id) ? 4 : 0);
+  }
+  function fKasten(f, parent, mitBehaelter) {
+    const text = mitBehaelter ? f.kurz : signaturKurz(f);
+    const label = text + (f.komplex !== null && f.komplex !== undefined ? ' ' + hoch(f.komplex) : '');
+    const e = blatt(f.id, [label], 'funktion', { parent, ref: f.id, fi: f.i, sym: symbolCode(f), pfad: f.pfad });
+    const cls = [];
+    if (f.ohneKoerper || f.implizit) cls.push('ohneKoerper');
+    if (f.test) cls.push('test');
+    e.classes = cls.join(' ');
+    return e;
+  }
+  // Rahmen der umgebenden Klassen (von außen nach innen); liefert den Rahmen der Funktion.
+  function rahmenKette(pfad, behaelter, wurzel, els, gesehen) {
+    if (!behaelter) return wurzel;
+    const teile = behaelter.split('.');
+    let eltern = wurzel;
+    for (let i = 1; i <= teile.length; i++) {
+      const kette = teile.slice(0, i).join('.');
+      const id = 'fk:' + pfad + '#' + kette;
+      if (!gesehen.has(id)) {
+        gesehen.add(id);
+        const k = (FD.klassen.get(pfad) || new Map()).get(kette);
+        const art = k ? KLASSEN_ART[k.art] || k.art : 'Klasse';
+        const teil = teile[i - 1];
+        els.push({ group: 'nodes', data: { id, label: art === 'Companion' && teil === 'Companion' ? 'Companion' : art + ' ' + teil, typ: 'fklasse', parent: eltern, ref: 'datei:' + pfad, pfad } });
+      }
+      eltern = id;
+    }
+    return eltern;
+  }
+  const dateiName = pfad => pfad.split('/').pop();
+
+  // Elemente der Funktionsansicht einer Datei (zustand.fDatei) oder des Wegmodus.
+  function funktionsElemente() {
+    const fd = fdaten();
+    const kanten = sammler();
+    const els = zustand.weg ? wegElemente(kanten) : dateiFunktionsElemente(kanten);
+    kanten.werte().forEach(e => {
+      const d = e.data;
+      d.breite = d.art === 'lesen' || d.art === 'schreiben' ? 0.9 : breite(d.gewicht);
+      d.label = d.gewicht >= 2 ? String(d.gewicht) : '';
+      const cls = [e.classes || ''];
+      if (d.unsicher) cls.push('unsicher');
+      if (d.verdichtet) cls.push('verdichtet');
+      if (d.art === 'lesen' || d.art === 'schreiben') cls.push('zugriff');
+      if (d.art === 'ueberschreibt' || d.art === 'actual') cls.push('punkt');
+      if (d.art === 'jni') cls.push('jni');
+      e.classes = cls.join(' ').trim();
+      els.push(e);
+    });
+    zustand.fKaesten = els.filter(e => e.group === 'nodes' && (e.data.typ === 'funktion' || e.data.typ === 'fzu')).length;
+    void fd;
+    return els;
+  }
+
+  function dateiFunktionsElemente(kanten) {
+    const fd = FD;
+    const pfad = zustand.fDatei;
+    const els = [];
+    const eigene = (fd.nachDatei.get(pfad) || []).map(i => fd.fn[i]);
+    const eigen = new Set(eigene.map(f => f.i));
+    const rahmen = 'ff:' + pfad;
+    const gesehen = new Set();
+    const eigeneEls = [];
+    eigene.forEach(f => eigeneEls.push(fKasten(f, rahmenKette(pfad, f.behaelter, rahmen, eigeneEls, gesehen), false)));
+    const liste = [];
+    eigene.forEach(f => {
+      fd.raus[f.i].forEach(k => { if (fKanteSichtbar(k)) liste.push(k); });
+      fd.rein[f.i].forEach(k => { if (!eigen.has(k.v) && fKanteSichtbar(k)) liste.push(k); });
+    });
+    // Nachbarn je fremder Datei; Aufrufer (nur rufend) zuerst, damit sie links stehen.
+    const nachbarn = new Map(), rufend = new Map();
+    liste.forEach(k => [k.v, k.n].forEach(i => {
+      if (eigen.has(i)) return;
+      const p = fd.fn[i].pfad;
+      if (!nachbarn.has(p)) { nachbarn.set(p, new Set()); rufend.set(p, true); }
+      nachbarn.get(p).add(i);
+      if (i === k.n) rufend.set(p, false);
+    }));
+    // Grenze: Nachbardateien mit den meisten Funktionen zusammenfassen, bis es passt.
+    let kaesten = eigene.length;
+    nachbarn.forEach(m => { kaesten += m.size; });
+    const zu = new Set();
+    const nachGroesse = [...nachbarn.entries()].sort((a, b) => b[1].size - a[1].size || (a[0] < b[0] ? -1 : 1));
+    for (const [p, m] of nachGroesse) {
+      if (kaesten <= GRENZE_KAESTEN) break;
+      if (zustand.fAuf.has(p) || m.size < 2) continue;
+      zu.add(p);
+      kaesten -= m.size - 1;
+    }
+    zustand.fZu = zu;
+    const ort = new Map(eigene.map(f => [f.i, f.id]));
+    const nachbarEls = (nurRufend) => {
+      const teil = [];
+      [...nachbarn.keys()].sort().forEach(p => {
+        if (rufend.get(p) !== nurRufend) return;
+        const m = nachbarn.get(p);
+        if (zu.has(p)) {
+          teil.push(blatt('fz:' + p, [dateiName(p) + ' (+' + m.size + ')'], 'fzu', { ref: 'datei:' + p, pfad: p }));
+          m.forEach(i => ort.set(i, 'fz:' + p));
+          return;
+        }
+        teil.push({ group: 'nodes', data: { id: 'fn:' + p, label: dateiName(p), typ: 'fnachbar', ref: 'datei:' + p, pfad: p } });
+        [...m].sort((a, b) => a - b).forEach(i => { const f = fd.fn[i]; teil.push(fKasten(f, 'fn:' + p, true)); ort.set(i, f.id); });
+      });
+      return teil;
+    };
+    els.push(...nachbarEls(true));
+    els.push({ group: 'nodes', data: { id: rahmen, label: dateiName(pfad), typ: 'fdatei', ref: 'datei:' + pfad, pfad } });
+    els.push(...eigeneEls);
+    els.push(...nachbarEls(false));
+    liste.forEach(k => {
+      const q = ort.get(k.v), z = ort.get(k.n);
+      kanten.add(q, z, k.art, k, q !== fd.fn[k.v].id || z !== fd.fn[k.n].id);
+    });
+    grenzErsatz(els, ort, liste);
+    return els;
+  }
+  // Grenzkanten ohne eigene Kante in der Ansicht (über ueberschreibt erreicht): Ersatzkante.
+  function grenzErsatz(els, ort, liste) {
+    const da = new Set(liste.map(k => FD.fn[k.v].id + '|' + FD.fn[k.n].id));
+    grenzPaare().forEach((b, paar) => {
+      if (da.has(paar)) return;
+      const v = fn(b.beleg.von), n = fn(b.beleg.nach);
+      if (!v || !n || !ort.has(v.i) || !ort.has(n.i) || ort.get(v.i) === ort.get(n.i)) return;
+      els.push({ group: 'edges', data: { id: 'fg:' + b.id, source: ort.get(v.i), target: ort.get(n.i), art: 'grenze', gewicht: 1, kanten: [], befund: b.id, unsicher: !!b.beleg.unsicher, verdichtet: false, breite: 1.6, label: '' }, classes: 'grenze' });
+    });
+  }
+
+  // ---- Wirkungsweg: dieselben Regeln wie `daidalos aufrufe` (ohne Wiederholung, Schalter für
+  // unsicher, Lesezugriffe und Tests), dazu wie in der Markierungs-Kette (A08) ueberschreibt/actual.
+  const WEG_ARTEN = new Set(['ruft', 'lesen', 'schreiben']);
+  function wegSchritte(i, vor) {
+    const liste = vor ? FD.raus[i] : FD.rein[i];
+    return liste.filter(k => WEG_ARTEN.has(k.art) && fKanteSichtbar(k)).map(k => ({ k, ziel: vor ? k.n : k.v }));
+  }
+  // Vorwärts: wer ein erreichtes Ziel überschreibt (rekursiv) und die actual zu einem expect.
+  // Rückwärts: was die Funktion überschreibt (rekursiv) und ihr expect; deren Aufrufer landen hier.
+  function erweiterung(i, vor) {
+    const liste = vor ? FD.rein[i] : FD.raus[i];
+    return liste.filter(k => (k.art === 'ueberschreibt' || k.art === 'actual') && (k.sicher || zustand.fUnsicher) && (zustand.mitTests || !FD.fn[k.v].test))
+      .map(k => ({ k, ziel: vor ? k.v : k.n }));
+  }
+  function suche(start, vor, tiefe) {
+    const stufe = new Map([[start, 0]]);
+    const kanten = [], extra = [];
+    const erweitere = (liste, d) => {
+      for (let j = 0; j < liste.length; j++) {
+        erweiterung(liste[j], vor).forEach(({ k, ziel }) => {
+          if (!stufe.has(ziel)) { stufe.set(ziel, d); liste.push(ziel); }
+          if (stufe.get(ziel) === d) extra.push(k);
+        });
+      }
+    };
+    let rand = [start];
+    if (!vor) erweitere(rand, 0);
+    for (let d = 0; d < tiefe && rand.length; d++) {
+      const neu = [];
+      rand.slice().sort((a, b) => a - b).forEach(x => {
+        wegSchritte(x, vor).forEach(({ k, ziel }) => {
+          if (!stufe.has(ziel)) { stufe.set(ziel, d + 1); neu.push(ziel); }
+          if (stufe.get(ziel) === d + 1 && stufe.get(x) === d) kanten.push(k);
+        });
+      });
+      erweitere(neu, d + 1);
+      rand = neu;
+    }
+    return { stufe, kanten, extra };
+  }
+  function berechneWeg() {
+    const w = zustand.weg;
+    if (w.art === 'pfad') return pfadErgebnis(w);
+    const start = fn(w.start).i, vor = w.richtung === 'vor';
+    const voll = suche(start, vor, w.tiefe);
+    let tiefe = w.tiefe, ergebnis = voll;
+    while (ergebnis.stufe.size > GRENZE_KAESTEN && tiefe > 1) { tiefe--; ergebnis = suche(start, vor, tiefe); }
+    let abgeschnitten = 0;
+    if (ergebnis.stufe.size > GRENZE_KAESTEN) {
+      // Schon Tiefe 1 ist zu groß: die ersten nach Id.
+      const behalten = new Set([...ergebnis.stufe.keys()].sort((a, b) => (ergebnis.stufe.get(a) - ergebnis.stufe.get(b)) || (FD.fn[a].id < FD.fn[b].id ? -1 : 1)).slice(0, GRENZE_KAESTEN));
+      abgeschnitten = ergebnis.stufe.size - behalten.size;
+      [...ergebnis.stufe.keys()].forEach(i => { if (!behalten.has(i)) ergebnis.stufe.delete(i); });
+      ergebnis.kanten = ergebnis.kanten.filter(k => ergebnis.stufe.has(k.v) && ergebnis.stufe.has(k.n));
+      ergebnis.extra = ergebnis.extra.filter(k => ergebnis.stufe.has(k.v) && ergebnis.stufe.has(k.n));
+    }
+    return Object.assign(ergebnis, { tiefe, fehlt: voll.stufe.size - ergebnis.stufe.size, abgeschnitten, vor, start });
+  }
+  // Kürzester Weg zwischen zwei Funktionen („Warum hängt“) nach denselben Regeln, vorwärts.
+  function funktionsWeg(von, nach) {
+    const a = FD.nachId.get(von), b = FD.nachId.get(nach);
+    if (!a || !b) return null;
+    const vorgaenger = new Map([[a.i, null]]);
+    let rand = [a.i];
+    while (rand.length && !vorgaenger.has(b.i)) {
+      const neu = [];
+      rand.slice().sort((x, y) => FD.fn[x].id < FD.fn[y].id ? -1 : 1).forEach(x => {
+        const schritte = wegSchritte(x, true);
+        const ziele = [];
+        schritte.forEach(s => { ziele.push(s); erweiterung(s.ziel, true).forEach(e => ziele.push({ k: e.k, ziel: e.ziel, ueber: s })); });
+        ziele.forEach(s => { if (!vorgaenger.has(s.ziel)) { vorgaenger.set(s.ziel, { von: x, s }); neu.push(s.ziel); } });
+      });
+      rand = neu;
+    }
+    if (!vorgaenger.has(b.i)) return null;
+    const knoten = [b.i], kanten = [], extra = [];
+    let x = b.i;
+    while (vorgaenger.get(x)) {
+      const v = vorgaenger.get(x);
+      if (v.s.ueber) { kanten.push(v.s.ueber.k); extra.push(v.s.k); knoten.push(v.s.ueber.ziel); }
+      else kanten.push(v.s.k);
+      knoten.push(v.von);
+      x = v.von;
+    }
+    knoten.reverse();
+    return { knoten, kanten, extra };
+  }
+  function pfadErgebnis(w) {
+    const weg = funktionsWeg(w.von, w.nach);
+    const stufe = new Map();
+    if (weg) {
+      let d = 0;
+      weg.knoten.forEach((i, nr) => {
+        // Über ueberschreibt erreichte Funktionen stehen in der Spalte des überschriebenen Ziels.
+        if (nr > 0 && weg.extra.some(k => k.v === i && k.n === weg.knoten[nr - 1])) stufe.set(i, d);
+        else stufe.set(i, nr === 0 ? 0 : ++d);
+      });
+    }
+    return { stufe, kanten: weg ? weg.kanten : [], extra: weg ? weg.extra : [], tiefe: null, fehlt: 0, abgeschnitten: 0, vor: true, pfad: !!weg, start: fn(w.von) ? fn(w.von).i : null };
+  }
+
+  function wegElemente(kanten) {
+    const w = berechneWeg();
+    zustand.wegErgebnis = w;
+    const els = [];
+    const rahmen = new Set();
+    const ids = [...w.stufe.keys()].sort((a, b) => (w.stufe.get(a) - w.stufe.get(b)) || (FD.fn[a].id < FD.fn[b].id ? -1 : 1));
+    ids.forEach(i => {
+      const f = FD.fn[i], d = w.stufe.get(i);
+      const r = 'fw:' + d + ':' + f.pfad;
+      if (!rahmen.has(r)) { rahmen.add(r); els.push({ group: 'nodes', data: { id: r, label: dateiName(f.pfad), typ: 'fnachbar', ref: 'datei:' + f.pfad, pfad: f.pfad } }); }
+      els.push(fKasten(f, r, true));
+    });
+    w.kanten.forEach(k => kanten.add(FD.fn[k.v].id, FD.fn[k.n].id, k.art, k));
+    // ueberschreibt/actual stehen in einer Spalte und zählen nicht für das Layout.
+    w.extra.forEach(k => { kanten.add(FD.fn[k.v].id, FD.fn[k.n].id, k.art, k); });
+    const extraIds = new Set(w.extra.map(k => k.id));
+    const alt = kanten.werte;
+    kanten.werte = () => alt().map(e => { if (e.data.kanten.every(id => extraIds.has(id))) e.classes = 'ohneLayout'; return e; });
+    const ort = new Map(ids.map(i => [i, FD.fn[i].id]));
+    grenzErsatz(els, ort, w.kanten.concat(w.extra));
+    return els;
+  }
+
+  // Klassen, die von Schaltern abhängen (Markierung, detekt), ohne neues Layout.
+  function fKlassen() {
+    zeigeWegInfo();
+    if (zustand.ebene !== 'funktion' || !FD) return;
+    const paare = grenzPaare();
+    cy.batch(() => {
+      cy.elements().removeClass('grenze grenzziel');
+      cy.nodes('[typ="funktion"]').forEach(n => n.data('sym', symbolCode(FD.fn[n.data('fi')])));
+      cy.edges().forEach(e => {
+        const ids = e.data('kanten') || [];
+        let b = e.data('befund') ? befundNachId.get(e.data('befund')) : null;
+        if (!b) {
+          for (const id of ids) {
+            const k = FD.kanten[+id.slice(3)];
+            if (k && k.art !== 'ueberschreibt' && k.art !== 'actual' && paare.has(FD.fn[k.v].id + '|' + FD.fn[k.n].id)) { b = paare.get(FD.fn[k.v].id + '|' + FD.fn[k.n].id); break; }
+          }
+        }
+        if (b && zustand.markierung) { e.addClass('grenze'); e.target().addClass('grenzziel'); }
+      });
+    });
+  }
+
+  // ---- Zählzeile des Wegmodus
+  const weginfo = document.getElementById('weginfo');
+  function zeigeWegInfo() {
+    const w = zustand.ebene === 'funktion' && zustand.weg ? zustand.wegErgebnis : null;
+    document.querySelector('.flaeche').classList.toggle('mitweg', !!w);
+    if (!w) { weginfo.hidden = true; return; }
+    const erreicht = [...w.stufe.keys()].filter(i => i !== w.start);
+    const dateien = new Set([...w.stufe.keys()].map(i => FD.fn[i].pfad));
+    const markiert = erreicht.filter(i => FD.fn[i].markiert).length;
+    let text;
+    if (zustand.weg.art === 'pfad') {
+      text = w.pfad ? 'Weg ' + kurzFunktion(zustand.weg.von) + ' → ' + kurzFunktion(zustand.weg.nach) + ': ' + (w.stufe.size - 1) + ' Schritte über ' + dateien.size + ' Dateien'
+        : kurzFunktion(zustand.weg.von) + ' ruft ' + kurzFunktion(zustand.weg.nach) + ' nicht (über ' + (zustand.fUnsicher ? 'sichere und unsichere' : 'sichere') + ' Kanten' + (zustand.fLesen ? ' mit Lesezugriffen' : '') + ').';
+    } else {
+      text = 'Wirkungsweg ' + (w.vor ? 'vorwärts' : 'rückwärts') + ' ab ' + kurzFunktion(zustand.weg.start) + ', Tiefe ' + w.tiefe + ': ' + erreicht.length + ' Funktionen in ' + dateien.size + ' Dateien erreicht · davon markiert ' + markiert + ', unmarkiert ' + (erreicht.length - markiert);
+      if (w.tiefe < zustand.weg.tiefe) text += ' · Tiefe auf ' + w.tiefe + ' gekürzt (Grenze ' + GRENZE_KAESTEN + ' Kästen), ' + w.fehlt + ' Funktionen bis Tiefe ' + zustand.weg.tiefe + ' nicht gezeigt';
+      else if (w.abgeschnitten) text += ' · ' + w.abgeschnitten + ' Funktionen nicht gezeigt (Grenze ' + GRENZE_KAESTEN + ' Kästen)';
+    }
+    weginfo.innerHTML = `<span>${esc(text)}</span> <button type="button" class="btn" data-zur-datei>Zurück zur Datei</button>`;
+    weginfo.querySelector('[data-zur-datei]').addEventListener('click', zurueckZurDatei);
+    weginfo.hidden = false;
+  }
+  async function zurueckZurDatei() {
+    const start = zustand.weg ? (zustand.weg.start || zustand.weg.von) : null;
+    zustand.weg = null;
+    if (start) await zeigeFunktion(start); else await zeigeFunktionsDatei(zustand.fDatei);
+  }
+
+  // Ansicht beim Öffnen: alles, wenn es lesbar ist, sonst die eigene Datei bzw. der Start.
+  function fStartAnsicht() {
+    if (ziel(cy.elements(), 30).zoom >= LESBAR) { einpassen(cy.elements(), 30); return; }
+    const kern = zustand.weg ? cy.getElementById(fn(zustand.weg.start || zustand.weg.von) ? fn(zustand.weg.start || zustand.weg.von).id : '') : cy.getElementById('ff:' + zustand.fDatei);
+    if (kern.empty()) { einpassen(cy.elements(), 30); return; }
+    const v = ziel(kern, 30);
+    const zoom = Math.max(v.zoom, Math.min(1, LESBAR * 1.05));
+    const bb = kern.boundingBox();
+    cy.viewport({ zoom, pan: { x: cy.width() / 2 - zoom * (bb.x1 + bb.w / 2), y: bb.h * zoom <= cy.height() - 60 ? cy.height() / 2 - zoom * (bb.y1 + bb.h / 2) : 40 - zoom * bb.y1 } });
+  }
+
+  // ---- Öffnen
+  async function zeigeFunktionsDatei(pfad, opt) {
+    fdaten();
+    zustand.ebene = 'funktion';
+    if (pfad !== zustand.fDatei) zustand.fAuf = new Set();
+    zustand.fDatei = pfad;
+    zustand.zuletztDatei = pfad;
+    zustand.weg = null;
+    const eigene = (FD.nachDatei.get(pfad) || []).map(i => FD.fn[i]);
+    if (eigene.some(f => f.test) && !eigene.some(f => !f.test) && !zustand.mitTests) zustand.mitTests = true;
+    if (!opt || !opt.ohneAuswahl) setzeAuswahl({ art: 'fdatei', id: pfad });
+    if (veraltet()) await zeichne();
+    leeren();
+    if (!opt || !opt.ohneAuswahl) dateiFunktionenSeite(pfad);
+  }
+  async function zeigeFunktion(id, opt) {
+    const f = fn(id);
+    if (!f) return;
+    if (zustand.weg && !cy.getElementById(id).nonempty()) zustand.weg = null;
+    if (!zustand.weg) {
+      if (f.pfad !== zustand.fDatei) zustand.fAuf = new Set();
+      zustand.fDatei = f.pfad;
+    }
+    zustand.zuletztDatei = f.pfad;
+    zustand.ebene = 'funktion';
+    if (f.test && !zustand.mitTests) zustand.mitTests = true;
+    setzeAuswahl({ art: 'funktion', id });
+    if (veraltet()) await zeichne();
+    // Liegt die Funktion in einer zusammengefassten Nachbardatei, wird diese aufgeklappt.
+    if (!zustand.weg && cy.getElementById(id).empty() && cy.getElementById('fz:' + f.pfad).nonempty()) {
+      zustand.fAuf.add(f.pfad);
+      await zeichne();
+    }
+    if (!opt || !opt.ohneFokus) hebeFunktionHervor(id);
+    funktionsDetails(id);
+  }
+  function hebeFunktionHervor(id) {
+    const f = fn(id);
+    if (cy.getElementById(id).nonempty()) fokus([id], { titel: kurzFunktion(id) });
+    else if (f && cy.getElementById('fz:' + f.pfad).nonempty()) fokus(['fz:' + f.pfad], { titel: kurzFunktion(id) });
+    else leeren();
+    zeigeWegInfo();
+  }
+  async function zeigeWeg(id, richtung, tiefe) {
+    const f = fn(id);
+    if (!f) return;
+    zustand.ebene = 'funktion';
+    zustand.fDatei = zustand.fDatei || f.pfad;
+    zustand.fTiefe = tiefe;
+    zustand.weg = { art: 'weg', start: id, richtung, tiefe };
+    setzeAuswahl({ art: 'funktion', id });
+    if (veraltet()) await zeichne();
+    hebeFunktionHervor(id);
+    funktionsDetails(id);
+  }
+  async function zeigeFunktionsPfad(von, nach) {
+    fdaten();
+    zustand.ebene = 'funktion';
+    zustand.weg = { art: 'pfad', von, nach };
+    zustand.fDatei = zustand.fDatei || fn(von).pfad;
+    setzeAuswahl({ art: 'pfad', von, nach, ebene: 'funktion' });
+    if (veraltet()) await zeichne();
+    leeren();
+    zeigeWegInfo();
+    const w = zustand.wegErgebnis;
+    if (w.pfad) {
+      const nks = cy.nodes('[typ="funktion"]');
+      nks.addClass('hl');
+      cy.getElementById(fn(von).id).addClass('gewaehlt');
+      fluss.start(cy.edges().not('.ohneLayout'));
+    }
+    funktionsDetails(von);
+    return w.pfad ? [...w.stufe.keys()].map(i => FD.fn[i].id) : null;
+  }
+  async function zeigeGrenze(befundId) {
+    const b = befundNachId.get(befundId);
+    if (!b) return;
+    const von = fn(b.beleg.von);
+    if (!von) return;
+    if (!zustand.markierung) { zustand.markierung = true; document.getElementById('u-markierung').checked = true; }
+    if (b.beleg.unsicher && !zustand.fUnsicher) zustand.fUnsicher = true;
+    zustand.ebene = 'funktion';
+    zustand.weg = null;
+    if (von.pfad !== zustand.fDatei) zustand.fAuf = new Set();
+    zustand.fDatei = von.pfad;
+    setzeAuswahl({ art: 'grenze', id: befundId });
+    if (veraltet()) await zeichne();
+    const nach = fn(b.beleg.nach);
+    if (nach && cy.getElementById(nach.id).empty() && cy.getElementById('fz:' + nach.pfad).nonempty()) { zustand.fAuf.add(nach.pfad); await zeichne(); }
+    const e = cy.edges('.grenze').filter(x => x.source().id() === von.id && (x.target().id() === b.beleg.nach || x.target().id() === 'fz:' + (nach ? nach.pfad : '')));
+    if (e.nonempty()) { hebeKanteHervor(e[0]); fKanteDetails(e[0]); }
+    else { hebeFunktionHervor(von.id); befundDetails(b); }
+  }
+
+  // ---- Seitenleiste
+  const kf = (id, text) => fn(id) ? `<button type="button" class="zur" data-funktion="${esc(id)}">${esc(text || kurzFunktion(id))}</button>` : `<code>${esc(text || kurzFunktion(id))}</code>`;
+  function signatur(f) {
+    const params = (f.params || []).map((t, i) => ((f.vararg || []).includes(i) ? 'vararg ' : '') + (t === null ? '?' : t) + ((f.vorgabe || []).includes(i) ? ' = …' : ''));
+    const name = f.name.replace(/\/\d+.*$/, '').replace(/^\[[^\]]*\]/, '');
+    const teile = [f.sicht].concat(f.mods || []);
+    if (f.c) return 'C: ' + name + '(' + (f.kurz.split('/')[1] || '') + ' Parameter)';
+    return teile.join(' ') + ' fun ' + (f.erw ? f.erw + '.' : '') + name + '(' + params.join(', ') + ')';
+  }
+  const TRAEGER_TEXT = { funktion: 'an der Funktion', klasse: 'an der Klasse', datei: 'an der Datei' };
+  // Unsicheres Ziel: die anderen Kandidaten derselben Aufrufstelle (gleicher Aufrufer, gleicher
+  // Name, unsicher).
+  function andereKandidaten(k) {
+    const name = n => FD.fn[n].name.replace(/\/.*$/, '');
+    return FD.raus[k.v].filter(x => x !== k && !x.sicher && x.art === k.art && name(x.n) === name(k.n)).map(x => FD.fn[x.n].id);
+  }
+  function aufrufZeile(k, gegen) {
+    const quelle = FD.fn[k.v];
+    const ort = k.zeile ? `<span class="ort">${esc(dateiName(quelle.pfad))}:${k.zeile}</span> ${editorKnopf(quelle.pfad, k.zeile, true)}` : '';
+    const merkmale = [ART_TEXT[k.art] || k.art];
+    if (k.herkunft) merkmale.push(k.herkunft);
+    if (k.gewicht > 1) merkmale.push(k.gewicht + '×');
+    if (FD.fn[k.v].test) merkmale.push('Test');
+    let unsicher = '';
+    if (!k.sicher) {
+      const andere = andereKandidaten(k);
+      unsicher = ` <span class="chip warn" title="unsicher">unsicher${k.grund ? ': ' + esc(k.grund) : ''}</span>${andere.length ? `<br><span class="leer">andere Kandidaten: ${andere.map(id => kf(id)).join(', ')}</span>` : ''}`;
+    }
+    return `<li>${kf(FD.fn[gegen].id)} ${ort} <span class="leer">${esc(merkmale.join(' · '))}</span>${unsicher}</li>`;
+  }
+  function aufrufListe(liste, gegen, leer) {
+    if (!liste.length) return `<p class="leer">${esc(leer)}</p>`;
+    const sortiert = liste.slice().sort((a, b) => (a.sicher === b.sicher ? 0 : a.sicher ? -1 : 1) || (FD.fn[gegen(a)].id < FD.fn[gegen(b)].id ? -1 : 1));
+    const html = `<ul class="liste kette">${sortiert.map(k => aufrufZeile(k, gegen(k))).join('')}</ul>`;
+    return sortiert.length > 40 ? `<details><summary>${sortiert.length} zeigen</summary>${html}</details>` : html;
+  }
+  function funktionsDetails(id) {
+    const f = fn(id);
+    if (!f) { uebersicht(); return; }
+    const chips = [];
+    if (f.markiert) chips.push(`<span class="chip warn" title="markiert">⛨ markiert${f.markierung ? ' · ' + esc(f.markierung[0].split('.').pop()) + ' ' + esc(TRAEGER_TEXT[f.markierung[1]]) : ''}</span>`);
+    if (f.ausnahme) chips.push('<span class="chip adr">Ausnahme</span>');
+    if (f.ohneKoerper) chips.push('<span class="chip">ohne Körper</span>');
+    if (f.implizit) chips.push('<span class="chip">implizit</span>');
+    if (f.test) chips.push('<span class="chip warn">Test</span>');
+    const annot = (f.annot || []).map(([n, s]) => `<li><code>@${esc(n)}</code>${s ? '' : ' <span class="leer">nicht aufgelöst</span>'}</li>`).join('');
+    const zeilen = [
+      ['Zeilen (ohne Leerzeilen)', f.zeilen], ['Komplexität', f.komplex === null ? '–' : f.komplex],
+      ['Fan-in sicher · mit unsicheren', f.fanIn + ' · ' + f.fanInU], ['Fan-out sicher · mit unsicheren', f.fanOut + ' · ' + f.fanOutU],
+      ['externe Aufrufe', f.extern]
+    ];
+    if (f.delegiert !== null && f.delegiert !== undefined) zeilen.push(['delegierte Eigenschaften gelesen', f.delegiert]);
+    const rein = FD.rein[f.i].filter(k => k.art !== 'ueberschreibt' && k.art !== 'actual' && (zustand.mitTests || !FD.fn[k.v].test));
+    const raus = FD.raus[f.i].filter(k => k.art !== 'ueberschreibt' && k.art !== 'actual');
+    const ueber = FD.raus[f.i].filter(k => k.art === 'ueberschreibt' || k.art === 'actual');
+    const ueberVon = FD.rein[f.i].filter(k => k.art === 'ueberschreibt' || k.art === 'actual');
+    const bf = M.befunde.filter(b => befundSichtbar(b) && (istMarkierung(b) ? b.beleg.von === id || b.beleg.nach === id || b.beleg.kette.some(e => e.funktion === id) : b.knoten.includes(id)));
+    const tiefe = zustand.weg && zustand.weg.tiefe ? zustand.weg.tiefe : zustand.fTiefe;
+    const weg = `<div><h3 class="quelle-m">Wirkungsweg <em>Tiefe</em></h3><div class="wegknoepfe"><button type="button" class="btn" data-weg="vor">Wirkungsweg vorwärts</button><button type="button" class="btn" data-weg="rueck">rückwärts</button><label>Tiefe <select id="weg-tiefe">${[1, 2, 3, 4, 5].map(n => `<option${n === tiefe ? ' selected' : ''}>${n}</option>`).join('')}</select></label></div>${zustand.weg ? '<p style="margin-top:6px"><button type="button" class="zur" data-zur-datei>← Zurück zur Datei</button></p>' : ''}</div>`;
+    seite.innerHTML = `<button type="button" class="zur" data-zur-datei-seite>← ${esc(dateiName(f.pfad))}</button>
+      <div><div class="kopfzeile"><h2>${esc(f.kurz)}</h2><div class="symbole">${editorKnopf(f.pfad, f.von)}</div></div>
+      <p class="pfad"><code>${esc(signatur(f))}</code></p>
+      <p class="pfad">${esc(f.pfad)}:${f.von}${f.bis !== f.von ? '–' + f.bis : ''}</p>${chips.length ? `<div class="chips" style="margin-top:6px">${chips.join('')}</div>` : ''}</div>
+      ${beschreibungHtml(id)}
+      ${weg}
+      ${annot ? `<div><h3 class="quelle-m">Annotationen <em>${f.annot.length}</em></h3><ul class="liste">${annot}</ul></div>` : ''}
+      <div><h3 class="quelle-m">Messwerte <em>gemessen · daidalos.json</em></h3><table>${zeilen.map(([a, b]) => `<tr><td>${esc(a)}</td><td>${esc(b)}</td></tr>`).join('')}</table></div>
+      <div><h3 class="quelle-m">Gerufen von <em>${rein.length}</em></h3>${aufrufListe(rein, k => k.v, 'niemandem (intern)')}</div>
+      <div><h3 class="quelle-m">Ruft <em>${raus.length}</em></h3>${aufrufListe(raus, k => k.n, 'keine interne Funktion')}</div>
+      ${ueber.length || ueberVon.length ? `<div><h3 class="quelle-m">Überschreibt · actual</h3><ul class="liste">${ueber.map(k => `<li>${esc(ART_TEXT[k.art])} ${kf(FD.fn[k.n].id)}${k.sicher ? '' : ' <span class="chip warn">unsicher</span>'}</li>`).join('')}${ueberVon.map(k => `<li>${k.art === 'actual' ? 'actual' : 'überschrieben von'} ${kf(FD.fn[k.v].id)}${k.sicher ? '' : ' <span class="chip warn">unsicher</span>'}</li>`).join('')}</ul></div>` : ''}
+      ${bf.length ? `<div><h3 class="quelle-m">Befunde an dieser Funktion <em>${bf.length}</em></h3><ol class="befunde">${bf.map(b => befundKnopf(b, '!')).join('')}</ol></div>` : ''}`;
+    verdrahte();
+    seite.querySelectorAll('[data-weg]').forEach(b => b.addEventListener('click', () => zeigeWeg(id, b.dataset.weg, +document.getElementById('weg-tiefe').value)));
+    document.getElementById('weg-tiefe').addEventListener('change', e => {
+      zustand.fTiefe = +e.target.value;
+      if (zustand.weg && zustand.weg.art === 'weg') zeigeWeg(zustand.weg.start, zustand.weg.richtung, zustand.fTiefe);
+    });
+    seite.querySelectorAll('[data-zur-datei]').forEach(b => b.addEventListener('click', zurueckZurDatei));
+    seite.querySelectorAll('[data-zur-datei-seite]').forEach(b => b.addEventListener('click', async () => {
+      if (zustand.weg) { zustand.weg = null; }
+      await zeigeFunktionsDatei(f.pfad);
+    }));
+  }
+  // Seitenleiste ohne gewählte Funktion: die Datei mit ihren Funktionen nach Zeile.
+  function dateiFunktionenSeite(pfad) {
+    const eigene = (FD.nachDatei.get(pfad) || []).map(i => FD.fn[i]).sort((a, b) => a.von - b.von || (a.id < b.id ? -1 : 1));
+    const dateiId = 'datei:' + pfad;
+    const zu = zustand.fZu && zustand.fZu.size ? `<p class="leer" style="margin-top:6px">${zustand.fZu.size} Nachbardateien zusammengefasst (Grenze ${GRENZE_KAESTEN} Kästen); ein Klick klappt eine auf.</p>` : '';
+    // Klassen als Überschrift, sobald sich der Behälter ändert (nach Zeile sortiert).
+    let zuletzt = null;
+    const kopf = f => {
+      if (f.behaelter === zuletzt) return '';
+      zuletzt = f.behaelter;
+      if (!f.behaelter) return '<li class="leer">oberste Ebene</li>';
+      const k = (FD.klassen.get(pfad) || new Map()).get(f.behaelter);
+      const teile = f.behaelter.split('.');
+      return `<li class="leer" style="padding-left:${(teile.length - 1) * 12}px">${esc(k ? KLASSEN_ART[k.art] || k.art : 'Klasse')} <code>${esc(f.behaelter)}</code></li>`;
+    };
+    const liste = eigene.map(f => kopf(f) + `<li style="padding-left:${(f.behaelter ? f.behaelter.split('.').length : 0) * 12}px">${f.markiert ? '<span title="markiert">⛨</span> ' : ''}${kf(f.id, f.name)} <span class="ort">${f.von}</span>${f.komplex !== null ? ` <span class="leer">K ${f.komplex}</span>` : ''}${f.ohneKoerper ? ' <span class="leer">ohne Körper</span>' : ''}</li>`).join('');
+    seite.innerHTML = `<button type="button" class="zur" data-knoten="${esc(dateiId)}">← Dateiebene</button>
+      <div><div class="kopfzeile"><h2>${esc(dateiName(pfad))}</h2><div class="symbole">${editorKnopf(pfad, 1)}</div></div><p class="pfad">${esc(pfad)} · Funktionsebene</p>${zu}</div>
+      ${knoten.has(dateiId) ? beschreibungHtml(dateiId) : ''}
+      <div><h3 class="quelle-m">Funktionen <em>${eigene.length}</em></h3>${eigene.length ? `<ul class="liste kette">${liste}</ul>` : '<p class="leer">Keine Funktionen in dieser Datei.</p>'}</div>
+      <div><p class="leer">Links stehen Aufrufer aus anderen Dateien, rechts Gerufene. Klick auf eine Funktion zeigt Signatur, Aufrufe und Wirkungsweg; Doppelklick auf eine fremde Funktion öffnet deren Datei.</p></div>`;
+    verdrahte();
+  }
+  // Seitenleiste ohne Datei: um eine Datei bitten.
+  function bitteUmDatei() {
+    const dateien = [...fdaten().nachDatei.keys()].sort();
+    seite.innerHTML = `<div><h2>Funktionsebene</h2><p class="leer">Die Funktionsebene zeigt immer eine Datei. Wähle eine Datei: Doppelklick auf der Dateiebene, Knopf „Funktionen“ in ihrer Seitenleiste oder hier.</p></div>
+      <div><input type="search" class="suche" id="f-datei" list="f-dateien" placeholder="Datei" aria-label="Datei" autocomplete="off"> <button type="button" class="btn" id="f-oeffnen">Öffnen</button><datalist id="f-dateien">${dateien.map(p => `<option value="${esc(p)}"></option>`).join('')}</datalist><p class="leer" id="f-fehler" style="margin-top:6px"></p></div>`;
+    const los = () => {
+      const t = document.getElementById('f-datei').value.trim();
+      const treffer = dateien.filter(p => p === t || p.endsWith('/' + t) || p.toLowerCase().includes(t.toLowerCase()));
+      const genau = dateien.find(p => p === t) || (treffer.length === 1 ? treffer[0] : null);
+      if (genau) zeigeFunktionsDatei(genau);
+      else document.getElementById('f-fehler').textContent = treffer.length ? treffer.length + ' Dateien passen' : 'Keine Datei mit Funktionen passt.';
+    };
+    document.getElementById('f-oeffnen').addEventListener('click', los);
+    document.getElementById('f-datei').addEventListener('keydown', e => { if (e.key === 'Enter') los(); });
+  }
+
+  function fKanteDetails(e) {
+    const d = e.data();
+    const ks = (d.kanten || []).map(id => FD.kanten[+id.slice(3)]).filter(Boolean);
+    let html = `<button type="button" class="zur" data-zur-datei-seite>← ${esc(dateiName(zustand.fDatei || ''))}</button>`;
+    const b = d.befund ? befundNachId.get(d.befund) : null;
+    if (!ks.length && b) {
+      html += `<div><h2>Grenzkante</h2><p class="pfad">${b ? esc(befundTitel(b)) : ''}</p></div><div><p>${kf(b.beleg.von)} ruft unmarkiert ${kf(b.beleg.nach)} über ueberschreibt/actual.</p><ol class="befunde" style="margin-top:8px">${befundKnopf(b, '!')}</ol></div>`;
+    } else {
+      const titel = ks.length === 1 ? kf(FD.fn[ks[0].v].id) + ' → ' + kf(FD.fn[ks[0].n].id) : esc(name(e.source().data('ref'))) + ' → ' + esc(name(e.target().data('ref')));
+      html += `<div><h2>${titel}</h2><p class="pfad">${esc(ART_TEXT[d.art] || d.art)}${d.verdichtet ? ' · zusammengefasst aus ' + ks.length + ' Kanten' : ''}</p></div>`;
+      html += `<div><h3 class="quelle-m">Aufrufe <em>gemessen · daidalos.json</em></h3><ul class="liste kette">${ks.map(k => aufrufZeile(k, k.n)).join('')}</ul><p class="leer" style="margin-top:6px">Je Kante die erste Aufrufstelle; alle Stellen stehen in daidalos.json und in daidalos aufrufe.</p></div>`;
+      const paare = grenzPaare();
+      const gb = ks.map(k => paare.get(FD.fn[k.v].id + '|' + FD.fn[k.n].id)).filter(Boolean);
+      if (gb.length) html += `<div><h3 class="quelle-m">Markierung verlassen <em>${gb.length}</em></h3><ol class="befunde">${gb.map(x => befundKnopf(x, '!')).join('')}</ol></div>`;
+    }
+    seite.innerHTML = html;
+    verdrahte();
+    seite.querySelectorAll('[data-zur-datei-seite]').forEach(x => x.addEventListener('click', () => { zustand.weg = null; zeigeFunktionsDatei(zustand.fDatei); }));
+  }
+
   // ------------------------------------------------------------ Start
   let gemerkt = null;
   try { gemerkt = localStorage.getItem('daidalos-thema'); } catch (e) { /* ohne Speicher */ }
@@ -1586,6 +2429,8 @@
   // Für Tests und spätere Erweiterungen.
   window.daidalos = {
     cy, zustand, zeiten, zeichne, zeigeBefund, zeigeKnoten, zeigeKante, zeigePfad, sucheWeg, editorLink,
+    zeigeFunktion, zeigeFunktionsDatei, zeigeWeg, zeigeFunktionsPfad, zeigeGrenze, fdaten, positionsEbene,
+    funktionsBlockGelesen: () => FD !== null, GRENZE_KAESTEN,
     kartenDateien, gross, SAMMEL, MIN_ZOOM_FOKUS, sperre, sperren, speicherName,
     fluss: () => fluss.stand(),
     letzterLink: () => letzterLink

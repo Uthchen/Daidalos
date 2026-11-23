@@ -29,6 +29,7 @@
         <button type="button" data-ebene="modul">Module</button>
         <button type="button" data-ebene="paket">Pakete</button>
         <button type="button" data-ebene="datei">Dateien</button>
+        <button type="button" data-ebene="funktion">Funktionen</button>
       </div>
     </div>
     <div class="gruppe"><b>Rolle</b>
@@ -42,6 +43,8 @@
       <label class="chk"><input type="checkbox" id="k-nutzt"><i></i>nutzt</label>
       <label class="chk"><input type="checkbox" id="k-jni"><i class="jni"></i>JNI</label>
       <label class="chk"><input type="checkbox" id="k-plugin"><i class="plugin"></i>Plugins</label>
+      <label class="chk"><input type="checkbox" id="k-lesen"><i class="zugriff"></i>Lesezugriffe</label>
+      <label class="chk"><input type="checkbox" id="k-unsicher" checked><i class="unsicher"></i>unsicher</label>
     </div>
     <div class="gruppe"><b>Überlagern</b>
       <label class="chk"><input type="checkbox" id="u-zyklen" checked><i class="red"></i>Zyklen</label>
@@ -65,6 +68,7 @@
     <div class="flaeche">
       <div id="cy" role="img" aria-label="Geflecht der Codebase"></div>
       <button type="button" class="schloss" id="schloss" aria-pressed="true" title="Alle Elemente zum Verschieben entsperren"></button>
+      <div class="weginfo" id="weginfo" hidden></div>
       <div class="pfadinfo" id="pfadinfo" hidden></div>
       <div class="lade" id="lade" hidden>Layout wird berechnet …</div>
       <div class="legende" aria-hidden="true">
@@ -77,6 +81,8 @@
         <span><i class="ln jni"></i>JNI</span>
         <span><i class="ln red"></i>Zyklus</span>
         <span><i class="sw einstieg"></i>Einstieg</span>
+        <span><i class="ln mark"></i>Markierung verlassen</span>
+        <span><i class="ln punkt"></i>überschreibt</span>
         <span>an jeder Datei: Code · Editor · Schloss</span>
       </div>
     </div>
@@ -87,6 +93,7 @@
 <script type="application/json" id="daidalos-daten">{{DATEN}}</script>
 <script type="application/json" id="daidalos-deutung">{{DEUTUNG}}</script>
 <script type="application/json" id="daidalos-einstellungen">{{EINSTELLUNGEN}}</script>
+<script type="application/json" id="funktionen">{{FUNKTIONEN}}</script>
 {{BIBLIOTHEKEN}}
 <script>
 {{SKRIPT}}

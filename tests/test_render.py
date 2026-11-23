@@ -111,8 +111,8 @@ def test_maskierung_von_script_ende() -> None:
 
 def test_bibliotheken_in_fester_anzahl_von_script_tags(tmp_path: Path) -> None:
     html = (rendere("mini_modulgraph", tmp_path) / "karte.html").read_text(encoding="utf-8")
-    # 3 Datenblöcke, 3 Bibliotheken, 1 Kartenskript.
-    assert html.count("</script>") == 7
+    # 4 Datenblöcke (seit A09 mit dem Funktionsblock), 3 Bibliotheken, 1 Kartenskript.
+    assert html.count("</script>") == 8
 
 
 def _messung() -> dict:
