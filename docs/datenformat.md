@@ -1,6 +1,6 @@
 # Datenformat
 
-Stand 2026-11-23 (A08). Diese Datei beschreibt `daidalos.json` (Ausgabe des Programms),
+Stand 2026-11-23 (A09). Diese Datei beschreibt `daidalos.json` (Ausgabe des Programms),
 `deutung.json` (Ausgabe des Skills, vom Programm nur gelesen) und `daidalos.toml` (Konfiguration im
 Zielrepo). Jede Änderung am Format wird hier nachgetragen;
 inkompatible Änderungen erhöhen `schema`.
@@ -371,14 +371,12 @@ oder zu Funktionen, ohne Abdeckungsbefunde (`unaufgeloest` der Art `aufruf`) und
 Datei-Felder `funktionen`, `klassen`, `annotationen` und `eigenschaften`. Für Messungen ohne
 Funktionsebene ist sie gleich der Messung.
 
-**Vorläufig bis A09.** Die Funktionsebene (Funktionsknoten, `ruft`, `ueberschreibt`, `actual`,
+**Endgültig seit A09.** Die Funktionsebene (Funktionsknoten, `ruft`, `ueberschreibt`, `actual`,
 `jni` auf Funktionsebene, die Datei-Felder `funktionen`, `klassen`, `annotationen`,
-`eigenschaften` und der Abdeckungsbefund) ist bis einschließlich A09 **vorläufig**. Ihre Felder
-dürfen sich in dieser Zeit ändern, ohne dass `schema` steigt: `schema` bleibt 1, auch bei
-inkompatiblen Änderungen der Funktionsebene. Diese Ausnahme gilt nur für die Funktionsebene; jede
-Änderung steht hier mit dem Auftrag, der sie gebracht hat. Programme, die die Funktionsebene lesen,
-richten sich bis dahin nach dieser Datei, nicht nach `schema`. Die Strukturansicht ist nicht
-betroffen.
+`eigenschaften` und der Abdeckungsbefund) war von A07 bis A09 vorläufig und durfte sich ohne
+höheres `schema` ändern. Seit A09 gilt für sie wie für alles andere Leitplanke 6: Jede Änderung
+steht hier, inkompatible Änderungen erhöhen `schema`. A09 hat `daidalos.json` nicht geändert; die
+Liste unten hält fest, was sich in der vorläufigen Zeit geändert hat.
 
 Änderungen in A08 (inkompatibel zu A07b):
 
@@ -774,7 +772,10 @@ Markdown auf stdout (`--json`: dasselbe als JSON), nur aus Messung und Deutung, 
 Inhalt: Projekt, Commit und Zahlen; Module und Ordner (Dateien, Zeilen, Fan-in, Fan-out,
 Gradle-Kanten nach außen); Pakete je Modul bzw. Ordner; wichtige Dateien mit Grund; Befunde in
 einer Zeile; **Messung** (seit A07: Funktionen produktiv und Test, `ruft`-Kanten sicher und
-unsicher, unaufgelöste Aufrufe mit den zehn häufigsten Namen; JSON-Schlüssel `messung`); **Offen**.
+unsicher, unaufgelöste Aufrufe mit den zehn häufigsten Namen; JSON-Schlüssel `messung`); seit A09
+**wichtige Funktionen** (JSON `wichtige_funktionen`: `id`, `datei`, `zeile_von`, `zeile_bis`,
+`fan_in`, `komplexitaet`, `markiert`, `gruende`, `deutung`; `zahlen.wichtige_funktionen`);
+**Offen**.
 Die Spalte „Deutung“ zeigt je Knoten `ok`, `fehlt`, `veraltet` oder `fremd`. Die Zusammenfassung
 arbeitet auf der Strukturansicht (ohne Funktionsebene, siehe dort).
 
@@ -790,10 +791,17 @@ fremde Dateien, die mindestens eines erfüllen. Gründe in dieser Reihenfolge:
 | `jni` | Ende einer `jni`-Kante |
 | `modulkante` | Ende einer produktiven `nutzt`-Datei-Kante mit `gewicht` ≥ 3 zwischen verschiedenen Modulen bzw. Ordnern |
 
+**Wichtige Funktionen** (seit A09, Auswahlregel, keine Deutung): produktive Funktionen mit `hash`
+(ohne implizite Konstruktoren) außerhalb von Fremdcode. Gründe: `fan-in` (die 20 mit dem höchsten
+sicheren `metriken.fan_in`, nur Fan-in > 0, Gleichstand nach Id) und `grenzkante` (`von` eines
+Befunds `markierung-verlassen`, nach Zahl der Grenzkanten, dann Id). Höchstens 40 insgesamt, die
+Fan-in-Auswahl zuerst. Ihre Beschreibung hat als Schlüssel die Funktions-Id; Hash und Abgleich
+laufen wie bei Dateien über den `hash` des Funktionsknotens.
+
 **Offen:**
 
-- Beschreibung `fehlt` für Module, Ordner und Pakete (ohne reinen Fremdcode) und wichtige Dateien
-  ohne Eintrag mit Text in `beschreibungen`.
+- Beschreibung `fehlt` für Module, Ordner und Pakete (ohne reinen Fremdcode), wichtige Dateien und
+  (seit A09) wichtige Funktionen ohne Eintrag mit Text in `beschreibungen`.
 - Beschreibung `veraltet` für jeden beschriebenen Knoten, dessen `hash` vom aktuellen abweicht.
 - Befunde ohne Einschätzung (außer `unaufgeloest` der Art `aufruf` und detekt-Befunden).
 - Tote Verweise: Ids in `beschreibungen`, `bereiche[].knoten`, `einschaetzungen[].befund` und
@@ -821,7 +829,9 @@ Für Module und Ordner: Kanten nach außen verdichtet, Pakete, wichtige Dateien 
 als eine Zeile (mit erster KDoc-Zeile); für Pakete alle Dateien voll, solange das Blatt unter
 etwa 400 Zeilen bleibt. Was nicht passt, steht als Kurzzeile oder als „… und n weitere“.
 Seit A07 listet das Arbeitsblatt **einer Datei** unter „deklariert“ zusätzlich die Funktions-Ids mit
-Zeile und Komplexität (C: `C`, implizite Konstruktoren: `implizit`), nach Zeile sortiert.
+Zeile und Komplexität (C: `C`, implizite Konstruktoren: `implizit`), nach Zeile sortiert; seit A09
+mit `Z. von–bis` (eine Zahl bei einer Zeile) und bei wichtigen Funktionen „wichtig, Deutung
+<stand>“.
 
 ## Aufrufe (`daidalos pfad` und `daidalos aufrufe`, seit A07)
 
@@ -879,7 +889,65 @@ absoluten Pfade).
 - **Sprungadressen:** `karte.html#knoten=<id>`, `#befund=<id>`, `#ebene=modul|paket|datei`,
   `#ebene=<e>&kante=<id>` (gemessene Kanten-Id oder Id einer verdichteten Kante der Karte) und
   `#ebene=<e>&von=<id>&nach=<id>` (Pfad-Suche); Ids URL-kodiert (`encodeURIComponent`). Die Adresse
-  folgt der Auswahl, jede neue Auswahl ist ein Eintrag im Browser-Verlauf.
+  folgt der Auswahl, jede neue Auswahl ist ein Eintrag im Browser-Verlauf. Seit A09 für die
+  Funktionsebene: `#datei-funktionen=<pfad>`, `#funktion=<id>` (mit `&datei-funktionen=<pfad>`,
+  wenn die Funktion als Nachbar einer anderen Datei gewählt ist), `#funktion=<id>&weg=vor|rueck&tiefe=N`
+  (Wirkungsweg, `&gewaehlt=<id>` für eine andere gewählte Funktion darin), `#grenze=<befund-id>`
+  (Grenzkante auf der Funktionsebene), `#ebene=funktion` und `#ebene=funktion&von=<id>&nach=<id>`
+  (Weg zwischen zwei Funktionen).
+- **Funktionsebene (seit A09):** eine Fokus-Ansicht je Datei, nie die ganze Ebene. Gezeigt werden
+  die Datei mit Klassen, Objekten und Companions als verschachtelte Rahmen und ihren Funktionen,
+  dazu je fremder Datei ein Rahmen mit den Funktionen, die hierher rufen oder von hier gerufen
+  werden (ELK, Richtung rechts). Kanten: `ruft` (unsicher gestrichelt, Gewicht ab 2 als Zahl),
+  `lesen`/`schreiben` dünn (Schalter „Lesezugriffe“, aus), `ueberschreibt`/`actual` gepunktet,
+  Schalter „unsicher“ (in der Dateiansicht an). Kanten aus Testcode nur mit „mit Tests“. Über 150
+  Kästen werden Nachbardateien mit den meisten Funktionen zu „Datei (+N)“ zusammengefasst, bis es
+  passt; ein Klick klappt eine auf. Grenzkanten `markierung-verlassen` sind in der Befundfarbe
+  gezeichnet, ihr Ziel bekommt einen Rand in derselben Farbe; gibt es keine Kante (Grenze über
+  `ueberschreibt`), steht eine Ersatzkante da. **Wirkungsweg:** Breitensuche ab einer Funktion
+  vorwärts oder rückwärts bis Tiefe 1–5 (Standard 3), ohne Wiederholungen, nur `ruft` (mit
+  Lesezugriffen nur mit dem Schalter), im Wegmodus standardmäßig nur sichere Kanten. Wie in der
+  Markierungs-Kette werden erreichte Ziele vorwärts um ihre Überschreibungen und `actual`
+  erweitert, rückwärts jede Funktion um das, was sie überschreibt, und ihr `expect` (gleiche
+  Spalte). Spalten nach Abstand, je Spalte und Datei ein Rahmen; über 150 Kästen wird die Tiefe
+  gekürzt und die Zählzeile nennt, wie viel fehlt. Gemerkte Positionen unter dem Schlüssel
+  `…|funktion:<pfad>` (Wirkungswege `…|funktion-weg:<id>:<richtung>:<tiefe>`).
+- **Funktionsblock (seit A09):** ein vierter Block `<script type="application/json"
+  id="funktionen">`, nur für die Karte; `daidalos.json` bleibt unverändert. Die Karte liest ihn
+  erst beim ersten Öffnen der Funktionsebene. Ohne Funktionsknoten steht `null` darin. Aufbau
+  (Schlüssel sortiert, kompakt):
+
+  ```json
+  { "format": 1, "arten": ["ruft", "lesen", "schreiben", "ueberschreibt", "actual", "jni"],
+    "dateien": ["core/…/Strich.kt"], "felder": ["datei", "kurz", …],
+    "funktionen": [[0, "Strich.setze/1", "Strich", 12, 20, 1, 3, 8, 2, 2, 1, 3, 0, 0,
+                    "public", [], ["Int"], [], [], [["de.a.Strichpfad", true]], null,
+                    ["de.a.Strichpfad", "funktion"]]],
+    "kanten": [[0, 4, 0, 1, 2, 14, 3, -1]],
+    "klassen": [[["Strich", "klasse", 10]]],
+    "merkmale": { "markiert": 1, "ausnahme": 2, "ohne_koerper": 4, "implizit": 8, "test": 16, "c": 32 },
+    "texte": ["import", "lesen", "unbekannter-empfaenger"] }
+  ```
+
+  - `dateien`: Pfade aller Dateien mit Funktionen, sortiert; `klassen[i]` gehört zu `dateien[i]`:
+    `[name, art, zeile]` wie im Datei-Feld `klassen`.
+  - `funktionen`: eine Zeile je Funktionsknoten, sortiert nach Id; die Spalten nennt `felder`:
+    `datei` (Index in `dateien`), `kurz` (Teil der Id hinter `#`; die Id ist
+    `funktion:<dateien[datei]>#<kurz>`), `behaelter`, `zeile_von`, `zeile_bis`, `merkmale`
+    (Bitfeld nach `merkmale`), `komplexitaet`, `zeilen`, `fan_in`, `fan_in_unsicher`, `fan_out`,
+    `fan_out_unsicher`, `externe_aufrufe`, `delegiert_gelesen`, `sichtbarkeit`, `modifikatoren`,
+    `parameter`, `parameter_vorgabe`, `parameter_vararg`, `annotationen` (`[name, sicher]`),
+    `erweiterung`, `markierung` (`[Annotation, Träger]` mit Träger `funktion`, `klasse` oder
+    `datei` nach der Regel der Markierungs-Kette, aus `[markierungen].annotationen`; `null`,
+    wenn nicht markiert oder ohne Konfiguration).
+  - `kanten`: `[von, nach, art, sicher, gewicht, ersteZeile, herkunft, grund]`, sortiert. `von`
+    und `nach` sind Indizes in `funktionen`, `art` ein Index in `arten`, `sicher` 0/1. Eine
+    `ruft`-Kante wird nach ihren Belegen geteilt: Belege mit Herkunft `lesen` bzw. `schreiben`
+    bilden eine Kante dieser Art, alle übrigen eine `ruft`-Kante; `sicher` und `gewicht` gelten je
+    Teil. Von den Belegen steht nur die erste Zeile (`ersteZeile`) mit ihrer Herkunft (`herkunft`,
+    Index in `texte`) und bei unsicheren Kanten der Grund des ersten unsicheren Belegs (`grund`,
+    Index in `texte`); `-1` für keinen. Die volle Liste steht in `daidalos.json`. Bei `jni` ist
+    `ersteZeile` die Kotlin-Zeile, bei `ueberschreibt`/`actual` `null`.
 - **Im Editor öffnen:** Die Karte setzt den Link zur Laufzeit zusammen: Verzeichnis der eigenen
   `file://`-Adresse plus `wurzel` plus Pfad der Datei. `{pfad}` ist der absolute Pfad mit `/`, ohne
   führenden Schrägstrich (`E:/Repo/app/A.kt`, unter Linux `home/u/repo/app/A.kt`), jedes Segment

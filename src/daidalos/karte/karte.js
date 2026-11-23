@@ -106,7 +106,8 @@
     wegErgebnis: null,
     fTiefe: 3,
     fLesen: false,             // Lesezugriffe (lesen/schreiben) zeigen und folgen
-    fUnsicher: true,           // unsichere Kanten zeigen und folgen
+    fUnsicher: true,           // Dateiansicht: unsichere Kanten zeigen (Standard an)
+    wegUnsicher: false,        // Wegmodus: unsicheren Kanten folgen (Standard aus, wie daidalos aufrufe)
     fAuf: new Set(),           // einzeln aufgeklappte Nachbardateien
     fZu: new Set(),
     fKaesten: 0
@@ -322,7 +323,7 @@
     if (zustand.ebene === 'funktion') {
       const w = zustand.weg;
       const weg = !w ? '' : w.art === 'weg' ? [w.start, w.richtung, w.tiefe].join('~') : ['pfad', w.von, w.nach].join('~');
-      return ['funktion', zustand.fDatei, weg, zustand.fLesen ? 'l' : '', zustand.fUnsicher ? 'u' : '', zustand.mitTests ? 't' : 'p',
+      return ['funktion', zustand.fDatei, weg, zustand.fLesen ? 'l' : '', unsicherAn() ? 'u' : '', zustand.mitTests ? 't' : 'p',
         zustand.markierung ? 'm' : '', [...zustand.fAuf].sort().join(','), zustand.kantenfuehrung].join('|');
     }
     const a = zustand.arten[zustand.ebene];
@@ -880,7 +881,7 @@
     zeilen.push(['Instabilität', zahl(m.instabilitaet)]);
     const bf = M.befunde.filter(b => befundSichtbar(b) && b.knoten.some(x => x === id || dateiDerFunktion(x) === id));
     const mitFunktionen = k.art === 'datei' && (k.sprache === 'kotlin' || k.sprache === 'c');
-    const symbole = k.art === 'datei' ? `<div class="symbole">${mitFunktionen ? `<button type="button" data-funktionen-datei="${esc(k.pfad)}" title="Funktionsebene dieser Datei öffnen">Funktionen</button>` : ''}<button type="button" disabled title="Code-Ansicht kommt mit daidalos serve">${SVG_CODE}Code</button>${editorKnopf(k.pfad, 1)}</div>` : '';
+    const symbole = k.art === 'datei' ? `<div class="symbole"><button type="button" disabled title="Code-Ansicht kommt mit daidalos serve">${SVG_CODE}Code</button>${editorKnopf(k.pfad, 1)}${mitFunktionen ? `<button type="button" data-funktionen-datei="${esc(k.pfad)}" title="Funktionsebene dieser Datei öffnen">Funktionen</button>` : ''}</div>` : '';
     seite.innerHTML = `<button type="button" class="zur" data-zurueck>← Übersicht</button>
       <div><div class="kopfzeile"><h2>${esc(name(id))}</h2>${symbole}</div><p class="pfad">${esc(unter)}</p>${chips.length ? `<div class="chips" style="margin-top:6px">${chips.join('')}</div>` : ''}</div>
       ${beschreibungHtml(id)}
@@ -1269,7 +1270,7 @@
       const c = document.getElementById('k-' + a);
       const moeglich = zustand.ebene === 'funktion';
       c.disabled = !moeglich;
-      c.checked = a === 'lesen' ? zustand.fLesen : zustand.fUnsicher;
+      c.checked = a === 'lesen' ? zustand.fLesen : unsicherAn();
       c.closest('label').classList.toggle('aus', !moeglich);
     });
     const pl = document.getElementById('k-plugin');
@@ -1301,7 +1302,7 @@
   // Ebenenwahl „Funktionen“: zuletzt gewählte Datei, sonst um eine Datei bitten.
   async function oeffneFunktionsebene() {
     const fd = fdaten();
-    const kandidat = [zustand.fDatei, zustand.zuletztDatei].find(p => p && fd.nachDatei.has(p));
+    const kandidat = [zustand.zuletztDatei, zustand.fDatei].find(p => p && fd.nachDatei.has(p));
     if (kandidat) { await zeigeFunktionsDatei(kandidat); return; }
     zustand.ebene = 'funktion';
     zustand.fDatei = null;
@@ -1336,7 +1337,7 @@
   }));
   document.getElementById('k-plugin').addEventListener('change', e => { zustand.plugins = e.target.checked; neuZeichnen(); });
   document.getElementById('k-lesen').addEventListener('change', e => { zustand.fLesen = e.target.checked; neuZeichnen(); });
-  document.getElementById('k-unsicher').addEventListener('change', e => { zustand.fUnsicher = e.target.checked; neuZeichnen(); });
+  document.getElementById('k-unsicher').addEventListener('change', e => { if (zustand.weg) zustand.wegUnsicher = e.target.checked; else zustand.fUnsicher = e.target.checked; neuZeichnen(); });
   document.getElementById('u-zyklen').addEventListener('change', e => { zustand.zyklen = e.target.checked; cy.style(stil()); });
   ['markierung', 'detekt'].forEach(schalter => document.getElementById('u-' + schalter).addEventListener('change', e => {
     zustand[schalter] = e.target.checked;
@@ -1851,10 +1852,12 @@
     return paare;
   }
 
+  // Schalter „unsicher“: Dateiansicht und Wegmodus haben eigene Stände.
+  function unsicherAn() { return zustand.weg ? zustand.wegUnsicher : zustand.fUnsicher; }
   // Kanten der Funktionsebene nach den Schaltern „Lesezugriffe“, „unsicher“ und „mit Tests“.
   function fKanteSichtbar(k) {
     if ((k.art === 'lesen' || k.art === 'schreiben') && !zustand.fLesen) return false;
-    if (!k.sicher && !zustand.fUnsicher) return false;
+    if (!k.sicher && !unsicherAn()) return false;
     if (!zustand.mitTests && FD.fn[k.v].test) return false;
     return true;
   }
@@ -2002,7 +2005,7 @@
   // Rückwärts: was die Funktion überschreibt (rekursiv) und ihr expect; deren Aufrufer landen hier.
   function erweiterung(i, vor) {
     const liste = vor ? FD.rein[i] : FD.raus[i];
-    return liste.filter(k => (k.art === 'ueberschreibt' || k.art === 'actual') && (k.sicher || zustand.fUnsicher) && (zustand.mitTests || !FD.fn[k.v].test))
+    return liste.filter(k => (k.art === 'ueberschreibt' || k.art === 'actual') && (k.sicher || unsicherAn()) && (zustand.mitTests || !FD.fn[k.v].test))
       .map(k => ({ k, ziel: vor ? k.v : k.n }));
   }
   function suche(start, vor, tiefe) {
@@ -2149,7 +2152,7 @@
     let text;
     if (zustand.weg.art === 'pfad') {
       text = w.pfad ? 'Weg ' + kurzFunktion(zustand.weg.von) + ' → ' + kurzFunktion(zustand.weg.nach) + ': ' + (w.stufe.size - 1) + ' Schritte über ' + dateien.size + ' Dateien'
-        : kurzFunktion(zustand.weg.von) + ' ruft ' + kurzFunktion(zustand.weg.nach) + ' nicht (über ' + (zustand.fUnsicher ? 'sichere und unsichere' : 'sichere') + ' Kanten' + (zustand.fLesen ? ' mit Lesezugriffen' : '') + ').';
+        : kurzFunktion(zustand.weg.von) + ' ruft ' + kurzFunktion(zustand.weg.nach) + ' nicht (über ' + (unsicherAn() ? 'sichere und unsichere' : 'sichere') + ' Kanten' + (zustand.fLesen ? ' mit Lesezugriffen' : '') + ').';
     } else {
       text = 'Wirkungsweg ' + (w.vor ? 'vorwärts' : 'rückwärts') + ' ab ' + kurzFunktion(zustand.weg.start) + ', Tiefe ' + w.tiefe + ': ' + erreicht.length + ' Funktionen in ' + dateien.size + ' Dateien erreicht · davon markiert ' + markiert + ', unmarkiert ' + (erreicht.length - markiert);
       if (w.tiefe < zustand.weg.tiefe) text += ' · Tiefe auf ' + w.tiefe + ' gekürzt (Grenze ' + GRENZE_KAESTEN + ' Kästen), ' + w.fehlt + ' Funktionen bis Tiefe ' + zustand.weg.tiefe + ' nicht gezeigt';

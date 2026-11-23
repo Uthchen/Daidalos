@@ -1,6 +1,6 @@
 ---
 name: daidalos
-description: "Zeichnet und deutet die Daidalos-Karte einer Codebase: misst mit dem Programm daidalos, wie Module, Pakete und Dateien verflochten sind, benennt Bereiche, beschreibt Module, Pakete und wichtige Dateien in je einem Satz, gewichtet Befunde wie Zyklen mit Begründung und Vorschlag und rendert karte.html und KARTE.md. Verwenden bei „Karte erstellen“, „Codebase-Karte aktualisieren“, „daidalos“, „Architektur-Karte“, „was hängt woran“, „warum hängt X an Y“, „wo sind Zyklen“, auch wenn das Wort Daidalos nicht fällt."
+description: "Zeichnet und deutet die Daidalos-Karte einer Codebase: misst mit dem Programm daidalos, wie Module, Pakete und Dateien verflochten sind, benennt Bereiche, beschreibt Module, Pakete, wichtige Dateien und wichtige Funktionen in je einem Satz, gewichtet Befunde wie Zyklen mit Begründung und Vorschlag und rendert karte.html und KARTE.md. Verwenden bei „Karte erstellen“, „Codebase-Karte aktualisieren“, „daidalos“, „Architektur-Karte“, „was hängt woran“, „warum hängt X an Y“, „wo sind Zyklen“, auch wenn das Wort Daidalos nicht fällt."
 argument-hint: "[zielrepo]"
 ---
 
@@ -53,7 +53,8 @@ daidalos zusammenfassung
 ```
 
 Die Zusammenfassung (Markdown, meist unter 300 Zeilen) enthält Zahlen, Module und Ordner, Pakete,
-**wichtige Dateien** mit Grund der Aufnahme, Befunde und den Abschnitt **Offen**. Lies nicht
+**wichtige Dateien** mit Grund der Aufnahme, **wichtige Funktionen** (seit A09), Befunde und den
+Abschnitt **Offen**. Lies nicht
 `daidalos.json` selbst; sie ist groß. `daidalos zusammenfassung --json` gibt dasselbe als JSON.
 
 Liegen Messung und Deutung nicht im Standardordner, gib sie an allen Befehlen mit
@@ -115,6 +116,13 @@ Satz `beschreibung` und `knoten` (Ids von Modulen, Ordnern, Paketen oder Dateien
 Je offenem Modul, Ordner, Paket und wichtiger Datei **ein** Satz in einfacher Sprache. Er sagt,
 wofür das Teil da ist, nicht wie es heißt. Nicht „StrichPuffer ist ein Puffer für Striche“,
 sondern „Hält die Punkte des laufenden Strichs, bis die Zeichenschicht sie abholt.“
+
+**Wichtige Funktionen** (Abschnitt in der Zusammenfassung: die 20 mit dem höchsten Fan-in und
+jede markierte Funktion mit Grenzkante) bekommen ebenfalls einen Satz; Schlüssel ist die
+Funktions-Id. Der Satz kommt aus dem **Körper der Funktion**: Lies ihn im Code an den Zeilen, die
+die Zusammenfassung (Spalte „Zeilen“) und das Arbeitsblatt der Datei (`Z. von–bis`) nennen, und
+sage, was die Funktion bewirkt, nicht wie sie heißt. Signatur und Name allein reichen nicht. Hash
+und `veraltet` laufen wie bei Dateien über den Hash des Funktionsknotens.
 
 ## 6. Einschätzungen
 

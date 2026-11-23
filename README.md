@@ -87,7 +87,13 @@ klon = "lokal/ziele/beispiel/klon"           # muss unter lokal/ liegen
 ausgabe = "lokal/ziele/beispiel/daidalos"    # Messung, Deutung, Karte
 konfiguration = "lokal/ziele/beispiel/daidalos.toml"  # optional
 zweig = "main"                               # optional, sonst origin/HEAD des Klons
+kopiere = ["local.properties"]               # optional: aus der Quelle, nicht in Git
+detekt = ["gradlew.bat", "detekt"]           # optional: Befehl für --mit-detekt (im Klon)
+umgebung = { JAVA_HOME = "C:/Java/jdk-21" }  # optional: Umgebung nur für den detekt-Befehl
 ```
+
+`umgebung` ergänzt die eigene Umgebung nur für den detekt-Befehl, nicht für den Scan; Werte werden
+wörtlich übernommen (keine Variablen-Ersetzung).
 
 Auffrischen:
 
