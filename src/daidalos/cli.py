@@ -197,6 +197,10 @@ def _aufrufzeilen(daten: dict[str, Any], aufrufe: dict[str, int]) -> list[str]:
         f"intern unsicher {aufrufe.get('intern-unsicher', 0)}"
         + (f" ({unsicher})" if unsicher else "")
         + f", unaufgelöst {aufrufe.get('unaufgeloest', 0)}, extern {aufrufe.get('extern', 0)}",
+        f"Zugriffe:  lesen sicher {aufrufe.get('lesen-sicher', 0)}, "
+        f"unsicher {aufrufe.get('lesen-unsicher', 0)}; "
+        f"schreiben sicher {aufrufe.get('schreiben-sicher', 0)}, "
+        f"unsicher {aufrufe.get('schreiben-unsicher', 0)}",
     ]
 
 

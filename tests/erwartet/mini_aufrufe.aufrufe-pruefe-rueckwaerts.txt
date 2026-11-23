@@ -6,6 +6,6 @@ Strich.pruefe/0  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt:21
     ← main/0  (siehe oben; Aufruf Haupt.kt:10)
     ← Werkbank.<init>/0  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt:11  (Aufruf Anlage.kt:12)
       ← Anlage.<init>/0  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt:15  (Aufruf Anlage.kt:16)
-    ← liefereStrich/0  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt:39  (Aufruf Werkzeug.kt:39)
+    ← liefereStrich/0  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt:40  (Aufruf Werkzeug.kt:40)
       ← zeichneAlles/1  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt:23  (Aufruf Werkzeug.kt:34)
     ← StrichTest.pruefeZeichnen/0  kern/src/commonTest/kotlin/de/beispiel/aufrufe/StrichTest.kt:7  (Aufruf StrichTest.kt:8)

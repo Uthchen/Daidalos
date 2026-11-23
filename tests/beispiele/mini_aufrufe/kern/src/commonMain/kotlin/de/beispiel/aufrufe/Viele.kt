@@ -2,7 +2,7 @@ package de.beispiel.aufrufe
 
 import de.beispiel.fremdmarken.Strichpfad
 
-// x.a().b(): unbekannter Empfänger mit wenigen und mit zu vielen Kandidaten
+// x.a().b(): unbekannter Empfänger mit wenigen und mit zu vielen Kandidaten (A07b: x = irgendwas)
 @Strichpfad
 class Eins { fun wert(): Int = 1; fun teil(): Int = 1 }
 
@@ -21,8 +21,8 @@ fun liefere(): Any = Eins()
 @Suppress("UNUSED")
 fun ketten() {
     liefere().toString().length
-    liefereEins().wert()
-    liefereEins().teil()
+    irgendwas().wert()
+    irgendwas().teil()
 }
 
 fun liefereEins(): Eins = Eins()
@@ -30,3 +30,5 @@ fun liefereEins(): Eins = Eins()
 expect fun plattformName(): String
 
 fun begruesse(): String = "Hallo " + plattformName()
+
+fun irgendwas() = liefere()

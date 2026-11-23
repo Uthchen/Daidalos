@@ -109,8 +109,8 @@
   "messung": {
     "funktionen": 27,
     "funktionen_test": 2,
-    "ruft_sicher": 14,
-    "ruft_unsicher": 1,
+    "ruft_sicher": 15,
+    "ruft_unsicher": 0,
     "unaufgeloeste_aufrufe": 0,
     "unaufgeloeste_dateien": 0,
     "unaufgeloeste_namen": []

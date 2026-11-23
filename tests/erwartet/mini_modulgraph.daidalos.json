@@ -191,24 +191,6 @@
       "von": "datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt"
     },
     {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt->funktion:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt#Start.<init>/0",
-      "nach": "funktion:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt#Start.<init>/0",
-      "von": "datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt"
-    },
-    {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt->funktion:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt#Start.bibliothek/0",
-      "nach": "funktion:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt#Start.bibliothek/0",
-      "von": "datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt"
-    },
-    {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt->funktion:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt#Start.los/0",
-      "nach": "funktion:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt#Start.los/0",
-      "von": "datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt"
-    },
-    {
       "art": "nutzt",
       "beleg": [
         {
@@ -223,18 +205,6 @@
       "nach": "datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt",
       "rolle": "produktiv",
       "sicher": true,
-      "von": "datei:anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt"
-    },
-    {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt->funktion:anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt#Bibliothek.<init>/0",
-      "nach": "funktion:anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt#Bibliothek.<init>/0",
-      "von": "datei:anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt"
-    },
-    {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt->funktion:anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt#Bibliothek.start/0",
-      "nach": "funktion:anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt#Bibliothek.start/0",
       "von": "datei:anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt"
     },
     {
@@ -269,12 +239,6 @@
       "nach": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Journal.kt",
       "rolle": "test",
       "sicher": true,
-      "von": "datei:anwendung/src/test/kotlin/beispiel/anwendung/StartTest.kt"
-    },
-    {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:anwendung/src/test/kotlin/beispiel/anwendung/StartTest.kt->funktion:anwendung/src/test/kotlin/beispiel/anwendung/StartTest.kt#StartTest.pruefe/0",
-      "nach": "funktion:anwendung/src/test/kotlin/beispiel/anwendung/StartTest.kt#StartTest.pruefe/0",
       "von": "datei:anwendung/src/test/kotlin/beispiel/anwendung/StartTest.kt"
     },
     {
@@ -352,24 +316,6 @@
       "von": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt"
     },
     {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt->funktion:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt#auswerten/2",
-      "nach": "funktion:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt#auswerten/2",
-      "von": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt"
-    },
-    {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt->funktion:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt#beginne/0",
-      "nach": "funktion:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt#beginne/0",
-      "von": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt"
-    },
-    {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt->funktion:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt#letzteMessung/0",
-      "nach": "funktion:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt#letzteMessung/0",
-      "von": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt"
-    },
-    {
       "art": "nutzt",
       "beleg": [
         {
@@ -410,12 +356,6 @@
       "von": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt"
     },
     {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt->funktion:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt#Messung.journal/0",
-      "nach": "funktion:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt#Messung.journal/0",
-      "von": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt"
-    },
-    {
       "art": "nutzt",
       "beleg": [
         {
@@ -430,12 +370,6 @@
       "nach": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt",
       "rolle": "produktiv",
       "sicher": true,
-      "von": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt"
-    },
-    {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt->funktion:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt#Eintrag.quelle/0",
-      "nach": "funktion:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt#Eintrag.quelle/0",
       "von": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt"
     },
     {
@@ -473,18 +407,6 @@
       "von": "datei:kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt"
     },
     {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt->funktion:kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt#AuswertungTest.pruefe/0",
-      "nach": "funktion:kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt#AuswertungTest.pruefe/0",
-      "von": "datei:kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt"
-    },
-    {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt->funktion:kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt#Punkt.<init>/2",
-      "nach": "funktion:kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt#Punkt.<init>/2",
-      "von": "datei:kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt"
-    },
-    {
       "art": "nutzt",
       "beleg": [
         {
@@ -519,18 +441,6 @@
       "von": "datei:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt"
     },
     {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt->funktion:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt#Strich.<init>/0",
-      "nach": "funktion:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt#Strich.<init>/0",
-      "von": "datei:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt"
-    },
-    {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt->funktion:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt#Strich.schiebe/1",
-      "nach": "funktion:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt#Strich.schiebe/1",
-      "von": "datei:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt"
-    },
-    {
       "art": "nutzt",
       "beleg": [
         {
@@ -548,24 +458,6 @@
       "von": "datei:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt"
     },
     {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt->funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#Hilfen.kennung/0",
-      "nach": "funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#Hilfen.kennung/0",
-      "von": "datei:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt"
-    },
-    {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt->funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#[Punkt]verschoben/1",
-      "nach": "funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#[Punkt]verschoben/1",
-      "von": "datei:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt"
-    },
-    {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt->funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#abstand/2",
-      "nach": "funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#abstand/2",
-      "von": "datei:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt"
-    },
-    {
       "art": "nutzt",
       "beleg": [
         {
@@ -580,18 +472,6 @@
       "nach": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt",
       "rolle": "produktiv",
       "sicher": true,
-      "von": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt"
-    },
-    {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt->funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt#Anfang.<init>/0",
-      "nach": "funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt#Anfang.<init>/0",
-      "von": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt"
-    },
-    {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt->funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt#Anfang.weiter/0",
-      "nach": "funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt#Anfang.weiter/0",
       "von": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt"
     },
     {
@@ -618,24 +498,6 @@
       "von": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt"
     },
     {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt->funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt#Ende.<init>/0",
-      "nach": "funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt#Ende.<init>/0",
-      "von": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt"
-    },
-    {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt->funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt#Ende.art/0",
-      "nach": "funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt#Ende.art/0",
-      "von": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt"
-    },
-    {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt->funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt#Ende.zurueck/0",
-      "nach": "funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt#Ende.zurueck/0",
-      "von": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt"
-    },
-    {
       "art": "nutzt",
       "beleg": [
         {
@@ -659,24 +521,6 @@
       "von": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt"
     },
     {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt->funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt#Mitte.<init>/0",
-      "nach": "funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt#Mitte.<init>/0",
-      "von": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt"
-    },
-    {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt->funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt#Mitte.weiter/0",
-      "nach": "funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt#Mitte.weiter/0",
-      "von": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt"
-    },
-    {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:nativ/src/main/cpp/insel_jni.c->funktion:nativ/src/main/cpp/insel_jni.c#Java_beispiel_nativ_Insel_rechne_1schnell/3",
-      "nach": "funktion:nativ/src/main/cpp/insel_jni.c#Java_beispiel_nativ_Insel_rechne_1schnell/3",
-      "von": "datei:nativ/src/main/cpp/insel_jni.c"
-    },
-    {
       "art": "jni",
       "beleg": [
         {
@@ -693,30 +537,14 @@
       "von": "datei:nativ/src/main/kotlin/beispiel/nativ/Insel.kt"
     },
     {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:nativ/src/main/kotlin/beispiel/nativ/Insel.kt->funktion:nativ/src/main/kotlin/beispiel/nativ/Insel.kt#Insel.fehlt/0",
-      "nach": "funktion:nativ/src/main/kotlin/beispiel/nativ/Insel.kt#Insel.fehlt/0",
-      "von": "datei:nativ/src/main/kotlin/beispiel/nativ/Insel.kt"
-    },
-    {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:nativ/src/main/kotlin/beispiel/nativ/Insel.kt->funktion:nativ/src/main/kotlin/beispiel/nativ/Insel.kt#Insel.rechne_schnell/1",
-      "nach": "funktion:nativ/src/main/kotlin/beispiel/nativ/Insel.kt#Insel.rechne_schnell/1",
-      "von": "datei:nativ/src/main/kotlin/beispiel/nativ/Insel.kt"
-    },
-    {
-      "art": "enthaelt",
-      "id": "kante:enthaelt:datei:werkzeug/Pruefung.kt->funktion:werkzeug/Pruefung.kt#pruefe/0",
-      "nach": "funktion:werkzeug/Pruefung.kt#pruefe/0",
-      "von": "datei:werkzeug/Pruefung.kt"
-    },
-    {
       "art": "ruft",
       "beleg": [
         {
           "herkunft": "konstruktor",
           "sicher": true,
-          "zeile": 10
+          "zeilen": [
+            10
+          ]
         }
       ],
       "gewicht": 1,
@@ -732,7 +560,9 @@
         {
           "herkunft": "konstruktor",
           "sicher": true,
-          "zeile": 8
+          "zeilen": [
+            8
+          ]
         }
       ],
       "gewicht": 1,
@@ -748,7 +578,9 @@
         {
           "herkunft": "objekt",
           "sicher": true,
-          "zeile": 8
+          "zeilen": [
+            8
+          ]
         }
       ],
       "gewicht": 1,
@@ -764,7 +596,9 @@
         {
           "herkunft": "konstruktor",
           "sicher": true,
-          "zeile": 7
+          "zeilen": [
+            7
+          ]
         }
       ],
       "gewicht": 1,
@@ -780,7 +614,9 @@
         {
           "herkunft": "konstruktor",
           "sicher": true,
-          "zeile": 6
+          "zeilen": [
+            6
+          ]
         }
       ],
       "gewicht": 1,
@@ -794,17 +630,18 @@
       "art": "ruft",
       "beleg": [
         {
-          "grund": "unbekannter-empfaenger",
-          "herkunft": "unbekannter-empfaenger",
-          "sicher": false,
-          "zeile": 6
+          "herkunft": "konstruktor-ergebnis",
+          "sicher": true,
+          "zeilen": [
+            6
+          ]
         }
       ],
       "gewicht": 1,
       "id": "kante:ruft:funktion:anwendung/src/test/kotlin/beispiel/anwendung/StartTest.kt#StartTest.pruefe/0->funktion:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt#Start.los/0:test",
       "nach": "funktion:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt#Start.los/0",
       "rolle": "test",
-      "sicher": false,
+      "sicher": true,
       "von": "funktion:anwendung/src/test/kotlin/beispiel/anwendung/StartTest.kt#StartTest.pruefe/0"
     },
     {
@@ -813,7 +650,9 @@
         {
           "herkunft": "import",
           "sicher": true,
-          "zeile": 8
+          "zeilen": [
+            8
+          ]
         }
       ],
       "gewicht": 1,
@@ -829,7 +668,9 @@
         {
           "herkunft": "import",
           "sicher": true,
-          "zeile": 8
+          "zeilen": [
+            8
+          ]
         }
       ],
       "gewicht": 1,
@@ -845,7 +686,9 @@
         {
           "herkunft": "konstruktor",
           "sicher": true,
-          "zeile": 10
+          "zeilen": [
+            10
+          ]
         }
       ],
       "gewicht": 1,
@@ -861,7 +704,9 @@
         {
           "herkunft": "gleiches-paket",
           "sicher": true,
-          "zeile": 7
+          "zeilen": [
+            7
+          ]
         }
       ],
       "gewicht": 1,
@@ -877,7 +722,9 @@
         {
           "herkunft": "erweiterung",
           "sicher": true,
-          "zeile": 7
+          "zeilen": [
+            7
+          ]
         }
       ],
       "gewicht": 1,
@@ -893,7 +740,9 @@
         {
           "herkunft": "konstruktor",
           "sicher": true,
-          "zeile": 5
+          "zeilen": [
+            5
+          ]
         }
       ],
       "gewicht": 1,
@@ -909,7 +758,9 @@
         {
           "herkunft": "konstruktor",
           "sicher": true,
-          "zeile": 6
+          "zeilen": [
+            6
+          ]
         }
       ],
       "gewicht": 1,
@@ -925,7 +776,9 @@
         {
           "herkunft": "konstruktor",
           "sicher": true,
-          "zeile": 8
+          "zeilen": [
+            8
+          ]
         }
       ],
       "gewicht": 1,
@@ -941,7 +794,9 @@
         {
           "herkunft": "konstruktor",
           "sicher": true,
-          "zeile": 6
+          "zeilen": [
+            6
+          ]
         }
       ],
       "gewicht": 1,
@@ -1657,6 +1512,7 @@
       "annotationen": [],
       "art": "datei",
       "bytes": 257,
+      "eigenschaften": [],
       "funktionen": 3,
       "hash": "sha256:d4ce78a89358102df5764073691057f6aa707a82b99658e74c3086d6826806a6",
       "id": "datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt",
@@ -1664,6 +1520,7 @@
         {
           "annotationen": [],
           "art": "klasse",
+          "eigenschaften": [],
           "name": "Start",
           "obertypen": [],
           "zeile": 7
@@ -1686,6 +1543,7 @@
       "annotationen": [],
       "art": "datei",
       "bytes": 197,
+      "eigenschaften": [],
       "fremd": true,
       "funktionen": 2,
       "hash": "sha256:8f8454b0976785ed84a3117aab9103a606ae81e15fb66dd7667cda045632407b",
@@ -1694,6 +1552,7 @@
         {
           "annotationen": [],
           "art": "klasse",
+          "eigenschaften": [],
           "name": "Bibliothek",
           "obertypen": [],
           "zeile": 6
@@ -1716,6 +1575,7 @@
       "annotationen": [],
       "art": "datei",
       "bytes": 170,
+      "eigenschaften": [],
       "funktionen": 1,
       "hash": "sha256:fbe6cb8915a623072c14193bc97c8d9cb8bff199c14e4e2b85278fe5403d251b",
       "id": "datei:anwendung/src/test/kotlin/beispiel/anwendung/StartTest.kt",
@@ -1723,6 +1583,7 @@
         {
           "annotationen": [],
           "art": "klasse",
+          "eigenschaften": [],
           "name": "StartTest",
           "obertypen": [],
           "zeile": 5
@@ -1793,6 +1654,7 @@
       "annotationen": [],
       "art": "datei",
       "bytes": 307,
+      "eigenschaften": [],
       "funktionen": 3,
       "hash": "sha256:6c14b2c5ee8fade9cc1ae05034236eea322282bc6921c5bcf871eeabb4078810",
       "id": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt",
@@ -1814,6 +1676,7 @@
       "annotationen": [],
       "art": "datei",
       "bytes": 285,
+      "eigenschaften": [],
       "funktionen": 1,
       "hash": "sha256:24662785873949f85296981c085f6cd755e5780ad5edf3a562a4ef4f43544b64",
       "id": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt",
@@ -1821,6 +1684,18 @@
         {
           "annotationen": [],
           "art": "klasse",
+          "eigenschaften": [
+            {
+              "delegiert": false,
+              "name": "eintrag",
+              "zeile": 7
+            },
+            {
+              "delegiert": false,
+              "name": "art",
+              "zeile": 8
+            }
+          ],
           "name": "Messung",
           "obertypen": [],
           "zeile": 7
@@ -1843,6 +1718,7 @@
       "annotationen": [],
       "art": "datei",
       "bytes": 180,
+      "eigenschaften": [],
       "funktionen": 1,
       "hash": "sha256:47d74efd83a00e816e5db10e72a277fdb7357e7908cbd32b2906c074f17b6b26",
       "id": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt",
@@ -1850,6 +1726,7 @@
         {
           "annotationen": [],
           "art": "klasse",
+          "eigenschaften": [],
           "name": "Eintrag",
           "obertypen": [],
           "zeile": 7
@@ -1857,6 +1734,7 @@
         {
           "annotationen": [],
           "art": "enum",
+          "eigenschaften": [],
           "name": "EintragsArt",
           "obertypen": [],
           "zeile": 5
@@ -1879,6 +1757,7 @@
       "annotationen": [],
       "art": "datei",
       "bytes": 119,
+      "eigenschaften": [],
       "funktionen": 0,
       "hash": "sha256:6ede18da4019981394e175ac7f5c8a36bc3cbf10303a72024629f04dff4b43c7",
       "id": "datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Journal.kt",
@@ -1886,6 +1765,13 @@
         {
           "annotationen": [],
           "art": "objekt",
+          "eigenschaften": [
+            {
+              "delegiert": false,
+              "name": "text",
+              "zeile": 4
+            }
+          ],
           "name": "Journal",
           "obertypen": [],
           "zeile": 3
@@ -1908,6 +1794,7 @@
       "annotationen": [],
       "art": "datei",
       "bytes": 242,
+      "eigenschaften": [],
       "funktionen": 1,
       "hash": "sha256:33bb9f583ebebf5fd86d164f9dd7b6d17a51297c536aefd72c793b36990ce739",
       "id": "datei:kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt",
@@ -1915,6 +1802,7 @@
         {
           "annotationen": [],
           "art": "klasse",
+          "eigenschaften": [],
           "name": "AuswertungTest",
           "obertypen": [],
           "zeile": 5
@@ -1953,6 +1841,7 @@
       "annotationen": [],
       "art": "datei",
       "bytes": 64,
+      "eigenschaften": [],
       "funktionen": 1,
       "hash": "sha256:5ef9e7a2256bdd7cfacd9f2d152fa57bb74b92151740e4653939328c78b8866f",
       "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt",
@@ -1960,6 +1849,18 @@
         {
           "annotationen": [],
           "art": "klasse",
+          "eigenschaften": [
+            {
+              "delegiert": false,
+              "name": "x",
+              "zeile": 3
+            },
+            {
+              "delegiert": false,
+              "name": "y",
+              "zeile": 3
+            }
+          ],
           "name": "Punkt",
           "obertypen": [],
           "zeile": 3
@@ -1982,6 +1883,7 @@
       "annotationen": [],
       "art": "datei",
       "bytes": 198,
+      "eigenschaften": [],
       "funktionen": 2,
       "hash": "sha256:23e31125c50adf4bd8fc16a324019fd858ed14d43181824e163889f26c1772b7",
       "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt",
@@ -1989,6 +1891,13 @@
         {
           "annotationen": [],
           "art": "klasse",
+          "eigenschaften": [
+            {
+              "delegiert": false,
+              "name": "punkte",
+              "zeile": 5
+            }
+          ],
           "name": "Strich",
           "obertypen": [],
           "zeile": 4
@@ -2011,6 +1920,7 @@
       "annotationen": [],
       "art": "datei",
       "bytes": 220,
+      "eigenschaften": [],
       "funktionen": 3,
       "hash": "sha256:7f17304976b80e241c292d2dd37045637e06a549e881c0c3f2218c9fa5d069b4",
       "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt",
@@ -2018,6 +1928,13 @@
         {
           "annotationen": [],
           "art": "objekt",
+          "eigenschaften": [
+            {
+              "delegiert": false,
+              "name": "GRENZE",
+              "zeile": 8
+            }
+          ],
           "name": "Hilfen",
           "obertypen": [],
           "zeile": 7
@@ -2040,6 +1957,7 @@
       "annotationen": [],
       "art": "datei",
       "bytes": 113,
+      "eigenschaften": [],
       "funktionen": 2,
       "hash": "sha256:66f78acdae44132b2ec79eba6abacc3b242fad8df23504e651028e768bcfec93",
       "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt",
@@ -2047,6 +1965,7 @@
         {
           "annotationen": [],
           "art": "klasse",
+          "eigenschaften": [],
           "name": "Anfang",
           "obertypen": [],
           "zeile": 5
@@ -2054,6 +1973,7 @@
         {
           "annotationen": [],
           "art": "enum",
+          "eigenschaften": [],
           "name": "AnfangsArt",
           "obertypen": [],
           "zeile": 3
@@ -2076,6 +1996,13 @@
       "annotationen": [],
       "art": "datei",
       "bytes": 154,
+      "eigenschaften": [
+        {
+          "delegiert": false,
+          "name": "ENDE_GRENZE",
+          "zeile": 3
+        }
+      ],
       "funktionen": 3,
       "hash": "sha256:1e2fb5301acb1fbdc7ce241ea57462690b0b1b43138ecc54fb49c37706d0b39c",
       "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt",
@@ -2083,6 +2010,7 @@
         {
           "annotationen": [],
           "art": "klasse",
+          "eigenschaften": [],
           "name": "Ende",
           "obertypen": [],
           "zeile": 5
@@ -2105,6 +2033,7 @@
       "annotationen": [],
       "art": "datei",
       "bytes": 108,
+      "eigenschaften": [],
       "funktionen": 2,
       "hash": "sha256:3ef923f62a3d2d603455ff4b6574de75eeba3a6d1a36f70e764f8f77b7f5a2e5",
       "id": "datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt",
@@ -2112,6 +2041,13 @@
         {
           "annotationen": [],
           "art": "klasse",
+          "eigenschaften": [
+            {
+              "delegiert": false,
+              "name": "grenze",
+              "zeile": 4
+            }
+          ],
           "name": "Mitte",
           "obertypen": [],
           "zeile": 3
@@ -2168,6 +2104,7 @@
       "annotationen": [],
       "art": "datei",
       "bytes": 117,
+      "eigenschaften": [],
       "funktionen": 2,
       "hash": "sha256:ae052e055da192b5a4e2f970c8db6efcd030419096e1eba412050609abd789ed",
       "id": "datei:nativ/src/main/kotlin/beispiel/nativ/Insel.kt",
@@ -2175,6 +2112,7 @@
         {
           "annotationen": [],
           "art": "objekt",
+          "eigenschaften": [],
           "name": "Insel",
           "obertypen": [],
           "zeile": 3
@@ -2213,6 +2151,7 @@
       "annotationen": [],
       "art": "datei",
       "bytes": 38,
+      "eigenschaften": [],
       "funktionen": 0,
       "hash": "sha256:e18aac8dcf06e6ae994d18e86e9f54714814ca4fb637d79883687284ad7c6490",
       "id": "datei:regeln/src/main/kotlin/beispiel/regeln/Regeln.kt",
@@ -2220,6 +2159,7 @@
         {
           "annotationen": [],
           "art": "klasse",
+          "eigenschaften": [],
           "name": "Regeln",
           "obertypen": [],
           "zeile": 3
@@ -2258,6 +2198,7 @@
       "annotationen": [],
       "art": "datei",
       "bytes": 40,
+      "eigenschaften": [],
       "funktionen": 1,
       "hash": "sha256:b4b7dedfe474b11eb5a6b294e783cc5cb3f046f0f00209282c7e5f3b6dfefd62",
       "id": "datei:werkzeug/Pruefung.kt",
@@ -2275,7 +2216,6 @@
       "zeilen": 3
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "Start",
       "datei": "anwendung/src/main/kotlin/beispiel/anwendung/Start.kt",
@@ -2291,9 +2231,7 @@
         "komplexitaet": 1,
         "zeilen": 0
       },
-      "modifikatoren": [],
       "name": "<init>",
-      "parameter": [],
       "quellsatz": "main",
       "rolle": "produktiv",
       "sichtbarkeit": "public",
@@ -2303,7 +2241,6 @@
       "zeile_von": 7
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "Start",
       "datei": "anwendung/src/main/kotlin/beispiel/anwendung/Start.kt",
@@ -2319,9 +2256,7 @@
         "komplexitaet": 1,
         "zeilen": 1
       },
-      "modifikatoren": [],
       "name": "bibliothek",
-      "parameter": [],
       "quellsatz": "main",
       "rolle": "produktiv",
       "sichtbarkeit": "public",
@@ -2331,7 +2266,6 @@
       "zeile_von": 10
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "Start",
       "datei": "anwendung/src/main/kotlin/beispiel/anwendung/Start.kt",
@@ -2347,9 +2281,7 @@
         "komplexitaet": 1,
         "zeilen": 1
       },
-      "modifikatoren": [],
       "name": "los",
-      "parameter": [],
       "quellsatz": "main",
       "rolle": "produktiv",
       "sichtbarkeit": "public",
@@ -2359,7 +2291,6 @@
       "zeile_von": 8
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "Bibliothek",
       "datei": "anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt",
@@ -2375,9 +2306,7 @@
         "komplexitaet": 1,
         "zeilen": 0
       },
-      "modifikatoren": [],
       "name": "<init>",
-      "parameter": [],
       "quellsatz": "main",
       "rolle": "produktiv",
       "sichtbarkeit": "public",
@@ -2387,7 +2316,6 @@
       "zeile_von": 6
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "Bibliothek",
       "datei": "anwendung/src/main/kotlin/beispiel/anwendung/fremd/Bibliothek.kt",
@@ -2403,9 +2331,7 @@
         "komplexitaet": 1,
         "zeilen": 1
       },
-      "modifikatoren": [],
       "name": "start",
-      "parameter": [],
       "quellsatz": "main",
       "rolle": "produktiv",
       "sichtbarkeit": "public",
@@ -2415,7 +2341,6 @@
       "zeile_von": 7
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "StartTest",
       "datei": "anwendung/src/test/kotlin/beispiel/anwendung/StartTest.kt",
@@ -2431,9 +2356,7 @@
         "komplexitaet": 2,
         "zeilen": 1
       },
-      "modifikatoren": [],
       "name": "pruefe",
-      "parameter": [],
       "quellsatz": "test",
       "rolle": "test",
       "sichtbarkeit": "public",
@@ -2443,7 +2366,6 @@
       "zeile_von": 6
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "",
       "datei": "kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt",
@@ -2459,21 +2381,10 @@
         "komplexitaet": 1,
         "zeilen": 1
       },
-      "modifikatoren": [],
       "name": "auswerten",
       "parameter": [
-        {
-          "name": "a",
-          "typ": "Punkt",
-          "vararg": false,
-          "vorgabe": false
-        },
-        {
-          "name": "b",
-          "typ": "Punkt",
-          "vararg": false,
-          "vorgabe": false
-        }
+        "Punkt",
+        "Punkt"
       ],
       "quellsatz": "commonMain",
       "rolle": "produktiv",
@@ -2484,7 +2395,6 @@
       "zeile_von": 8
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "",
       "datei": "kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt",
@@ -2500,9 +2410,7 @@
         "komplexitaet": 1,
         "zeilen": 1
       },
-      "modifikatoren": [],
       "name": "beginne",
-      "parameter": [],
       "quellsatz": "commonMain",
       "rolle": "produktiv",
       "sichtbarkeit": "public",
@@ -2512,7 +2420,6 @@
       "zeile_von": 10
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "",
       "datei": "kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Auswertung.kt",
@@ -2528,9 +2435,7 @@
         "komplexitaet": 1,
         "zeilen": 1
       },
-      "modifikatoren": [],
       "name": "letzteMessung",
-      "parameter": [],
       "quellsatz": "commonMain",
       "rolle": "produktiv",
       "sichtbarkeit": "public",
@@ -2540,7 +2445,6 @@
       "zeile_von": 12
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "Messung",
       "datei": "kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt",
@@ -2556,9 +2460,7 @@
         "komplexitaet": 1,
         "zeilen": 1
       },
-      "modifikatoren": [],
       "name": "journal",
-      "parameter": [],
       "quellsatz": "commonMain",
       "rolle": "produktiv",
       "sichtbarkeit": "public",
@@ -2568,7 +2470,6 @@
       "zeile_von": 10
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "Eintrag",
       "datei": "kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt",
@@ -2584,9 +2485,7 @@
         "komplexitaet": 1,
         "zeilen": 1
       },
-      "modifikatoren": [],
       "name": "quelle",
-      "parameter": [],
       "quellsatz": "commonMain",
       "rolle": "produktiv",
       "sichtbarkeit": "public",
@@ -2596,7 +2495,6 @@
       "zeile_von": 8
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "AuswertungTest",
       "datei": "kern-labor/src/commonTest/kotlin/beispiel/kern/labor/messung/AuswertungTest.kt",
@@ -2612,9 +2510,7 @@
         "komplexitaet": 1,
         "zeilen": 1
       },
-      "modifikatoren": [],
       "name": "pruefe",
-      "parameter": [],
       "quellsatz": "commonTest",
       "rolle": "test",
       "sichtbarkeit": "public",
@@ -2624,7 +2520,6 @@
       "zeile_von": 7
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "Punkt",
       "datei": "kern/src/commonMain/kotlin/beispiel/kern/Punkt.kt",
@@ -2640,21 +2535,10 @@
         "komplexitaet": 1,
         "zeilen": 0
       },
-      "modifikatoren": [],
       "name": "<init>",
       "parameter": [
-        {
-          "name": "x",
-          "typ": "Int",
-          "vararg": false,
-          "vorgabe": false
-        },
-        {
-          "name": "y",
-          "typ": "Int",
-          "vararg": false,
-          "vorgabe": false
-        }
+        "Int",
+        "Int"
       ],
       "quellsatz": "commonMain",
       "rolle": "produktiv",
@@ -2665,7 +2549,6 @@
       "zeile_von": 3
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "Strich",
       "datei": "kern/src/commonMain/kotlin/beispiel/kern/Strich.kt",
@@ -2681,9 +2564,7 @@
         "komplexitaet": 1,
         "zeilen": 1
       },
-      "modifikatoren": [],
       "name": "<init>",
-      "parameter": [],
       "quellsatz": "commonMain",
       "rolle": "produktiv",
       "sichtbarkeit": "public",
@@ -2693,7 +2574,6 @@
       "zeile_von": 4
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "Strich",
       "datei": "kern/src/commonMain/kotlin/beispiel/kern/Strich.kt",
@@ -2709,15 +2589,9 @@
         "komplexitaet": 1,
         "zeilen": 1
       },
-      "modifikatoren": [],
       "name": "schiebe",
       "parameter": [
-        {
-          "name": "p",
-          "typ": "Punkt",
-          "vararg": false,
-          "vorgabe": false
-        }
+        "Punkt"
       ],
       "quellsatz": "commonMain",
       "rolle": "produktiv",
@@ -2728,7 +2602,6 @@
       "zeile_von": 7
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "Hilfen",
       "datei": "kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt",
@@ -2744,9 +2617,7 @@
         "komplexitaet": 1,
         "zeilen": 1
       },
-      "modifikatoren": [],
       "name": "kennung",
-      "parameter": [],
       "quellsatz": "commonMain",
       "rolle": "produktiv",
       "sichtbarkeit": "public",
@@ -2756,7 +2627,6 @@
       "zeile_von": 10
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "",
       "datei": "kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt",
@@ -2772,15 +2642,9 @@
         "komplexitaet": 1,
         "zeilen": 1
       },
-      "modifikatoren": [],
       "name": "verschoben",
       "parameter": [
-        {
-          "name": "d",
-          "typ": "Int",
-          "vararg": false,
-          "vorgabe": false
-        }
+        "Int"
       ],
       "quellsatz": "commonMain",
       "rolle": "produktiv",
@@ -2791,7 +2655,6 @@
       "zeile_von": 5
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "",
       "datei": "kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt",
@@ -2807,21 +2670,10 @@
         "komplexitaet": 1,
         "zeilen": 1
       },
-      "modifikatoren": [],
       "name": "abstand",
       "parameter": [
-        {
-          "name": "a",
-          "typ": "Punkt",
-          "vararg": false,
-          "vorgabe": false
-        },
-        {
-          "name": "b",
-          "typ": "Punkt",
-          "vararg": false,
-          "vorgabe": false
-        }
+        "Punkt",
+        "Punkt"
       ],
       "quellsatz": "commonMain",
       "rolle": "produktiv",
@@ -2832,7 +2684,6 @@
       "zeile_von": 3
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "Anfang",
       "datei": "kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt",
@@ -2848,9 +2699,7 @@
         "komplexitaet": 1,
         "zeilen": 0
       },
-      "modifikatoren": [],
       "name": "<init>",
-      "parameter": [],
       "quellsatz": "commonMain",
       "rolle": "produktiv",
       "sichtbarkeit": "public",
@@ -2860,7 +2709,6 @@
       "zeile_von": 5
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "Anfang",
       "datei": "kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt",
@@ -2876,9 +2724,7 @@
         "komplexitaet": 1,
         "zeilen": 1
       },
-      "modifikatoren": [],
       "name": "weiter",
-      "parameter": [],
       "quellsatz": "commonMain",
       "rolle": "produktiv",
       "sichtbarkeit": "public",
@@ -2888,7 +2734,6 @@
       "zeile_von": 6
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "Ende",
       "datei": "kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt",
@@ -2904,9 +2749,7 @@
         "komplexitaet": 1,
         "zeilen": 0
       },
-      "modifikatoren": [],
       "name": "<init>",
-      "parameter": [],
       "quellsatz": "commonMain",
       "rolle": "produktiv",
       "sichtbarkeit": "public",
@@ -2916,7 +2759,6 @@
       "zeile_von": 5
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "Ende",
       "datei": "kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt",
@@ -2932,9 +2774,7 @@
         "komplexitaet": 1,
         "zeilen": 1
       },
-      "modifikatoren": [],
       "name": "art",
-      "parameter": [],
       "quellsatz": "commonMain",
       "rolle": "produktiv",
       "sichtbarkeit": "public",
@@ -2944,7 +2784,6 @@
       "zeile_von": 6
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "Ende",
       "datei": "kern/src/commonMain/kotlin/beispiel/kern/zyklus/Ende.kt",
@@ -2960,9 +2799,7 @@
         "komplexitaet": 1,
         "zeilen": 1
       },
-      "modifikatoren": [],
       "name": "zurueck",
-      "parameter": [],
       "quellsatz": "commonMain",
       "rolle": "produktiv",
       "sichtbarkeit": "public",
@@ -2972,13 +2809,12 @@
       "zeile_von": 8
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "Mitte",
       "datei": "kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt",
       "erweiterung": null,
+      "hash": "sha256:127c4649acacc885f553b8ade601680870ee6929e05fd2c72e3d0341eda83965",
       "id": "funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt#Mitte.<init>/0",
-      "implizit": true,
       "metriken": {
         "externe_aufrufe": 0,
         "fan_in": 1,
@@ -2986,21 +2822,18 @@
         "fan_out": 0,
         "fan_out_unsicher": 0,
         "komplexitaet": 1,
-        "zeilen": 0
+        "zeilen": 1
       },
-      "modifikatoren": [],
       "name": "<init>",
-      "parameter": [],
       "quellsatz": "commonMain",
       "rolle": "produktiv",
       "sichtbarkeit": "public",
       "sprache": "kotlin",
       "stelligkeit": 0,
-      "zeile_bis": 3,
+      "zeile_bis": 4,
       "zeile_von": 3
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "Mitte",
       "datei": "kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt",
@@ -3016,9 +2849,7 @@
         "komplexitaet": 1,
         "zeilen": 1
       },
-      "modifikatoren": [],
       "name": "weiter",
-      "parameter": [],
       "quellsatz": "commonMain",
       "rolle": "produktiv",
       "sichtbarkeit": "public",
@@ -3028,7 +2859,6 @@
       "zeile_von": 6
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "",
       "datei": "nativ/src/main/cpp/insel_jni.c",
@@ -3044,27 +2874,11 @@
         "komplexitaet": null,
         "zeilen": 4
       },
-      "modifikatoren": [],
       "name": "Java_beispiel_nativ_Insel_rechne_1schnell",
       "parameter": [
-        {
-          "name": "env",
-          "typ": "JNIEnv",
-          "vararg": false,
-          "vorgabe": false
-        },
-        {
-          "name": "self",
-          "typ": "jobject",
-          "vararg": false,
-          "vorgabe": false
-        },
-        {
-          "name": "a",
-          "typ": "jint",
-          "vararg": false,
-          "vorgabe": false
-        }
+        "JNIEnv",
+        "jobject",
+        "jint"
       ],
       "quellsatz": "main",
       "rolle": "produktiv",
@@ -3075,7 +2889,6 @@
       "zeile_von": 5
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "Insel",
       "datei": "nativ/src/main/kotlin/beispiel/nativ/Insel.kt",
@@ -3095,7 +2908,6 @@
         "external"
       ],
       "name": "fehlt",
-      "parameter": [],
       "quellsatz": "main",
       "rolle": "produktiv",
       "sichtbarkeit": "public",
@@ -3105,7 +2917,6 @@
       "zeile_von": 6
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "Insel",
       "datei": "nativ/src/main/kotlin/beispiel/nativ/Insel.kt",
@@ -3126,12 +2937,7 @@
       ],
       "name": "rechne_schnell",
       "parameter": [
-        {
-          "name": "a",
-          "typ": "Int",
-          "vararg": false,
-          "vorgabe": false
-        }
+        "Int"
       ],
       "quellsatz": "main",
       "rolle": "produktiv",
@@ -3142,7 +2948,6 @@
       "zeile_von": 4
     },
     {
-      "annotationen": [],
       "art": "funktion",
       "behaelter": "",
       "datei": "werkzeug/Pruefung.kt",
@@ -3158,9 +2963,7 @@
         "komplexitaet": 1,
         "zeilen": 1
       },
-      "modifikatoren": [],
       "name": "pruefe",
-      "parameter": [],
       "rolle": "produktiv",
       "sichtbarkeit": "public",
       "sprache": "kotlin",

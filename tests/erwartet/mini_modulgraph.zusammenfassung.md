@@ -86,7 +86,7 @@ Auswahlregel: produktiv, nicht fremd und mindestens eines: unter den 30 mit dem 
 
 ## Messung
 
-Funktionen: 27 produktiv, 2 Test; ruft-Kanten: 14 sicher, 1 unsicher.
+Funktionen: 27 produktiv, 2 Test; ruft-Kanten: 15 sicher, 0 unsicher.
 Unaufgelöste Aufrufe: keine.
 
 ## Offen

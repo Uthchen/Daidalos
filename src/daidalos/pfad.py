@@ -131,11 +131,15 @@ def _belege(daten: dict[str, Any], ebene: str, kanten: list[Kante]) -> list[Any]
         knoten = {k["id"]: k for k in daten["knoten"]}
         for k in kanten:
             datei = knoten[k["von"]]["datei"]
+            stellen = []
             for b in k["beleg"]:
-                eintrag = {"datei": datei, "herkunft": b["herkunft"], "zeile": b["zeile"]}
-                if not b["sicher"]:
-                    eintrag["grund"] = b.get("grund")
-                belege.append(eintrag)
+                for zeile in b["zeilen"]:
+                    eintrag = {"datei": datei, "herkunft": b["herkunft"], "zeile": zeile}
+                    if not b["sicher"]:
+                        eintrag["grund"] = b.get("grund")
+                    stellen.append(eintrag)
+            stellen.sort(key=lambda e: (e["zeile"], e["herkunft"], "grund" in e))
+            belege.extend(stellen)
         return belege[:BELEGE_JE_SCHRITT]
     nutzt = [k for k in kanten if k["art"] == "nutzt"]
     if ebene == "datei":
@@ -280,8 +284,10 @@ def aufrufbaum(
     while stapel:
         ziel, stufe, kante = stapel.pop()
         aufrufer = kante["von"]
-        belege = [b for b in kante["beleg"] if unsicher or b["sicher"]]
-        stellen = ", ".join(str(b["zeile"]) for b in belege)
+        nummern = sorted(
+            {z for b in kante["beleg"] if unsicher or b["sicher"] for z in b["zeilen"]}
+        )
+        stellen = ", ".join(str(z) for z in nummern)
         datei = knoten[aufrufer]["datei"].rsplit("/", 1)[-1]
         merkmale = [f"Aufruf {datei}:{stellen}"]
         if not kante["sicher"]:

@@ -55,7 +55,7 @@ def lade_messung(pfad: Path) -> dict[str, Any]:
 # Kanten zwischen Funktionen; die Karte zeigt sie (noch) nicht.
 FUNKTIONSKANTEN = frozenset({"ruft", "ueberschreibt", "actual"})
 # Felder des Datei-Knotens, die nur die Funktionsebene betreffen
-_FUNKTIONSFELDER = ("annotationen", "funktionen", "klassen")
+_FUNKTIONSFELDER = ("annotationen", "eigenschaften", "funktionen", "klassen")
 
 
 def ist_abdeckungsbefund(befund: dict[str, Any]) -> bool:

@@ -117,6 +117,7 @@ Zeilenumbruch verbunden.
 | `funktionen` | Zahl | seit A07: Zahl der Funktionsknoten der Datei (auch implizite Konstruktoren); bei Kotlin-Dateien und C/C++-Dateien mit `Java_…`-Funktionen |
 | `klassen` | Liste | seit A07, nur Kotlin, siehe [Klassen](#klassen) |
 | `annotationen` | Liste | seit A07, nur Kotlin: `@file:`-Annotationen, siehe [Annotationen](#annotationen) |
+| `eigenschaften` | Liste | seit A07b, nur Kotlin: Eigenschaften der obersten Ebene, Aufbau wie bei [Klassen](#klassen) |
 
 **Modul einer Datei:** der Modulordner mit dem längsten passenden Pfadpräfix (verschachtelte
 Module). Paketnamen werden dafür nicht herangezogen.
@@ -229,7 +230,7 @@ veraltete Beschreibungen.
 | `nutzt` | datei → datei | Kotlin-Bezug (Import, gleiches Paket, voll qualifiziert) |
 | `nutzt` | paket → paket, modul/ordner → modul/ordner | Verdichtung der Datei-Kanten, getrennt nach Rolle |
 | `jni` | datei (Kotlin) → datei (C/C++) | `external fun` zu `Java_…` |
-| `enthaelt` | modul/ordner → paket, paket → datei, modul/ordner → datei, datei → funktion | Hierarchie |
+| `enthaelt` | modul/ordner → paket, paket → datei, modul/ordner → datei | Hierarchie; seit A07b **keine** Kante datei → funktion, die Datei steht in `datei` des Funktionsknotens |
 | `ruft` | funktion → funktion | Aufruf, seit A07; siehe [Funktionsebene](#funktionsebene-seit-a07) |
 | `ueberschreibt` | funktion → funktion | `override fun` → Funktion im internen Obertyp, seit A07 |
 | `actual` | funktion → funktion | `actual fun` → `expect fun`, seit A07 |
@@ -363,8 +364,26 @@ Einschätzung und macht eine Datei nicht wichtig. Die Zusammenfassung zeigt ihn 
 Nur Kotlin (`.kt`) und die C-Seite von JNI. Karte, `KARTE.md`, Zusammenfassung und der Abgleich
 der Deutung arbeiten auf der **Strukturansicht**: der Messung ohne Funktionsknoten, ohne Kanten von
 oder zu Funktionen, ohne Abdeckungsbefunde (`unaufgeloest` der Art `aufruf`) und ohne die
-Datei-Felder `funktionen`, `klassen` und `annotationen`. Für Messungen ohne Funktionsebene ist sie
-gleich der Messung.
+Datei-Felder `funktionen`, `klassen`, `annotationen` und `eigenschaften`. Für Messungen ohne
+Funktionsebene ist sie gleich der Messung.
+
+**Vorläufig bis A09.** Die Funktionsebene (Funktionsknoten, `ruft`, `ueberschreibt`, `actual`,
+`jni` auf Funktionsebene, die Datei-Felder `funktionen`, `klassen`, `annotationen`,
+`eigenschaften` und der Abdeckungsbefund) ist bis einschließlich A09 **vorläufig**. Ihre Felder
+dürfen sich in dieser Zeit ändern, ohne dass `schema` steigt: `schema` bleibt 1, auch bei
+inkompatiblen Änderungen der Funktionsebene. Diese Ausnahme gilt nur für die Funktionsebene; jede
+Änderung steht hier mit dem Auftrag, der sie gebracht hat. Programme, die die Funktionsebene lesen,
+richten sich bis dahin nach dieser Datei, nicht nach `schema`. Die Strukturansicht ist nicht
+betroffen.
+
+Änderungen in A07b (inkompatibel zu A07):
+
+- keine `enthaelt`-Kante Datei → Funktion mehr;
+- `beleg` von `ruft` je (Herkunft, sicher, Grund) zusammengefasst, mit `zeilen` statt `zeile`;
+- `parameter` nur noch als Liste der Typen, dazu `parameter_vorgabe` und `parameter_vararg`;
+- leere Listen und `false` entfallen bei Funktionsknoten (Standardwerte in der Feldtabelle);
+- neue Herkünfte `rueckgabe`, `konstruktor-ergebnis`, `initialisierer`, `cast`, `lesen`,
+  `schreiben`; neues Feld `eigenschaften` an Klassen und Dateien.
 
 #### Welche Funktionen Knoten werden
 
@@ -373,7 +392,9 @@ gleich der Messung.
 - der primäre Konstruktor (`<init>`), sobald die Klasse (auch ein Objekt) `init`-Blöcke oder
   Initialisierer von Eigenschaften (auch `by`-Delegaten) mit Aufrufen hat. Seine Aufrufe stammen aus
   diesen Teilen, aus Vorgabewerten der Klassenparameter und aus dem Aufruf des
-  Oberklassen-Konstruktors (`: Basis(…)`). Seine Zeilen reichen vom Klassenkopf bis zum letzten Teil;
+  Oberklassen-Konstruktors (`: Basis(…)`). Seine Zeilen reichen vom Klassenkopf bis zum letzten Teil.
+  Seit A07b auch, wenn diese Teile keine Aufrufe, aber Zugriffe haben und mindestens ein Zugriff eine
+  Kante ergibt oder ein Aufruf den Konstruktor trifft (dann ohne Oberklassen-Aufruf und Vorgabewerte);
 - jeder sekundäre Konstruktor; `this(…)` und `super(…)` gelten als Aufruf eines Konstruktors;
 - `get()`/`set()` mit Körper;
 - **implizite Konstruktoren** (`implizit: true`): nur wenn ein Aufruf `Klasse(…)` eine Klasse ohne
@@ -387,30 +408,43 @@ nicht gezählt.
 
 #### Felder eines Funktionsknotens
 
-| Feld | Bedeutung |
-| --- | --- |
-| `id`, `art` (`"funktion"`) | siehe Id-Schema |
-| `datei` | Pfad der Datei (relativ, mit `/`) |
-| `sprache` | `kotlin` oder `c` |
-| `zeile_von`, `zeile_bis` | erste (mit Annotationen und Modifikatoren) und letzte Zeile |
-| `name`, `behaelter`, `stelligkeit` | wie in der Id; `behaelter` auf oberster Ebene `""` |
-| `sichtbarkeit` | `public`, `internal`, `protected`, `private` (ohne Angabe `public`) |
-| `modifikatoren` | sortiert, aus `abstract`, `actual`, `expect`, `external`, `infix`, `inline`, `open`, `operator`, `override`, `suspend` |
-| `erweiterung` | Empfängertyp wie geschrieben oder `null` |
-| `parameter` | `[{ "name", "typ", "vorgabe": bool, "vararg": bool }]`; `typ` wie geschrieben ohne Leerzeichen, `null` ohne Angabe (Setter) |
-| `rolle`, `quellsatz` | wie bei der Datei |
-| `annotationen` | siehe [Annotationen](#annotationen) |
-| `metriken` | siehe [Metriken je Funktion](#metriken-je-funktion) |
-| `hash` | `sha256:` über den Text der Funktion nach CRLF→LF; beim primären Konstruktor über seine Teile, mit Zeilenumbruch verbunden; fehlt bei impliziten Konstruktoren |
-| `implizit` | `true` bei impliziten Konstruktoren, sonst fehlt das Feld |
+Seit A07b **entfallen leere Listen und `false`** bei Funktionsknoten (nur dort). Ein fehlendes Feld
+hat den Standardwert aus der Spalte „fehlt →“; „nie“ heißt, das Feld steht immer da.
+
+| Feld | fehlt → | Bedeutung |
+| --- | --- | --- |
+| `id`, `art` (`"funktion"`) | nie | siehe Id-Schema |
+| `datei` | nie | Pfad der Datei (relativ, mit `/`); die Zugehörigkeit zur Datei (es gibt keine `enthaelt`-Kante) |
+| `sprache` | nie | `kotlin` oder `c` |
+| `zeile_von`, `zeile_bis` | nie | erste (mit Annotationen und Modifikatoren) und letzte Zeile |
+| `name`, `behaelter`, `stelligkeit` | nie | wie in der Id; `behaelter` auf oberster Ebene `""` |
+| `sichtbarkeit` | nie | `public`, `internal`, `protected`, `private` (ohne Angabe `public`) |
+| `modifikatoren` | `[]` | sortiert, aus `abstract`, `actual`, `expect`, `external`, `infix`, `inline`, `open`, `operator`, `override`, `suspend` |
+| `erweiterung` | nie | Empfängertyp wie geschrieben oder `null` |
+| `parameter` | `[]` | Typen der Parameter in Reihenfolge, wie geschrieben ohne Leerzeichen; `null` ohne Angabe (Setter). Parameternamen stehen nicht in der Messung |
+| `parameter_vorgabe` | `[]` | Indizes (ab 0) der Parameter mit Vorgabewert, aufsteigend |
+| `parameter_vararg` | `[]` | Index des `vararg`-Parameters |
+| `rolle` | nie | wie bei der Datei |
+| `quellsatz` | kein Quellsatz | wie bei der Datei |
+| `annotationen` | `[]` | siehe [Annotationen](#annotationen); bei C immer leer |
+| `metriken` | nie | siehe [Metriken je Funktion](#metriken-je-funktion) |
+| `hash` | implizit | `sha256:` über den Text der Funktion nach CRLF→LF; beim primären Konstruktor über seine Teile, mit Zeilenumbruch verbunden; fehlt nur bei impliziten Konstruktoren |
+| `implizit` | `false` | `true` bei impliziten Konstruktoren |
 
 #### Klassen
 
-Je Kotlin-Datei `klassen`: `{ "name", "art", "zeile", "annotationen", "obertypen" }`, sortiert nach
-`name`. `name` ist die Kette relativ zur Datei. `art` ist `klasse`, `schnittstelle`, `objekt`,
+Je Kotlin-Datei `klassen`: `{ "name", "art", "zeile", "annotationen", "eigenschaften",
+"obertypen" }`, sortiert nach `name`. `name` ist die Kette relativ zur Datei. `art` ist `klasse`, `schnittstelle`, `objekt`,
 `companion`, `enum`, `annotation` oder `enum-eintrag` (nur Einträge mit Körper). `obertypen`:
 `[{ "name": wie geschrieben ohne Typargumente, "voll": voller Name oder null }]`. `voll` ist
 gesetzt, wenn der Name intern oder über einen expliziten Import aufgelöst wird.
+
+`eigenschaften` (seit A07b): `[{ "delegiert": bool, "name", "zeile" }]` nach Zeile, dann Name: die
+Eigenschaften im Klassenkörper (ohne Erweiterungseigenschaften) und die `val`/`var`-Parameter des
+primären Konstruktors. `delegiert` ist `true` bei `by …` (etwa `by lazy`, `by mutableStateOf`);
+solche Eigenschaften haben keinen Accessor-Knoten und ergeben keine Kante. Das Datei-Feld
+`eigenschaften` listet ebenso die Eigenschaften der obersten Ebene. Hier entfallen leere Listen und
+`false` nicht.
 
 #### Annotationen
 
@@ -444,8 +478,8 @@ Auflösung; es gilt der erste Schritt, der greift:
    Typangabe oder `= Klasse(…)` (nur wenn vor dem Aufruf in einem umgebenden Block deklariert),
    Objekt-, Companion-, Klassen- und Enum-Namen sowie Ketten aus solchen **Eigenschaften**
    (`a.b.f()`, `Klasse.Companion.f()`, `Enum.EINTRAG.f()`; `Enum.entries` ist extern).
-   Typparameter gelten als ihre Schranke. Keine Rückgabetypen, keine Ketten über Aufrufe
-   (`a.b().c()`, auch `Klasse(…).f()`), keine Smart-Casts. Gesucht wird in der Klasse und ihren
+   Typparameter gelten als ihre Schranke. Seit A07b zusätzlich **Typen durch Nachschlagen**
+   (siehe unten). Keine Smart-Casts. Gesucht wird in der Klasse und ihren
    internen Obertypen (Breite zuerst, überschriebene nur einmal), bei Klassennamen im Objekt bzw. im
    Companion. Gibt es eine Klasse unter dem vollen Namen mehrfach, sind alle Kanten unsicher
    (`unbekannter-empfaenger`); eine `expect`- und ihre `actual`-Klasse zählen als eine.
@@ -473,6 +507,44 @@ Auflösung; es gilt der erste Schritt, der greift:
 7. **Extern:** bekannter externer Empfängertyp ohne passende Erweiterung, oder ohne Empfänger intern
    nicht gefunden. Keine Kante, nur `metriken.externe_aufrufe`.
 
+**Typen durch Nachschlagen (seit A07b).** Nur Typen, die ausdrücklich im Code stehen:
+
+- **Rückgabetyp** (Herkunft `rueckgabe`): `f().g()`, `a.b().c()`, wenn der innere Aufruf genau
+  ein sicheres Ziel hat und dieses einen ausgeschriebenen Rückgabetyp hat (Typparameter gelten als
+  Schranke). Eine Ausdrucksfunktion ohne Rückgabetyp (`fun f() = …`) zählt nur, wenn ihr Ausdruck
+  ein Konstruktoraufruf ist. Rückgabetypen externer Funktionen bleiben unbekannt.
+- **Konstruktor-Ergebnis** (`konstruktor-ergebnis`): `Klasse(…).f()`. Die Klasse steht auch fest,
+  wenn nur die Überladung des Konstruktors offen ist (Grund `ueberladung`). Ein externer
+  großgeschriebener Aufruf ohne Empfänger gilt als externer Typ (wie `val x = Klasse()` in A07).
+- **Initialisierer** (`initialisierer`): `val x = y`, `val p = feld`, `val k = liefere()` und
+  Ketten wie `val i = a.b` übernehmen den Typ der rechten Seite, wenn er nach diesen Regeln oder
+  denen aus A07 bekannt ist; für lokale Werte und Eigenschaften (Klasse, oberste Ebene). Die rechte
+  Seite wird an ihrer eigenen Stelle aufgelöst. `= Klasse(…)` bleibt wie in A07 (Herkunft `lokal`
+  bzw. `eigenschaft`).
+- **Cast** (`cast`): `(x as T).f()`, `(x as? T)?.f()`.
+- `x!!` und Klammern sind durchsichtig: `x!!.f()` hat die Herkunft von `x`. Ketten dürfen seit A07b
+  auch `?.` enthalten (`a?.b.f()`).
+- Nicht: Smart-Casts, Typargumente (`List<T>`, `it`), Rückgabetypen externer Funktionen, Typaliase,
+  Überladungen nach Argumenttypen.
+
+Der Beleg nennt die Herkunft des **letzten** Schritts: `a.b().c()` ist `rueckgabe`,
+`f().feld.g()` ist `eigenschaft`, außer `feld` hat selbst keine Typangabe und übernimmt den Typ aus
+seinem Initialisierer (`initialisierer`).
+
+**Zugriffe auf Eigenschaften mit eigenem Accessor (seit A07b).** Hat eine interne Eigenschaft ein
+`get()` mit Körper, ist jedes Lesen eine `ruft`-Kante zum Knoten `<get-x>` (Herkunft `lesen`); hat
+sie ein `set()` mit Körper, ist jede Zuweisung (`=`, `+=` und andere, `++`, `--`) eine Kante zu
+`<set-x>` (Herkunft `schreiben`). `+=`, `++` und `--` lesen zusätzlich. Als Lesen gilt ein Name als
+Ausdruck, `a.x` (nicht als Kopf eines Aufrufs), `this.x` und `"$x"`; nicht Namen in Deklarationen,
+Typen, Labels, Argumentnamen und Funktionsreferenzen. Lokale Werte und Parameter verdecken
+Eigenschaften. Für den Empfänger gelten die Regeln der Aufrufe (`this`/implizit, Parameter,
+Eigenschaft, lokal, Objekt, Ketten, Typen durch Nachschlagen, Erweiterungseigenschaften). Bei
+unbekanntem Empfänger gibt es unsichere Kanten (`unbekannter-empfaenger`) zu allen sichtbaren
+Accessoren dieses Namens, bei mehr als 5 keine Kante. Eigenschaften ohne eigenen Accessor und
+delegierte Eigenschaften ergeben keine Kante. Zugriffe zählen nicht als Aufrufe, weder in
+`externe_aufrufe` noch im Abdeckungsbefund. Mehrere Zugriffe einer Funktion auf dasselbe Ziel bilden
+eine Kante mit `gewicht`.
+
 **Abschwächungen:** Liegt zwischen Aufruf und Fundort ein impliziter Empfänger mit unbekanntem Typ
 (Lambda von `apply`/`run`/`with` auf unbekanntem Empfänger, Lambda einer internen Funktion mit
 Empfänger-Funktionstyp), werden alle Treffer unsicher (`unbekannter-empfaenger`). Liegt dort ein
@@ -482,11 +554,15 @@ Empfänger wie `let`, `map`, `forEach`, `remember`), werden Treffer **kleingesch
 außerhalb der Klassen (Datei, Import, Paket) unsicher (`kleingeschrieben`): Ein gleichnamiges
 Mitglied hätte Vorrang.
 
-Kante `ruft`: `gewicht` = Zahl der Aufrufstellen, `sicher` = mindestens ein Beleg sicher, `rolle`
-nach der aufrufenden Datei, `beleg` = `[{ "zeile", "herkunft", "sicher", "grund"? }]` nach Zeile
-sortiert; `zeile` ist die Zeile des Funktionsnamens. `herkunft`: `this`, `parameter`,
+Kante `ruft`: `gewicht` = Zahl der Aufruf- und Zugriffsstellen, `sicher` = mindestens ein Beleg
+sicher, `rolle` nach der aufrufenden Datei. `beleg` (seit A07b zusammengefasst): je (Herkunft,
+sicher, Grund) ein Eintrag `{ "herkunft", "sicher", "grund"?, "zeilen": [12, 40, 41] }`. `zeilen`
+ist aufsteigend, mit Wiederholung bei mehreren Stellen in einer Zeile; die Summe der Längen ist
+`gewicht`. Die Einträge sind nach erster Zeile, Herkunft, sicher vor unsicher und Grund sortiert. Eine
+Zeile ist die Zeile des Funktions- bzw. Eigenschaftsnamens. `herkunft`: `this`, `parameter`,
 `eigenschaft`, `lokal`, `objekt`, `ohne-empfaenger` (oberste Ebene derselben Datei), `import`,
-`gleiches-paket`, `konstruktor`, `erweiterung`, `referenz`, `super`, `unbekannter-empfaenger`.
+`gleiches-paket`, `konstruktor`, `erweiterung`, `referenz`, `super`, `unbekannter-empfaenger`; seit
+A07b `rueckgabe`, `konstruktor-ergebnis`, `initialisierer`, `cast`, `lesen`, `schreiben`.
 `grund` nur bei unsicheren Belegen: `ueberladung`, `erweiterung`, `unbekannter-empfaenger`,
 `kleingeschrieben`. Selbstaufrufe ergeben eine Kante auf sich selbst. `ruft` wird nicht auf Datei-
 oder Paketebene verdichtet.

@@ -9,7 +9,8 @@ Stelle lokal deklariert sind.
 from __future__ import annotations
 
 import hashlib
-from dataclasses import dataclass, field
+import re
+from dataclasses import dataclass, field, replace
 
 from tree_sitter import Node
 
@@ -120,14 +121,23 @@ class AnnotationRoh:
     zeile: int
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, eq=False)
 class Empfaenger:
-    """Empfänger eines Aufrufs.
+    """Empfänger eines Aufrufs oder Zugriffs.
 
-    ``art``: ``ohne``, ``this`` (``name`` = Label oder ``None``), ``super`` (``name`` = Typ in
-    ``super<I>`` oder ``None``), ``kette`` (``name`` = erster Bezeichner, ``rest`` = weitere
-    Eigenschaften, ``herkunft`` = ``lokal``, ``parameter`` oder ``frei``, ``typ`` = Typ des
-    lokalen Namens oder ``None``) und ``unbekannt`` (Rückgabewert, Index, Ausdruck).
+    ``art``:
+
+    - ``ohne``;
+    - ``this`` (``name`` = Label oder ``None``);
+    - ``super`` (``name`` = Typ in ``super<I>`` oder ``None``);
+    - ``kette`` (``name`` = erster Bezeichner, ``rest`` = weitere Eigenschaften, ``herkunft`` =
+      ``lokal``, ``parameter``, ``this`` oder ``frei``, ``typ`` = Typ des lokalen Namens oder
+      ``None``, ``quelle`` = Initialisierer eines lokalen Werts ohne Typangabe);
+    - ``ergebnis`` (Ergebnis des Aufrufs ``aufruf``, danach die Eigenschaften ``rest``);
+    - ``cast`` (``x as T``: ``typ`` = ``T``, danach ``rest``);
+    - ``unbekannt`` (Index, Literal, sonstiger Ausdruck).
+
+    ``!!`` und Klammern sind durchsichtig.
     """
 
     art: str
@@ -135,9 +145,19 @@ class Empfaenger:
     rest: tuple[str, ...] = ()
     herkunft: str | None = None
     typ: str | None = None
+    aufruf: Aufruf | None = None
+    quelle: Herleitung | None = None
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, eq=False)
+class Herleitung:
+    """Rechte Seite eines Initialisierers ohne Typangabe, mit den Rahmen an dieser Stelle."""
+
+    empfaenger: Empfaenger
+    rahmen: tuple[Rahmen, ...]
+
+
+@dataclass(frozen=True, eq=False)
 class Rahmen:
     """Ein impliziter Empfänger, von innen nach außen.
 
@@ -155,7 +175,7 @@ class Rahmen:
     empfaenger: Empfaenger | None = None
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, eq=False)
 class Aufruf:
     zeile: int
     name: str
@@ -167,6 +187,24 @@ class Aufruf:
     wert: bool = False
     lokal: bool = False
     referenz: bool = False
+
+
+@dataclass(frozen=True, eq=False)
+class Zugriff:
+    """Lesen (``schreiben`` falsch) oder Schreiben einer Eigenschaft ``name``."""
+
+    zeile: int
+    name: str
+    empfaenger: Empfaenger
+    rahmen: tuple[Rahmen, ...]
+    schreiben: bool = False
+
+
+@dataclass(frozen=True)
+class EigenschaftRoh:
+    name: str
+    zeile: int
+    delegiert: bool
 
 
 @dataclass
@@ -186,6 +224,13 @@ class FunktionRoh:
     aufrufe: list[Aufruf] = field(default_factory=list)
     # Klassenkette, in der die Funktion steht (für ``this``); bei Erweiterungen ebenso
     klasse: str = ""
+    zugriffe: list[Zugriff] = field(default_factory=list)
+    # ausgeschriebener Rückgabetyp (Typparameter durch Schranke ersetzt) oder ``None``
+    rueckgabe: str | None = None
+    # Ausdrucksfunktion ohne Rückgabetyp, deren Ausdruck ein Aufruf ist
+    rueckgabe_aufruf: Aufruf | None = None
+    # primärer Konstruktor, dessen Initialisierer nur Zugriffe und keine Aufrufe haben
+    nur_zugriffe: bool = False
 
     @property
     def stelligkeit(self) -> int:
@@ -206,6 +251,10 @@ class KlasseRoh:
     companion: str | None = None  # Kette des Companion
     konstruktor_knoten: bool = False  # ob ein ``<init>``-Knoten für den primären entsteht
     eintraege: list[str] = field(default_factory=list)  # Einträge einer ``enum class``
+    # Eigenschaften ohne Typangabe: Name → Initialisierer
+    herleitungen: dict[str, Herleitung] = field(default_factory=dict)
+    # echte Eigenschaften (``val``/``var`` im Konstruktor, Körper) für die Ausgabe
+    liste: list[EigenschaftRoh] = field(default_factory=list)
 
 
 @dataclass
@@ -216,6 +265,8 @@ class FunktionenDatei:
     # Eigenschaften der obersten Ebene: Name → Typ oder ``None``
     eigenschaften: dict[str, str | None] = field(default_factory=dict)
     typaliase: set[str] = field(default_factory=set)
+    herleitungen: dict[str, Herleitung] = field(default_factory=dict)
+    eigenschaften_liste: list[EigenschaftRoh] = field(default_factory=list)
 
 
 # ---------------------------------------------------------------- Hilfen
@@ -485,17 +536,17 @@ def _komplexitaet(knoten_liste: list[Node]) -> int:
 @dataclass(frozen=True)
 class _Umgebung:
     # Namen in Gültigkeit: Name → (Art, Typ); Art ``lokal``, ``parameter``, ``funktion``
-    bereiche: tuple[dict[str, tuple[str, str | None]], ...]
+    bereiche: tuple[dict[str, tuple[str, str | Herleitung | None]], ...]
     rahmen: tuple[Rahmen, ...]
     typparameter: dict[str, str | None]
 
-    def mit_bereich(self, bereich: dict[str, tuple[str, str | None]]) -> _Umgebung:
+    def mit_bereich(self, bereich: dict[str, tuple[str, str | Herleitung | None]]) -> _Umgebung:
         return _Umgebung((*self.bereiche, bereich), self.rahmen, self.typparameter)
 
     def mit_rahmen(self, rahmen: Rahmen) -> _Umgebung:
         return _Umgebung(self.bereiche, (rahmen, *self.rahmen), self.typparameter)
 
-    def suche(self, name: str) -> tuple[str, str | None] | None:
+    def suche(self, name: str) -> tuple[str, str | Herleitung | None] | None:
         for bereich in reversed(self.bereiche):
             if name in bereich:
                 return bereich[name]
@@ -551,43 +602,65 @@ def _initialisierer(knoten: Node) -> Node | None:
 
 
 class _Sammler:
-    """Läuft durch einen Funktionskörper und sammelt Aufrufe mit ihrer Umgebung."""
+    """Läuft durch einen Funktionskörper und sammelt Aufrufe und Zugriffe mit ihrer Umgebung."""
 
     def __init__(self) -> None:
         self.aufrufe: list[Aufruf] = []
+        self.zugriffe: list[Zugriff] = []
+        # Aufruf je Knoten (Anfang, Ende): ein Aufruf, der Empfänger eines anderen ist, entsteht
+        # schon beim äußeren und darf beim Durchlaufen nicht doppelt gezählt werden.
+        self._aufruf_je_knoten: dict[tuple[int, int], Aufruf | None] = {}
+        # linke Seiten einfacher Zuweisungen: werden geschrieben, nicht gelesen
+        self._nicht_lesen: set[tuple[int, int]] = set()
 
     # ------------------------------------------------------------ Empfänger
 
     def _empfaenger(self, knoten: Node, umgebung: _Umgebung) -> Empfaenger:
-        if knoten.type == "this_expression":
+        typ = knoten.type
+        if typ == "parenthesized_expression":
+            innen = knoten.named_children[0] if knoten.named_children else None
+            return self._empfaenger(innen, umgebung) if innen is not None else _UNBEKANNT
+        if typ == "unary_expression":
+            kinder = knoten.children
+            if len(kinder) == 2 and kinder[1].type == "!!":
+                return self._empfaenger(kinder[0], umgebung)
+            return _UNBEKANNT
+        if typ == "as_expression":
+            ziel = next((k for k in knoten.named_children[1:] if k.type in _TYPKNOTEN), None)
+            if ziel is None:
+                return _UNBEKANNT
+            return Empfaenger("cast", typ=umgebung.typ(ohne_leerzeichen(text(ziel))))
+        if typ == "call_expression":
+            aufruf = self._aufruf(knoten, umgebung)
+            return Empfaenger("ergebnis", aufruf=aufruf) if aufruf is not None else _UNBEKANNT
+        if typ == "this_expression":
             label = next((k for k in knoten.named_children if k.type == "identifier"), None)
             return Empfaenger("this", text(label) if label is not None else None)
-        if knoten.type == "super_expression":
-            typ = next((k for k in knoten.named_children if k.type == "user_type"), None)
-            return Empfaenger("super", typ_basis(text(typ)) if typ is not None else None)
-        kette = _punktkette(knoten)
-        if kette is None:
-            # ``this.feld.f()``: Kette hinter ``this``
-            if knoten.type == "navigation_expression":
-                teile: list[str] = []
-                aktuell = knoten
-                while aktuell.type == "navigation_expression":
-                    kinder = aktuell.children
-                    if len(kinder) != 3 or kinder[1].type != "." or kinder[2].type != "identifier":
-                        return Empfaenger("unbekannt")
-                    teile.insert(0, text(kinder[2]))
-                    aktuell = kinder[0]
-                if aktuell.type == "this_expression" and not aktuell.named_children:
-                    return Empfaenger("kette", teile[0], tuple(teile[1:]), "this")
-            return Empfaenger("unbekannt")
-        erster, rest = kette[0], tuple(kette[1:])
-        lokal = umgebung.suche(erster)
-        if lokal is not None:
-            art, typ = lokal
+        if typ == "super_expression":
+            obertyp = next((k for k in knoten.named_children if k.type == "user_type"), None)
+            return Empfaenger("super", typ_basis(text(obertyp)) if obertyp is not None else None)
+        if typ == "identifier":
+            name = text(knoten)
+            lokal = umgebung.suche(name)
+            if lokal is None:
+                return Empfaenger("kette", name, (), "frei")
+            art, wert = lokal
             if art == "funktion":
-                return Empfaenger("unbekannt")
-            return Empfaenger("kette", erster, rest, art, typ)
-        return Empfaenger("kette", erster, rest, "frei")
+                return _UNBEKANNT
+            if isinstance(wert, Herleitung):
+                return Empfaenger("kette", name, (), art, None, quelle=wert)
+            return Empfaenger("kette", name, (), art, wert)
+        if typ == "navigation_expression":
+            kinder = knoten.children
+            if len(kinder) != 3 or kinder[1].type not in _PUNKTE or kinder[2].type != "identifier":
+                return _UNBEKANNT
+            links = self._empfaenger(kinder[0], umgebung)
+            teil = text(kinder[2])
+            if links.art == "this" and links.name is None:
+                return Empfaenger("kette", teil, (), "this")
+            if links.art in {"kette", "ergebnis", "cast"}:
+                return replace(links, rest=(*links.rest, teil))
+        return _UNBEKANNT
 
     # ------------------------------------------------------------ Lauf
 
@@ -604,18 +677,21 @@ class _Sammler:
                 bereich[name] = wert
                 continue
             typ = knoten.type
-            if typ in _KOMMENTARE:
+            if typ in _KOMMENTARE or typ in _OHNE_ZUGRIFFE:
                 continue
             kinder: list[Node] = list(knoten.children)
             neue = umg
             spaeter: list[tuple[dict, str, tuple]] = []
 
+            if typ == "identifier":
+                self._lies_name(knoten, umg)
+                continue
             if typ in {"block", "control_structure_body", "when_entry"}:
                 neue = umg.mit_bereich({})
             elif typ == "lambda_literal":
                 neue = self._lambda(knoten, umg)
             elif typ == "for_statement":
-                bereich: dict[str, tuple[str, str | None]] = {}
+                bereich: dict[str, tuple[str, str | Herleitung | None]] = {}
                 for kind in knoten.named_children:
                     if kind.type == "variable_declaration":
                         name = kind.named_children[0] if kind.named_children else None
@@ -637,7 +713,11 @@ class _Sammler:
                 for kind in knoten.named_children:
                     if kind.type == "variable_declaration" and kind.named_children:
                         name = text(kind.named_children[0])
-                        decl = _deklarierter_typ(kind, umg) or _konstruktor_typ(initial)
+                        decl: str | Herleitung | None = _deklarierter_typ(
+                            kind, umg
+                        ) or _konstruktor_typ(initial)
+                        if decl is None and initial is not None:
+                            decl = self.herleitung(initial, umg)
                         spaeter.append((bereich_jetzt, name, ("lokal", decl)))
                     elif kind.type == "multi_variable_declaration":
                         for v in kind.named_children:
@@ -679,10 +759,21 @@ class _Sammler:
                 self._aufruf(knoten, umg)
             elif typ == "callable_reference":
                 self._referenz(knoten, umg, None)
+                continue
             elif typ == "navigation_expression":
                 kinder_alle = knoten.children
                 if len(kinder_alle) == 3 and kinder_alle[1].type == "::":
                     self._referenz(knoten, umg, kinder_alle[0])
+                else:
+                    self._lies_navigation(knoten, umg)
+            elif typ == "assignment":
+                self._zuweisung(knoten, umg)
+            elif typ == "unary_expression":
+                operator = next((k.type for k in knoten.children if k.type in {"++", "--"}), None)
+                if operator is not None and knoten.named_children:
+                    self._schreibe(knoten.named_children[0], umg)
+            elif typ == "string_literal":
+                self._vorlage(knoten, umg)
 
             if spaeter:
                 for eintrag_neu in spaeter:
@@ -691,8 +782,88 @@ class _Sammler:
                 if kind.is_named:
                     stapel.append((kind, neue, None))
 
+    def herleitung(self, ausdruck: Node, umg: _Umgebung) -> Herleitung | None:
+        """Initialisierer, dessen Typ die Auflösung nachschlagen kann (sonst ``None``)."""
+        empfaenger = self._empfaenger(ausdruck, umg)
+        if empfaenger.art in {"unbekannt", "this", "super"}:
+            return None
+        return Herleitung(empfaenger, umg.rahmen)
+
+    # ------------------------------------------------------------ Zugriffe
+
+    def _lies_name(self, knoten: Node, umg: _Umgebung) -> None:
+        """Ein Bezeichner als Ausdruck: Lesen einer Eigenschaft mit implizitem Empfänger."""
+        if (knoten.start_byte, knoten.end_byte) in self._nicht_lesen or not _ist_ausdruck(knoten):
+            return
+        name = text(knoten)
+        if umg.suche(name) is None:
+            self.zugriffe.append(Zugriff(zeile(knoten), name, _OHNE, umg.rahmen))
+
+    def _lies_navigation(self, knoten: Node, umg: _Umgebung) -> None:
+        kinder = knoten.children
+        if len(kinder) != 3 or kinder[1].type not in _PUNKTE or kinder[2].type != "identifier":
+            return
+        eltern = knoten.parent
+        if (
+            eltern is not None
+            and eltern.type == "call_expression"
+            and eltern.named_children
+            and eltern.named_children[0] == knoten
+        ):
+            return  # Kopf eines Aufrufs
+        if (knoten.start_byte, knoten.end_byte) in self._nicht_lesen:
+            return
+        self.zugriffe.append(
+            Zugriff(zeile(kinder[2]), text(kinder[2]), self._empfaenger(kinder[0], umg), umg.rahmen)
+        )
+
+    def _schreibe(self, ziel: Node, umg: _Umgebung) -> None:
+        if ziel.type == "identifier":
+            name = text(ziel)
+            if umg.suche(name) is None:
+                self.zugriffe.append(Zugriff(zeile(ziel), name, _OHNE, umg.rahmen, True))
+        elif ziel.type == "navigation_expression":
+            kinder = ziel.children
+            if len(kinder) == 3 and kinder[1].type in _PUNKTE and kinder[2].type == "identifier":
+                self.zugriffe.append(
+                    Zugriff(
+                        zeile(kinder[2]),
+                        text(kinder[2]),
+                        self._empfaenger(kinder[0], umg),
+                        umg.rahmen,
+                        True,
+                    )
+                )
+
+    def _zuweisung(self, knoten: Node, umg: _Umgebung) -> None:
+        kinder = knoten.children
+        if len(kinder) < 3:
+            return
+        links, operator = kinder[0], kinder[1].type
+        self._schreibe(links, umg)
+        if operator == "=":
+            self._nicht_lesen.add((links.start_byte, links.end_byte))
+
+    def _vorlage(self, knoten: Node, umg: _Umgebung) -> None:
+        """``"$name"``: die Grammatik liest den Namen als Text."""
+        kinder = knoten.children
+        for i, kind in enumerate(kinder[:-1]):
+            if kind.type != "string_content" or not text(kind).endswith("$"):
+                continue
+            folgend = kinder[i + 1]
+            if folgend.type != "string_content":
+                continue
+            treffer = _BEZEICHNER.match(text(folgend))
+            if treffer is None:
+                continue
+            name = treffer.group(0)
+            if umg.suche(name) is None:
+                self.zugriffe.append(Zugriff(zeile(folgend), name, _OHNE, umg.rahmen))
+
+    # ------------------------------------------------------------ Lambdas
+
     def _lambda(self, knoten: Node, umg: _Umgebung) -> _Umgebung:
-        bereich: dict[str, tuple[str, str | None]] = {}
+        bereich: dict[str, tuple[str, str | Herleitung | None]] = {}
         parameter = next((k for k in knoten.named_children if k.type == "lambda_parameters"), None)
         if parameter is None:
             bereich["it"] = ("lokal", None)
@@ -759,16 +930,16 @@ class _Sammler:
                     werte = [k for k in argumente.named_children if k.type == "value_argument"]
                     if werte and werte[0].named_children:
                         erstes = werte[0].named_children[0]
-                ziel = (
-                    self._empfaenger(erstes, umg) if erstes is not None else Empfaenger("unbekannt")
-                )
+                ziel = self._empfaenger(erstes, umg) if erstes is not None else _UNBEKANNT
                 return Rahmen("bereich", empfaenger=ziel)
             if empfaenger_knoten is not None:
                 return Rahmen("bereich", empfaenger=self._empfaenger(empfaenger_knoten, umg))
             if name == "run":
                 return None  # ``run { }`` ohne Empfänger
-            return Rahmen("bereich", empfaenger=Empfaenger("unbekannt"))
+            return Rahmen("bereich", empfaenger=_UNBEKANNT)
         return Rahmen("lambda", wert=name)
+
+    # ------------------------------------------------------------ Aufrufe
 
     def _argumente(self, knoten: Node) -> tuple[Node, int]:
         """Kopf und Zahl der Argumente eines Aufrufs; ein nachgestelltes Lambda zählt mit."""
@@ -781,43 +952,52 @@ class _Sammler:
                 anzahl += 1
         return kopf, anzahl
 
-    def _aufruf(self, knoten: Node, umg: _Umgebung) -> None:
+    def _aufruf(self, knoten: Node, umg: _Umgebung) -> Aufruf | None:
+        """Der Aufruf eines ``call_expression``; jeder Knoten zählt nur einmal."""
+        schluessel = (knoten.start_byte, knoten.end_byte)
+        if schluessel in self._aufruf_je_knoten:
+            return self._aufruf_je_knoten[schluessel]
+        aufruf = self._neuer_aufruf(knoten, umg)
+        self._aufruf_je_knoten[schluessel] = aufruf
+        return aufruf
+
+    def _neuer_aufruf(self, knoten: Node, umg: _Umgebung) -> Aufruf | None:
         kopf, anzahl = self._argumente(knoten)
         if kopf.type == "call_expression":
             if all(k.type == "annotated_lambda" for k in knoten.named_children[1:]):
-                return  # ``f(x) { }``: der innere Aufruf zählt mit dem Lambda
-            return  # Aufruf eines Ergebnisses ``f()()``: kein Funktionsname
+                # ``f(x) { }``: der innere Aufruf zählt mit dem Lambda
+                return self._aufruf(kopf, umg)
+            return None  # Aufruf eines Ergebnisses ``f()()``: kein Funktionsname
         if knoten.parent is not None and knoten.parent.type == "call_expression":
             eltern = knoten.parent
             if eltern.named_children[0] == knoten and all(
                 k.type == "annotated_lambda" for k in eltern.named_children[1:]
             ):
                 anzahl += len(eltern.named_children) - 1
+        aufruf: Aufruf | None = None
         if kopf.type == "identifier":
             name = text(kopf)
             lokal = umg.suche(name)
             wert = lokal is not None and lokal[0] in {"lokal", "parameter"}
             lokale_funktion = lokal is not None and lokal[0] == "funktion"
-            self.aufrufe.append(
-                Aufruf(
-                    zeile(kopf),
-                    name,
-                    anzahl,
-                    Empfaenger("ohne"),
-                    umg.rahmen,
-                    wert=wert,
-                    lokal=lokale_funktion,
-                )
+            aufruf = Aufruf(
+                zeile(kopf),
+                name,
+                anzahl,
+                _OHNE,
+                umg.rahmen,
+                wert=wert,
+                lokal=lokale_funktion,
             )
-            return
-        if kopf.type == "navigation_expression":
+        elif kopf.type == "navigation_expression":
             kinder = kopf.children
             if len(kinder) != 3 or kinder[2].type != "identifier" or kinder[1].type == "::":
-                return
+                return None
             empfaenger = self._empfaenger(kinder[0], umg)
-            self.aufrufe.append(
-                Aufruf(zeile(kinder[2]), text(kinder[2]), anzahl, empfaenger, umg.rahmen)
-            )
+            aufruf = Aufruf(zeile(kinder[2]), text(kinder[2]), anzahl, empfaenger, umg.rahmen)
+        if aufruf is not None:
+            self.aufrufe.append(aufruf)
+        return aufruf
 
     def _referenz(self, knoten: Node, umg: _Umgebung, links: Node | None) -> None:
         name_knoten = knoten.children[-1]
@@ -831,7 +1011,7 @@ class _Sammler:
                     zeile(name_knoten),
                     name,
                     None,
-                    Empfaenger("ohne"),
+                    _OHNE,
                     umg.rahmen,
                     wert=lokal is not None and lokal[0] in {"lokal", "parameter"},
                     lokal=lokal is not None and lokal[0] == "funktion",
@@ -845,7 +1025,95 @@ class _Sammler:
         )
 
 
+_UNBEKANNT = Empfaenger("unbekannt")
+_OHNE = Empfaenger("ohne")
+_PUNKTE = frozenset({".", "?."})
+_BEZEICHNER = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
+_TYPKNOTEN = frozenset(
+    {
+        "user_type",
+        "nullable_type",
+        "function_type",
+        "parenthesized_type",
+        "non_nullable_type",
+        "type_modifiers",
+        "definitely_non_nullable_type",
+    }
+)
+# Teilbäume ohne Aufrufe oder Zugriffe
+_OHNE_ZUGRIFFE = frozenset({*_TYPKNOTEN, "label", "type_arguments", "type_parameters", "type_test"})
+# Eltern, unter denen ein Bezeichner ein Name und kein Ausdruck ist
+_NAMENS_ELTERN = frozenset(
+    {
+        "variable_declaration",
+        "multi_variable_declaration",
+        "type_parameter",
+        "function_declaration",
+        "class_declaration",
+        "object_declaration",
+        "parameter",
+        "class_parameter",
+        "catch_block",
+        "this_expression",
+        "super_expression",
+        "callable_reference",
+        "lambda_parameters",
+        "getter",
+        "setter",
+        "type_alias",
+        "enum_entry",
+        "companion_object",
+        "import_header",
+        "package_header",
+        "constructor_invocation",
+    }
+)
+
+
+def _ist_ausdruck(knoten: Node) -> bool:
+    """Ob ein Bezeichner für einen Wert steht (nicht Name, Label, Funktion, Argumentname)."""
+    eltern = knoten.parent
+    if eltern is None or eltern.type in _NAMENS_ELTERN:
+        return False
+    if eltern.type == "navigation_expression":
+        return eltern.children[0] == knoten
+    if eltern.type == "call_expression":
+        return eltern.named_children[0] != knoten
+    if eltern.type == "infix_expression":
+        return len(eltern.named_children) < 3 or eltern.named_children[1] != knoten
+    folgend = knoten.next_sibling
+    if eltern.type == "value_argument" and folgend is not None and folgend.type == "=":
+        return False
+    vorher = knoten.prev_sibling
+    return vorher is None or not (vorher.type == "label" or vorher.type.endswith("@"))
+
+
 # ---------------------------------------------------------------- Deklarationen
+
+
+def _rueckgabetyp(knoten: Node) -> str | None:
+    """Ausgeschriebener Rückgabetyp einer ``function_declaration`` (hinter den Parametern)."""
+    for i, kind in enumerate(knoten.children):
+        if kind.type == "function_value_parameters":
+            return _typ_nach(knoten, i + 1)
+    return None
+
+
+def _ausdruck_des_koerpers(koerper: Node) -> Node | None:
+    """Ausdruck einer Ausdrucksfunktion ``= …`` oder ``None`` bei einem Block."""
+    kinder = koerper.children
+    if kinder and kinder[0].type == "=":
+        return next((k for k in kinder[1:] if k.is_named and k.type not in _KOMMENTARE), None)
+    return None
+
+
+def _wert_parameter(kind: Node) -> bool:
+    """Ob ein ``class_parameter`` mit ``val`` oder ``var`` eine Eigenschaft ist."""
+    return any(k.type in {"val", "var"} for k in kind.children)
+
+
+def _delegiert(knoten: Node) -> bool:
+    return any(k.type == "property_delegate" for k in knoten.named_children)
 
 
 class _Leser:
@@ -890,6 +1158,12 @@ class _Leser:
             if k.type not in {"parameter", "parameter_modifiers"}
         ]
         sammler.lauf([*standard, *koerper], umgebung)
+        rueckgabe = umgebung.typ(_rueckgabetyp(knoten))
+        rueckgabe_aufruf: Aufruf | None = None
+        if rueckgabe is None and koerper:
+            ausdruck = _ausdruck_des_koerpers(koerper[0])
+            if ausdruck is not None and ausdruck.type == "call_expression":
+                rueckgabe_aufruf = sammler._aufruf(ausdruck, umgebung)
         self.ergebnis.funktionen.append(
             FunktionRoh(
                 behaelter=behaelter,
@@ -906,6 +1180,9 @@ class _Leser:
                 komplexitaet=_komplexitaet([knoten]),
                 aufrufe=sammler.aufrufe,
                 klasse=ketten[-1] if ketten else "",
+                zugriffe=sammler.zugriffe,
+                rueckgabe=rueckgabe,
+                rueckgabe_aufruf=rueckgabe_aufruf,
             )
         )
 
@@ -961,6 +1238,7 @@ class _Leser:
                     komplexitaet=_komplexitaet([kind]),
                     aufrufe=sammler.aufrufe,
                     klasse=ketten[-1] if ketten else "",
+                    zugriffe=sammler.zugriffe,
                 )
             )
 
@@ -1004,8 +1282,22 @@ class _Leser:
                     name = next((k for k in eintrag.named_children if k.type == "identifier"), None)
                     if name is not None:
                         klasse.eintraege.append(text(name))
+        primaer_knoten = next(
+            (k for k in knoten.named_children if k.type == "primary_constructor"), None
+        )
+        if primaer_knoten is not None and primaer is not None:
+            for k in primaer_knoten.named_children:
+                if k.type != "class_parameters":
+                    continue
+                for p in k.named_children:
+                    name_knoten = next(
+                        (t for t in p.named_children if t.type == "identifier"), None
+                    )
+                    if p.type == "class_parameter" and name_knoten and _wert_parameter(p):
+                        klasse.liste.append(EigenschaftRoh(text(name_knoten), zeile(p), False))
         # Teile des primären Konstruktors: init-Blöcke und Initialisierer der Eigenschaften
         init_teile: list[Node] = []
+        ohne_typ: list[tuple[str, Node]] = []  # Eigenschaften, deren Typ der Initialisierer gibt
         if koerper is not None:
             for kind in koerper.named_children:
                 if kind.type == "anonymous_initializer":
@@ -1020,6 +1312,9 @@ class _Leser:
                         typ = _typ_nach(variable, 1) or _konstruktor_typ(initial)
                         if _empfaenger_typ(kind) is None:
                             klasse.eigenschaften[name] = typ
+                            klasse.liste.append(EigenschaftRoh(name, zeile(kind), _delegiert(kind)))
+                            if typ is None and initial is not None:
+                                ohne_typ.append((name, initial))
                     if initial is not None:
                         init_teile.append(initial)
                     delegat = next(
@@ -1029,9 +1324,6 @@ class _Leser:
                         init_teile.append(delegat)
             self._sammle(koerper, neue_ketten, tp)
         # Parameter mit Vorgabe im primären Konstruktor
-        primaer_knoten = next(
-            (k for k in knoten.named_children if k.type == "primary_constructor"), None
-        )
         vorgaben: list[Node] = []
         if primaer_knoten is not None:
             for k in primaer_knoten.named_children:
@@ -1050,8 +1342,13 @@ class _Leser:
             tp,
         )
         sammler.lauf(init_teile, umgebung)
-        if sammler.aufrufe and art != "schnittstelle":
-            # Aufruf des Oberklassen-Konstruktors gehört dazu
+        for name, initial in ohne_typ:
+            herleitung = sammler.herleitung(initial, umgebung)
+            if herleitung is not None:
+                klasse.herleitungen[name] = herleitung
+        if (sammler.aufrufe or sammler.zugriffe) and art != "schnittstelle":
+            nur_zugriffe = not sammler.aufrufe
+            # Aufruf des Oberklassen-Konstruktors gehört dazu (wie in A07 nur bei Aufrufen)
             obersammler = _Sammler()
             obersammler.lauf(
                 [
@@ -1060,11 +1357,13 @@ class _Leser:
                     if spez.type == "delegation_specifiers"
                     for k in spez.named_children
                 ]
-                + vorgaben,
+                + vorgaben
+                if not nur_zugriffe
+                else [],
                 umgebung,
             )
             aufrufe = obersammler.aufrufe + sammler.aufrufe
-            for spez in knoten.named_children:
+            for spez in knoten.named_children if not nur_zugriffe else []:
                 if spez.type != "delegation_specifiers":
                     continue
                 for s in spez.named_children:
@@ -1113,6 +1412,8 @@ class _Leser:
                     komplexitaet=_komplexitaet(init_teile),
                     aufrufe=sorted(aufrufe, key=lambda a: (a.zeile, a.name)),
                     klasse=kette,
+                    zugriffe=obersammler.zugriffe + sammler.zugriffe,
+                    nur_zugriffe=nur_zugriffe,
                 )
             )
 
@@ -1166,8 +1467,25 @@ class _Leser:
                 komplexitaet=_komplexitaet([knoten]),
                 aufrufe=sorted(sammler.aufrufe, key=lambda a: (a.zeile, a.name)),
                 klasse=kette,
+                zugriffe=sammler.zugriffe,
             )
         )
+
+    def _oberste_eigenschaft(self, kind: Node, typparameter: dict[str, str | None]) -> None:
+        variable = next((k for k in kind.named_children if k.type == "variable_declaration"), None)
+        if variable is None or not variable.named_children or _empfaenger_typ(kind) is not None:
+            return
+        name = text(variable.named_children[0])
+        initial = _initialisierer(kind)
+        typ = _typ_nach(variable, 1) or _konstruktor_typ(initial)
+        self.ergebnis.eigenschaften[name] = typ
+        eintrag = EigenschaftRoh(name, zeile(kind), _delegiert(kind))
+        self.ergebnis.eigenschaften_liste.append(eintrag)
+        if typ is None and initial is not None:
+            umgebung = _Umgebung(({},), (), typparameter)
+            herleitung = _Sammler().herleitung(initial, umgebung)
+            if herleitung is not None:
+                self.ergebnis.herleitungen[name] = herleitung
 
     def _sammle(self, container: Node, ketten: list[str], typparameter: dict[str, str | None]):
         praefix = f"{ketten[-1]}." if ketten else ""
@@ -1225,17 +1543,7 @@ class _Leser:
                 self._sekundaer(kind, behaelter, ketten, typparameter)
             elif typ == "property_declaration":
                 if not ketten:
-                    variable = next(
-                        (k for k in kind.named_children if k.type == "variable_declaration"), None
-                    )
-                    if (
-                        variable is not None
-                        and variable.named_children
-                        and _empfaenger_typ(kind) is None
-                    ):
-                        self.ergebnis.eigenschaften[text(variable.named_children[0])] = _typ_nach(
-                            variable, 1
-                        ) or _konstruktor_typ(_initialisierer(kind))
+                    self._oberste_eigenschaft(kind, typparameter)
                 self._accessoren(kind, behaelter, ketten, typparameter)
             elif typ == "type_alias" and not ketten:
                 name = kind.child_by_field_name("type")
