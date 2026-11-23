@@ -132,26 +132,21 @@ Code nachgesehen. Die Tabelle steht nur in `lokal/A07-stichprobe.md`.
 Den Ausreißer der ersten Runde zeigt Abweichung 6. Endstand: Durch die Enum-Regel entstanden 20
 sichere Aufrufstellen mehr, die Ziehung ergab 18 neue Kanten; alle sind geprüft.
 
-**Drei Ketten:** `daidalos aufrufe` mit Tiefe 3 für drei Einstiege mit `@Strichpfad`, nur in
-`lokal/A07-ketten.md`:
-
-- `StrichEingabe.beruehrung`;
-- `KernThread.durchlauf`;
-- `Darstellung.liesRing`.
-
-Alle drei Bäume sind plausibel. Jeder interne Aufruf in den Körpern der Einstiege ist gefunden.
-Es fehlt das Lesen von Eigenschaften mit eigenem Getter: `MessstrichGl.voll` hat einen
-`@Strichpfad get()`, der als Knoten existiert, aber von keiner Kante erreicht wird.
+**Drei Ketten:** `daidalos aufrufe` mit Tiefe 3 für drei Einstiege mit `@Strichpfad` (Eingabe,
+Kern-Thread, Darstellung); Bäume und Urteil nur in `lokal/A07-ketten.md`. Alle drei Bäume sind
+plausibel. Jeder interne Aufruf in den Körpern der Einstiege ist gefunden. Es fehlt das Lesen von
+Eigenschaften mit eigenem Getter: In einem Fall hat eine gelesene Eigenschaft einen markierten
+`get()`, der als Knoten `<get-…>` existiert, aber von keiner Kante erreicht wird.
 
 ## Abweichungen vom Auftrag
 
 1. **Plausibilitätsregel erweitert.**
    - Die wörtliche Regel („jede sichere `ruft`-Kante zwischen zwei Dateien hat eine `nutzt`-Kante“)
      ergab an Sketchorus 133 Verstöße.
-   - Alle laufen über Empfänger mit bekanntem Typ, meist Eigenschaftsketten wie
-     `q.index.schreibplatz()` (`q: PunktRingpuffer`, `index: RingIndex`) oder
-     `anlage.eingabe.f()`.
-   - Stichproben zeigen: Die Kanten sind richtig, nur kommt der Name `RingIndex` in der aufrufenden
+   - Alle laufen über Empfänger mit bekanntem Typ, meist Eigenschaftsketten der Form
+     `q.index.f()`: `q` hat einen Typ aus einer importierten Datei, dessen Eigenschaft `index` einen
+     Typ aus einer dritten Datei hat.
+   - Stichproben zeigen: Die Kanten sind richtig, nur kommt der Typ von `index` in der aufrufenden
      Datei nicht vor.
    - Die Prüfung lässt deshalb für Belege mit Herkunft `eigenschaft`, `parameter`, `lokal`, `this`
      und `super` einen `nutzt`-Weg über höchstens drei Kanten zu. Die Zahl dieser Fälle wird
@@ -176,8 +171,8 @@ Es fehlt das Lesen von Eigenschaften mit eigenem Getter: `MessstrichGl.voll` hat
    wird dort zuerst gesucht, bei unbekanntem Typ werden Treffer unsicher.
 6. **Nach der ersten Stichprobe verschärft:**
    - Kandidaten aus Modulen ohne Gradle-Abhängigkeit fallen weg.
-   - `Enum.entries` ist extern. Das war der Ausreißer `Format16.entries.filter { … }`, der auf eine
-     eigene Methode `P3Pruefung.filter` zeigte.
+   - `Enum.entries` ist extern. Das war der Ausreißer `EineEnum.entries.filter { … }`, der auf eine
+     gleichnamige eigene Methode `filter` einer Klasse zeigte.
    - `Enum.EINTRAG` hat den Typ der Enum-Klasse.
 7. **Keine Kante:**
    - Aufrufe lokaler Funktionen und von Funktionen anonymer Objekte gehören zur Funktion.
@@ -212,7 +207,7 @@ Es fehlt das Lesen von Eigenschaften mit eigenem Getter: `MessstrichGl.voll` hat
   - Smart-Casts (`if (x is Kreis) x.radius()` bleibt beim deklarierten Typ, oft extern);
   - Typargumente (`List<Strich>` → `liste.first().f()`);
   - `it` und Lambda-Parameter ohne Typangabe;
-  - lokale Werte, deren Initialisierer kein Konstruktor ist (`val p = pinselWeg`).
+  - lokale Werte, deren Initialisierer kein Konstruktor ist (`val p = feld`).
 - **Überladungen gleicher Stelligkeit** werden nicht nach Argumenttypen unterschieden, auch
   Literale nicht (`varint(0)` → `Int` oder `Long`).
 - **Lesen und Schreiben von Eigenschaften** ist kein Aufruf, auch nicht bei eigenem Getter oder
@@ -234,11 +229,11 @@ Produktive unsichere und unaufgelöste Aufrufstellen an Sketchorus (716), nach A
 
 | Empfänger | Stellen | Was helfen würde |
 | --- | ---: | --- |
-| lokaler Wert oder Lambda-Parameter ohne Typ | 341 | **Initialisierer übernehmen:** `val p = pinselWeg` (Eigenschaft mit Typ), `val x = y` (lokal mit Typ) und **erklärte Rückgabetypen interner Funktionen** (`val k = liefere()` mit `fun liefere(): K`) |
+| lokaler Wert oder Lambda-Parameter ohne Typ | 341 | **Initialisierer übernehmen:** `val p = feld` (Eigenschaft mit Typ), `val x = y` (lokal mit Typ) und **erklärte Rückgabetypen interner Funktionen** (`val k = liefere()` mit `fun liefere(): K`) |
 | Ausdruck als Empfänger (Rückgabewert, Index, `!!`, Klammer) | 227 | **erklärte Rückgabetypen interner Funktionen** für `f().g()` und `a.b().c()`; `Klasse(…).f()` als Konstruktor-Ergebnis; `(x as T).f()` |
 | Überladung gleicher Stelligkeit | 93 | Argumenttypen aus Literalen (`0` → `Int`, `0L` → `Long`, `x.toLong()`) und aus Parametern oder lokalen Werten mit Typ |
 | `it` im Lambda | 21 | Typargumente einfacher Sammlungen (`List<T>.forEach`) und eigener Funktionen mit Lambda-Parameter |
-| `kleingeschrieben` | 17 | eine kleine Liste bekannter Mitglieder externer Obertypen (z. B. detekt `Rule`), oder bewusst so lassen |
+| `kleingeschrieben` | 17 | eine kleine Liste bekannter Mitglieder externer Obertypen (z. B. Basisklassen von detekt-Regeln), oder bewusst so lassen |
 | Name oder Eigenschaft ohne Typ | 14 | Eigenschaften mit Initialisierer aus Eigenschaften oder Rückgabetypen (wie oben) |
 
 **Empfehlung:** Zuerst erklärte Rückgabetypen interner Funktionen und die Übernahme von
@@ -254,7 +249,7 @@ Schritt mehr Nachschlagen. Danach Literaltypen für Überladungen.
    - die Funktionsebene in eine eigene Datei `aufrufe.json` legen;
    - `enthaelt` Datei → Funktion weglassen, es steht ja schon in `datei` des Funktionsknotens.
 2. **Getter und Setter:** Sollen Lesen und Schreiben von Eigenschaften mit eigenem Accessor
-   `ruft`-Kanten zu `<get-x>`/`<set-x>` werden? Für A08 wichtig, siehe `MessstrichGl.voll`.
+   `ruft`-Kanten zu `<get-x>`/`<set-x>` werden? Für A08 wichtig, siehe die drei Ketten.
 3. **`Klasse(…).f()`** als sicher werten? Das wäre ein Rückgabewert, aber ein trivialer.
 4. **Fan-in/Fan-out** nur über produktive Kanten, wie bei Dateien? Oder sollen Test-Aufrufer
    mitzählen?
@@ -262,8 +257,8 @@ Schritt mehr Nachschlagen. Danach Literaltypen für Überladungen.
 ## Nächste sinnvolle Schritte
 
 1. **A08:**
-   - Markierung aus `daidalos.toml`: volle Namen, hier `de.sketchorus.core.strichpfad.Strichpfad`.
-     `gegenfaelle.Strichpfad` taucht 22-mal auf und bleibt korrekt getrennt.
+   - Markierung aus `daidalos.toml` über volle Namen. Die gleichnamige Annotation aus einem
+     anderen Paket (22 Funktionen) bleibt an Sketchorus korrekt getrennt.
    - Der Kette über `ruft` folgen, an Schnittstellen über `ueberschreibt` rückwärts weiter.
    - Klassen-Markierungen auf ihre Funktionen übertragen, ohne `<init>`.
 2. **Accessoren als Ziele aufnehmen** (Frage 2), bevor A08 Befunde meldet.
