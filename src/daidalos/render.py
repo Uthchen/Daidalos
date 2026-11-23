@@ -13,6 +13,7 @@ from typing import Any
 from urllib.parse import quote
 
 from daidalos import __version__
+from daidalos.ids import kanten_id as _kid
 from daidalos.konfiguration import STANDARD_EDITOR_LINK
 from daidalos.scanner import SCHEMA
 
@@ -227,7 +228,7 @@ class _MdBauer:
             "kanten": {},
         }
         self.knoten = {k["id"]: k for k in messung["knoten"]}
-        self.kanten = {k["id"]: k for k in messung["kanten"]}
+        self.kanten = {_kid(k): k for k in messung["kanten"]}
         self.befunde = {b["id"]: b for b in messung["befunde"]}
 
     def kn(self, knoten_id: str) -> str:

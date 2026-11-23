@@ -14,6 +14,7 @@ import pytest
 
 from conftest import BEISPIELE, ERWARTET
 from daidalos.cli import main
+from daidalos.ids import kanten_id
 from daidalos.zusammenfassung import finde_offenes, wichtige_dateien
 
 
@@ -138,7 +139,7 @@ def test_trennstelle_eines_paketzyklus_nimmt_die_dateien_darunter() -> None:
     messung = json.loads((ERWARTET / "mini_modulgraph.daidalos.json").read_text(encoding="utf-8"))
     wichtig = wichtige_dateien(messung)
     befund = next(b for b in messung["befunde"] if b["id"].startswith("befund:zyklus:paket"))
-    trenn = next(k for k in messung["kanten"] if k["id"] == befund["beleg"]["trennstelle"])
+    trenn = next(k for k in messung["kanten"] if kanten_id(k) == befund["beleg"]["trennstelle"])
     dateien = {k["id"]: k for k in messung["knoten"] if k["art"] == "datei"}
     unter = [
         k

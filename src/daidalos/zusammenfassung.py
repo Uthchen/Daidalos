@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from daidalos import __version__
+from daidalos.ids import kanten_id as _kid
 from daidalos.render import anzeigename, ist_abdeckungsbefund, strukturansicht
 
 Knoten = dict[str, Any]
@@ -72,7 +73,7 @@ def wichtige_dateien(messung: dict[str, Any]) -> dict[str, list[str]]:
     """
     messung = strukturansicht(messung)
     knoten = {k["id"]: k for k in messung["knoten"]}
-    kanten = {k["id"]: k for k in messung["kanten"]}
+    kanten = {_kid(k): k for k in messung["kanten"]}
     gruende: dict[str, set[str]] = {}
 
     def nimm(knoten_id: str, grund: str) -> None:
@@ -183,7 +184,7 @@ def finde_offenes(
     # Abdeckungsbefunde brauchen keine Einschätzung.
     befunde = {b["id"] for b in messung["befunde"] if not ist_abdeckungsbefund(b)}
     alle_befunde = {b["id"] for b in messung["befunde"]}
-    kanten = {k["id"] for k in messung["kanten"]}
+    kanten = {_kid(k) for k in messung["kanten"]}
     offen = Offen()
 
     beschreibungen = deutung.get("beschreibungen")
@@ -261,7 +262,7 @@ class Zusammenfassung:
         self.voll = self.messung
         self.messung = strukturansicht(self.messung)
         self.knoten = {k["id"]: k for k in self.messung["knoten"]}
-        self.kanten = {k["id"]: k for k in self.messung["kanten"]}
+        self.kanten = {_kid(k): k for k in self.messung["kanten"]}
         self.wichtig = wichtige_dateien(self.messung)
         self.offen = finde_offenes(self.messung, self.deutung, self.wichtig)
         roh = (self.deutung or {}).get("beschreibungen")

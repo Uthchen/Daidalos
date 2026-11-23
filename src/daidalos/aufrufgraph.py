@@ -213,6 +213,8 @@ class Aufrufgraph:
         self.je_datei: dict[str, list[FInfo]] = defaultdict(list)
         # Namen der Eigenschaften mit eigenem ``get()`` bzw. ``set()``
         self.accessoren: dict[str, set[str]] = {"get": set(), "set": set()}
+        # Namen delegierter Eigenschaften (``by lazy`` u. a.), für den Vermerk der Kette
+        self.delegierte: set[str] = set()
         # Zwischenergebnisse je Aufruf bzw. Herleitung (Schlüssel: ``id``)
         self._loesungen: dict[int, Ergebnis] = {}
         self._ergebnis_typen: dict[int, Typ] = {}
@@ -231,6 +233,9 @@ class Aufrufgraph:
                 self.typaliase.add(f"{q.paket}.{alias}" if q.paket else alias)
             for name, typ in q.inhalt.eigenschaften.items():
                 self.eigenschaften_paket[(q.container, q.paket)].setdefault(name, (q, typ))
+            self.delegierte.update(e.name for e in q.inhalt.eigenschaften_liste if e.delegiert)
+            for kr in q.inhalt.klassen:
+                self.delegierte.update(e.name for e in kr.liste if e.delegiert)
             for k in q.inhalt.klassen:
                 voll = f"{q.paket}.{k.name}" if q.paket else k.name
                 info = KInfo(q, k, voll)
@@ -1315,6 +1320,66 @@ class Aufrufgraph:
                     return ergebnis
         return None
 
+    def loese_delegiert(self, z: Zugriff, f: FInfo) -> str | None:
+        """Voller Name der delegierten Eigenschaft, die ``z`` sicher liest; sonst ``None``.
+
+        Nur für den Vermerk ``delegiert_gelesen`` der Markierungs-Kette; ergibt keine Kante.
+        """
+        if z.schreiben or z.name not in self.delegierte:
+            return None
+        q = f.quelle
+        assert isinstance(q, Quelle)
+
+        def in_klassen(klassen: list[KInfo]) -> str | None:
+            """Voller Name, ``""`` (gefunden, nicht delegiert) oder ``None`` (nicht gefunden)."""
+            gefunden, _, besitzer = self.eigenschaft(klassen, z.name)
+            if not gefunden or besitzer is None:
+                return None
+            if any(e.name == z.name and e.delegiert for e in besitzer.roh.liste):
+                return f"{besitzer.voll}.{z.name}"
+            return ""
+
+        def oberste(quelle: Quelle) -> str | None:
+            for e in quelle.inhalt.eigenschaften_liste:
+                if e.name == z.name:
+                    if not e.delegiert:
+                        return ""
+                    return f"{quelle.paket}.{z.name}" if quelle.paket else z.name
+            return None
+
+        e = z.empfaenger
+        if e.art == "ohne":
+            for r in z.rahmen:
+                if r.art == "lambda":
+                    continue
+                typ = self._rahmen_typ(r, q, f)
+                if typ is None or typ.art != "intern" or not typ.klassen:
+                    continue
+                stufen = [typ.klassen]
+                if r.art == "klasse" and (c := self.companion(typ.klassen[0])) is not None:
+                    stufen.append([c])
+                for klassen in stufen:
+                    treffer = in_klassen(klassen)
+                    if treffer is not None:
+                        return treffer or None
+            treffer = oberste(q)
+            if treffer is not None:
+                return treffer or None
+            eigene = self.eigenschaften_paket.get((q.container, q.paket), {})
+            if z.name in eigene:
+                return oberste(eigene[z.name][0]) or None
+            return None
+        if e.art in {"unbekannt", "super"}:
+            return None
+        typ = self._empfaenger_typ(e, q, f, z.rahmen)
+        if typ.art != "intern" or len(typ.klassen) != 1:
+            return None
+        klassen = typ.klassen
+        if typ.objekt and klassen[0].roh.art not in {"objekt", "companion", "enum-eintrag"}:
+            c = self.companion(klassen[0])
+            klassen = [c] if c is not None else []
+        return in_klassen(klassen) or None if klassen else None
+
     # ------------------------------------------------------------ Ausgabe
 
     def baue(self) -> AufrufErgebnis:
@@ -1322,6 +1387,7 @@ class Aufrufgraph:
         extern: Counter[str] = Counter()
         unaufgeloest: dict[str, Counter[tuple[str, str]]] = defaultdict(Counter)
         statistik: Counter[str] = Counter()
+        delegiert: dict[str, set[str]] = defaultdict(set)
         nach_id = {f.id: f for f in self.funktionen}
         for f in self.funktionen:
             if f.roh is None or not isinstance(f.quelle, Quelle):
@@ -1348,6 +1414,9 @@ class Aufrufgraph:
                     extern[f.id] += 1
                     statistik["extern"] += 1
             for z in f.roh.zugriffe:
+                gelesen = self.loese_delegiert(z, f)
+                if gelesen is not None:
+                    delegiert[f.id].add(gelesen)
                 treffer = self.loese_zugriff(z, f)
                 if treffer is None:
                     continue
@@ -1361,7 +1430,9 @@ class Aufrufgraph:
         # Konstruktoren mit nur Zugriffen: sichtbar, sobald sie eine Kante haben
         for von, _ in kanten_belege:
             nach_id[von].benutzt = True
-        return AufrufErgebnis(self, nach_id, kanten_belege, extern, unaufgeloest, statistik)
+        return AufrufErgebnis(
+            self, nach_id, kanten_belege, extern, unaufgeloest, statistik, dict(delegiert)
+        )
 
 
 # (Herkunft, sicher, Grund, Zeile) einer Aufruf- oder Zugriffsstelle
@@ -1376,6 +1447,8 @@ class AufrufErgebnis:
     extern: Counter[str]
     unaufgeloest: dict[str, Counter[tuple[str, str]]]
     statistik: Counter[str]
+    # Funktions-Id → volle Namen der gelesenen delegierten Eigenschaften
+    delegiert: dict[str, set[str]] = field(default_factory=dict)
 
 
 # ---------------------------------------------------------------- JSON
@@ -1465,6 +1538,8 @@ class Messung:
     # Datei-Pfad → zusätzliche Felder des Datei-Knotens
     datei_felder: dict[str, dict[str, Any]]
     statistik: Counter[str]
+    # Funktions-Id → gelesene delegierte Eigenschaften (für die Markierungs-Kette)
+    delegiert: dict[str, set[str]] = field(default_factory=dict)
 
 
 def miss(
@@ -1655,7 +1730,9 @@ def miss(
                 "schwere": "hinweis",
             }
         )
-    return Messung(knoten, kanten, befunde, dict(datei_felder), ergebnis.statistik)
+    return Messung(
+        knoten, kanten, befunde, dict(datei_felder), ergebnis.statistik, ergebnis.delegiert
+    )
 
 
 def _ueberschreibt(graph: Aufrufgraph, f: FInfo) -> list[Kante]:

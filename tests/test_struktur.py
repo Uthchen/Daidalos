@@ -7,6 +7,7 @@ from typing import Any
 import pytest
 
 from conftest import BEISPIELE
+from daidalos import ids
 from daidalos.konfiguration import lade_konfiguration
 from daidalos.scanner import scanne
 from daidalos.struktur import ordne_zu
@@ -27,7 +28,7 @@ def _knoten(daten: dict[str, Any], knoten_id: str) -> dict[str, Any]:
 
 
 def _kante(daten: dict[str, Any], kanten_id: str) -> dict[str, Any]:
-    return next(k for k in daten["kanten"] if k["id"] == kanten_id)
+    return next(k for k in daten["kanten"] if ids.kanten_id(k) == kanten_id)
 
 
 def test_projektname_aus_konfiguration(daten: dict[str, Any]) -> None:
