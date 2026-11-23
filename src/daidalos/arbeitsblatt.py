@@ -16,6 +16,7 @@ from typing import Any
 
 from daidalos.adapter.baum import alle, parse, text, zeile
 from daidalos.adapter.kotlin import lies_kotlin
+from daidalos.ids import datei_der_funktion
 from daidalos.render import anzeigename
 from daidalos.zusammenfassung import stand_der_beschreibung, wichtige_dateien
 
@@ -178,7 +179,7 @@ class Arbeitsblatt:
         self.funktionen: dict[str, list[Knoten]] = {}
         for k in messung["knoten"]:
             if k["art"] == "funktion":
-                self.funktionen.setdefault(k["datei"], []).append(k)
+                self.funktionen.setdefault(datei_der_funktion(k), []).append(k)
         self.raus: dict[str, list[dict[str, Any]]] = {}
         self.rein: dict[str, list[dict[str, Any]]] = {}
         for k in messung["kanten"]:

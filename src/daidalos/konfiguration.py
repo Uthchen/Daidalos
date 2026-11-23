@@ -60,10 +60,29 @@ class ProjektKonfiguration:
 
 
 @dataclass(frozen=True)
+class MarkierungsKonfiguration:
+    # volle Namen der Annotationen, die eine Funktion markieren
+    annotationen: tuple[str, ...] = ()
+    # volle Namen der Annotationen für bewusste Ausnahmen
+    ausnahmen: tuple[str, ...] = ()
+    # gitwildmatch: Pfade, die weder Quelle noch Ziel einer Kette sind
+    ausgenommen: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class DetektKonfiguration:
+    # gitwildmatch, relativ zum Zielrepo; auch in ausgeschlossenen Pfaden gesucht
+    sarif: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
 class Konfiguration:
     projekt: ProjektKonfiguration = field(default_factory=ProjektKonfiguration)
     scan: ScanKonfiguration = field(default_factory=ScanKonfiguration)
     editor: EditorKonfiguration = field(default_factory=EditorKonfiguration)
+    # ``None``: kein Abschnitt [markierungen], also keine Markierungs-Kette
+    markierungen: MarkierungsKonfiguration | None = None
+    detekt: DetektKonfiguration = field(default_factory=DetektKonfiguration)
     # Datei, aus der gelesen wurde; None, wenn keine vorhanden war.
     quelle: Path | None = None
 
@@ -76,6 +95,8 @@ _BEKANNT: dict[str, frozenset[str]] = {
     "projekt": frozenset({"name"}),
     "scan": frozenset({"ausschliessen", "fremd"}),
     "editor": frozenset({"befehl", "link"}),
+    "markierungen": frozenset({"annotationen", "ausnahmen", "ausgenommen"}),
+    "detekt": frozenset({"sarif"}),
 }
 
 
@@ -120,6 +141,15 @@ def lade_konfiguration(
         raise KonfigurationsFehler(
             f"{pfad}: [projekt].name muss eine nicht leere Zeichenkette sein"
         )
+    markierungen: MarkierungsKonfiguration | None = None
+    if "markierungen" in daten:
+        m = daten["markierungen"]
+        markierungen = MarkierungsKonfiguration(
+            annotationen=_liste_von_texten(pfad, m, "markierungen", "annotationen"),
+            ausnahmen=_liste_von_texten(pfad, m, "markierungen", "ausnahmen"),
+            ausgenommen=_liste_von_texten(pfad, m, "markierungen", "ausgenommen"),
+        )
+    detekt = daten.get("detekt", {})
     return Konfiguration(
         projekt=ProjektKonfiguration(name=name),
         scan=ScanKonfiguration(
@@ -130,6 +160,8 @@ def lade_konfiguration(
             befehl=_text(pfad, editor, "editor", "befehl", STANDARD_EDITOR_BEFEHL),
             link=link,
         ),
+        markierungen=markierungen,
+        detekt=DetektKonfiguration(sarif=_liste_von_texten(pfad, detekt, "detekt", "sarif")),
         quelle=pfad,
     )
 

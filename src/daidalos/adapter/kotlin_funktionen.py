@@ -231,6 +231,8 @@ class FunktionRoh:
     rueckgabe_aufruf: Aufruf | None = None
     # primärer Konstruktor, dessen Initialisierer nur Zugriffe und keine Aufrufe haben
     nur_zugriffe: bool = False
+    # ``fun`` ohne Körper (abstrakt, Schnittstelle, ``expect``, ``external``)
+    koerper: bool = True
 
     @property
     def stelligkeit(self) -> int:
@@ -1183,6 +1185,7 @@ class _Leser:
                 zugriffe=sammler.zugriffe,
                 rueckgabe=rueckgabe,
                 rueckgabe_aufruf=rueckgabe_aufruf,
+                koerper=bool(koerper),
             )
         )
 

@@ -18,6 +18,7 @@ from daidalos.adapter.kotlin_funktionen import FunktionenDatei, lies_funktionen
 from daidalos.analysen.zyklen import GraphKante, zyklus_befunde
 from daidalos.aufloeser import PRODUKTIV, TEST, Quelldatei, loese_auf
 from daidalos.aufrufgraph import CQuelle, Quelle, miss
+from daidalos.ids import kanten_id as kanten_id_von
 from daidalos.konfiguration import Warner, warne_stderr
 
 Knoten = dict[str, Any]
@@ -240,7 +241,7 @@ def baue_struktur(ziel: Path, dateien: list[Knoten], warne: Warner = warne_stder
     for pfad, felder in messung.datei_felder.items():
         nach_pfad[pfad].update(felder)
 
-    kanten.sort(key=lambda k: (k["von"], k["nach"], k["art"], k["id"]))
+    kanten.sort(key=lambda k: (k["von"], k["nach"], k["art"], kanten_id_von(k)))
     knoten.sort(key=lambda k: k["id"])
     befunde.sort(key=lambda b: b["id"])
     return Struktur(knoten, kanten, befunde, dict(messung.statistik))

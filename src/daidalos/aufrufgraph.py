@@ -1495,7 +1495,7 @@ def miss(
                 "art": "ruft",
                 "beleg": _belege_json(belege),
                 "gewicht": len(belege),
-                "id": _kanten_id("ruft", von, nach, rolle),
+                # keine ``id``: sie lautet ``kante:ruft:<von>-><nach>:<rolle>`` (daidalos.ids)
                 "nach": nach,
                 "rolle": rolle,
                 "sicher": sicher,
@@ -1557,7 +1557,6 @@ def miss(
         k: Knoten = {
             "art": "funktion",
             "behaelter": f.behaelter,
-            "datei": q.pfad,
             "erweiterung": f.erweiterung,
             "id": f.id,
             "name": f.name,
@@ -1594,6 +1593,8 @@ def miss(
                 metriken["komplexitaet"] = 1
             if f.implizit:
                 k["implizit"] = True
+            if f.roh is not None and not f.roh.koerper:
+                k["ohne_koerper"] = True
         else:
             k["sprache"] = "c"
             c = next(x for x in q.funktionen if x.name == f.name)
@@ -1604,7 +1605,7 @@ def miss(
             metriken["komplexitaet"] = None
         k["metriken"] = metriken
         knoten.append(k)
-        # Die Datei steht in ``datei``; eine ``enthaelt``-Kante Datei → Funktion gibt es nicht.
+        # Die Datei steht in der Id; eine ``enthaelt``-Kante Datei → Funktion gibt es nicht.
         felder = datei_felder[q.pfad]
         felder["funktionen"] = felder.get("funktionen", 0) + 1
 

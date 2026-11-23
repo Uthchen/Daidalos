@@ -21,6 +21,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from daidalos.ids import datei_der_funktion, kanten_id
+
 PRODUKTIV_ARTEN = frozenset({"gradle-api", "gradle-impl", "gradle-compileonly", "gradle-sonstige"})
 
 
@@ -114,7 +116,6 @@ def indirekte_ruft_kanten(daten: dict[str, Any]) -> list[str]:
 
 
 def _pruefe_ruft(daten: dict[str, Any]) -> tuple[list[str], list[str]]:
-    knoten = {k["id"]: k for k in daten["knoten"]}
     nutzt: dict[str, set[str]] = {}
     for k in daten["kanten"]:
         if k["art"] == "nutzt" and k["von"].startswith("datei:"):
@@ -124,15 +125,15 @@ def _pruefe_ruft(daten: dict[str, Any]) -> tuple[list[str], list[str]]:
     for k in daten["kanten"]:
         if k["art"] != "ruft" or not k["sicher"]:
             continue
-        von = "datei:" + knoten[k["von"]]["datei"]
-        nach = "datei:" + knoten[k["nach"]]["datei"]
+        von = "datei:" + datei_der_funktion(k["von"])
+        nach = "datei:" + datei_der_funktion(k["nach"])
         if von == nach or nach in nutzt.get(von, set()):
             continue
         herkunft = {b["herkunft"] for b in k["beleg"] if b["sicher"]}
         if herkunft <= _UEBER_TYP and _erreichbar(nutzt, von, nach, INDIREKT_HOECHSTENS):
-            indirekt.append(k["id"])
+            indirekt.append(kanten_id(k))
         else:
-            fehler.append(f"{k['id']} (ruft ohne nutzt)")
+            fehler.append(f"{kanten_id(k)} (ruft ohne nutzt)")
     return fehler, indirekt
 
 
@@ -166,8 +167,8 @@ def funktions_verstoesse(daten: dict[str, Any]) -> list[str]:
     for k in daten["kanten"]:
         if k["art"] == "ueberschreibt":
             von, nach = knoten[k["von"]], knoten[k["nach"]]
-            ziel = f"{paket_von.get(nach['datei'], '')}.{nach['behaelter']}".lstrip(".")
-            if ziel not in alle_ober(von["datei"], von["behaelter"]):
+            ziel = f"{paket_von.get(datei_der_funktion(nach), '')}.{nach['behaelter']}".lstrip(".")
+            if ziel not in alle_ober(datei_der_funktion(von), von["behaelter"]):
                 fehler.append(f"{k['id']} (ueberschreibt ohne Obertyp)")
     return fehler
 
