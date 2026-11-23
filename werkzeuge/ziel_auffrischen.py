@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -35,7 +36,16 @@ EXIT_FEHLER = 2
 
 WURZEL = Path(__file__).resolve().parent.parent
 ZIELE = Path("lokal") / "ziele.toml"
-SCHLUESSEL = {"quelle", "klon", "ausgabe", "konfiguration", "zweig", "kopiere", "detekt"}
+SCHLUESSEL = {
+    "quelle",
+    "klon",
+    "ausgabe",
+    "konfiguration",
+    "zweig",
+    "kopiere",
+    "detekt",
+    "umgebung",
+}
 PFLICHT = ("quelle", "klon", "ausgabe")
 
 BEISPIEL = """\
@@ -50,6 +60,7 @@ BEISPIEL = """\
 # zweig = "main"                                     # optional, sonst origin/HEAD des Klons
 # kopiere = ["local.properties"]                     # optional: aus der Quelle, nicht in Git
 # detekt = ["gradlew.bat", "detekt"]                 # optional: Befehl für --mit-detekt (im Klon)
+# umgebung = { JAVA_HOME = "C:/Programme/Java/jdk-21" }  # optional: nur für den detekt-Befehl
 """
 
 
@@ -69,6 +80,8 @@ class Ziel:
     kopiere: tuple[str, ...] = ()
     # Befehl für ``--mit-detekt``, im Klon ausgeführt; ``None``: keiner eingetragen
     detekt: tuple[str, ...] | None = None
+    # Umgebungsvariablen nur für den detekt-Befehl (zusätzlich zur eigenen Umgebung, ohne Ersetzung)
+    umgebung: tuple[tuple[str, str], ...] = ()
 
 
 def _pfad(wurzel: Path, wert: object, schluessel: str, name: str) -> Path:
@@ -117,6 +130,11 @@ def lies_ziel(wurzel: Path, name: str) -> Ziel:
         detekt = _textliste(detekt, "detekt", name)
         if not detekt:
             raise Fehler(f"Ziel {name}: detekt darf nicht leer sein")
+    umgebung = eintrag.get("umgebung", {})
+    if not isinstance(umgebung, dict) or not all(
+        isinstance(s, str) and s and isinstance(w, str) for s, w in umgebung.items()
+    ):
+        raise Fehler(f"Ziel {name}: umgebung muss eine Tabelle Text → Text sein")
     return Ziel(
         name=name,
         quelle=_pfad(wurzel, eintrag["quelle"], "quelle", name),
@@ -126,6 +144,7 @@ def lies_ziel(wurzel: Path, name: str) -> Ziel:
         zweig=zweig,
         kopiere=kopiere,
         detekt=detekt,
+        umgebung=tuple(sorted(umgebung.items())),
     )
 
 
@@ -159,7 +178,9 @@ def fuehre_detekt_aus(ziel: Ziel) -> float:
         befehl[0] = str(ziel.klon / befehl[0])
     beginn = time.perf_counter()
     try:
-        lauf = subprocess.run(befehl, cwd=ziel.klon, capture_output=True)
+        lauf = subprocess.run(
+            befehl, cwd=ziel.klon, capture_output=True, env={**os.environ, **dict(ziel.umgebung)}
+        )
     except OSError as fehler:
         befehl_text = " ".join(ziel.detekt)
         raise Fehler(f"detekt-Befehl {befehl_text} nicht ausführbar: {fehler}") from fehler
