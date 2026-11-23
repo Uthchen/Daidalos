@@ -109,6 +109,8 @@ ol.befunde li button:focus-visible { outline: 2px solid var(--accent); }
 ol.befunde li button[aria-current="true"] { border-color: var(--accent); background: var(--accent-soft); }
 .prio { grid-row: span 3; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 600; font-family: var(--mono); color: var(--panel); background: var(--muted); }
 .prio.crit { background: var(--crit); } .prio.warn { background: var(--warn); } .prio.adr { background: var(--adr); }
+.prio.nachrangig { background: transparent; border: 1.5px dashed var(--muted); box-sizing: border-box; opacity: .7; }
+.nachrangig-marke { display: inline-block; margin-left: 4px; padding: 0 5px; border-radius: 3px; border: 1px solid var(--line); font-size: 10.5px; font-weight: 500; letter-spacing: .03em; color: var(--muted); vertical-align: 1px; }
 .bt { font-weight: 600; font-size: 13.5px; }
 .bm { font-family: var(--mono); font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
 .bd { font-size: 12.5px; color: var(--fg); }

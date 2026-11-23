@@ -295,6 +295,36 @@ def test_sprungadresse_knoten_und_seitenleiste(seite: tuple[Any, list[str]], kar
     assert fehler == []
 
 
+def test_nachrangige_einschaetzung_ohne_zahl(seite: tuple[Any, list[str]], karte: Path) -> None:
+    s, fehler = seite
+    jni = next(b["id"] for b in messung()["befunde"] if b["regel"] == "jni-ohne-gegenstueck")
+    oeffne(s, karte)
+    gewichtet = s.locator("#seite ol.befunde").first
+    knoepfe = gewichtet.locator("button")
+    assert knoepfe.count() == 2
+    # Priorisiert: Zahl im Kreis, kein Zeichen.
+    erster = knoepfe.nth(0)
+    assert erster.locator(".prio").inner_text() == "1"
+    assert erster.locator(".nachrangig-marke").count() == 0
+    # Ohne Priorität: gedämpftes Zeichen „nachrangig“ statt einer Zahl.
+    zweiter = gewichtet.locator(f'button[data-befund="{jni}"]')
+    assert zweiter.locator(".prio").inner_text() == ""
+    assert "nachrangig" in zweiter.locator(".prio").get_attribute("class")
+    assert zweiter.locator(".nachrangig-marke").inner_text() == "nachrangig"
+    farbe = s.evaluate(
+        "[getComputedStyle(document.querySelector('.nachrangig-marke')).color,"
+        " getComputedStyle(document.querySelector('.bt')).color]"
+    )
+    assert farbe[0] != farbe[1]  # gedämpft gegenüber dem Titel
+    # Auch in der Seitenleiste des Befunds.
+    zweiter.click()
+    warte(s, 200)
+    einschaetzung = s.locator("#seite .deut").filter(has_text="Die Funktion wird im Beispiel")
+    assert einschaetzung.locator(".nachrangig-marke").inner_text() == "nachrangig"
+    assert "Priorität" not in einschaetzung.inner_text()
+    assert fehler == []
+
+
 # ---------------------------------------------------------------- A05 Teil A
 
 

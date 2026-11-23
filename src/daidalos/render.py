@@ -329,21 +329,30 @@ class _MdBauer:
             z.append("Knoten: " + (", ".join(self.kn(k) for k in b["knoten"]) or "–"))
         return z
 
+    def einschaetzung(self, marke: str, e: dict[str, Any]) -> list[str]:
+        befund = self.befunde[e["befund"]]
+        verweis = self.bf(befund["id"], self.befund_titel(befund))
+        z = [f"{marke} **{_md(e['titel'])}** ({verweis})"]
+        if e["begruendung"]:
+            z.append(f"   {_md(e['begruendung'])}")
+        if e["vorschlag"]:
+            z.append(f"   Vorschlag: {_md(e['vorschlag'])}")
+        return z
+
     def befunde_md(self) -> list[str]:
         z = ["", "## Befunde"]
         einsch = self.deutung["einschaetzungen"]
         if einsch:
             z += ["", "### Einschätzungen", "", "Aus der Deutung, nach Priorität.", ""]
-            for nr, e in enumerate(einsch, 1):
-                befund = self.befunde[e["befund"]]
-                z.append(
-                    f"{nr}. **{_md(e['titel'])}** "
-                    f"({self.bf(befund['id'], self.befund_titel(befund))})"
-                )
-                if e["begruendung"]:
-                    z.append(f"   {_md(e['begruendung'])}")
-                if e["vorschlag"]:
-                    z.append(f"   Vorschlag: {_md(e['vorschlag'])}")
+            priorisiert = [e for e in einsch if e["prioritaet"] is not None]
+            nachrangig = [e for e in einsch if e["prioritaet"] is None]
+            for nr, e in enumerate(priorisiert, 1):
+                z += self.einschaetzung(f"{nr}.", e)
+            if priorisiert and nachrangig:
+                z.append("")
+            # Ohne Priorität: kleines Zeichen „nachrangig“ statt einer Zahl.
+            for e in nachrangig:
+                z += self.einschaetzung("- <sub>nachrangig</sub>", e)
         zyklen = [b for b in self.messung["befunde"] if b["regel"] == "zyklus"]
         z += ["", "### Zyklen"]
         if not zyklen:

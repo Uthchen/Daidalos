@@ -68,6 +68,9 @@ Aus der Deutung, nach Priorität.
    Anfang, Mitte und Ende kennen sich gegenseitig.
    Vorschlag: Die schwächste Verbindung Anfang → Mitte entfernen.
 
+- <sub>nachrangig</sub> **Fehlende Brücke der Insel** ([JNI ohne Gegenstück: beispiel.nativ.Insel.fehlt](karte.html#befund=befund%3Ajni-ohne-gegenstueck%3Anativ%2Fsrc%2Fmain%2Fkotlin%2Fbeispiel%2Fnativ%2FInsel.kt%3Abeispiel.nativ.Insel.fehlt))
+   Die Funktion wird im Beispiel nie aufgerufen.
+
 ### Zyklen
 
 #### Paketebene

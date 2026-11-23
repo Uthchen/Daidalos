@@ -47,6 +47,13 @@
       "prioritaet": 2,
       "titel": "Toter Verweis",
       "vorschlag": ""
+    },
+    {
+      "befund": "befund:jni-ohne-gegenstueck:nativ/src/main/kotlin/beispiel/nativ/Insel.kt:beispiel.nativ.Insel.fehlt",
+      "begruendung": "Die Funktion wird im Beispiel nie aufgerufen.",
+      "prioritaet": null,
+      "titel": "Fehlende Brücke der Insel",
+      "vorschlag": ""
     }
   ],
   "kanten": {
