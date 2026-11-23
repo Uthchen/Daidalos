@@ -1956,6 +1956,10 @@
       kaesten -= m.size - 1;
     }
     zustand.fZu = zu;
+    // Gleichnamige Dateien (etwa aus verschiedenen Modulen) mit ihrem ersten Pfadteil.
+    const zahlName = new Map();
+    [pfad, ...nachbarn.keys()].forEach(p => zahlName.set(dateiName(p), (zahlName.get(dateiName(p)) || 0) + 1));
+    const titel = p => zahlName.get(dateiName(p)) > 1 ? p.split('/')[0] + ' · ' + dateiName(p) : dateiName(p);
     const ort = new Map(eigene.map(f => [f.i, f.id]));
     const nachbarEls = (nurRufend) => {
       const teil = [];
@@ -1963,11 +1967,11 @@
         if (rufend.get(p) !== nurRufend) return;
         const m = nachbarn.get(p);
         if (zu.has(p)) {
-          teil.push(blatt('fz:' + p, [dateiName(p) + ' (+' + m.size + ')'], 'fzu', { ref: 'datei:' + p, pfad: p }));
+          teil.push(blatt('fz:' + p, [titel(p) + ' (+' + m.size + ')'], 'fzu', { ref: 'datei:' + p, pfad: p }));
           m.forEach(i => ort.set(i, 'fz:' + p));
           return;
         }
-        teil.push({ group: 'nodes', data: { id: 'fn:' + p, label: dateiName(p), typ: 'fnachbar', ref: 'datei:' + p, pfad: p } });
+        teil.push({ group: 'nodes', data: { id: 'fn:' + p, label: titel(p), typ: 'fnachbar', ref: 'datei:' + p, pfad: p } });
         [...m].sort((a, b) => a - b).forEach(i => { const f = fd.fn[i]; teil.push(fKasten(f, 'fn:' + p, true)); ort.set(i, f.id); });
       });
       return teil;
@@ -2260,6 +2264,10 @@
     if (!von) return;
     if (!zustand.markierung) { zustand.markierung = true; document.getElementById('u-markierung').checked = true; }
     if (b.beleg.unsicher && !zustand.fUnsicher) zustand.fUnsicher = true;
+    // Grenzkante nur über Lesezugriffe (Getter/Setter): Schalter „Lesezugriffe“ einschalten.
+    const nachF = fn(b.beleg.nach);
+    const direkt = nachF ? FD.raus[von.i].filter(k => k.n === nachF.i) : [];
+    if (direkt.length && !direkt.some(k => k.art === 'ruft') && direkt.some(k => k.art === 'lesen' || k.art === 'schreiben')) zustand.fLesen = true;
     zustand.ebene = 'funktion';
     zustand.weg = null;
     if (von.pfad !== zustand.fDatei) zustand.fAuf = new Set();
@@ -2269,8 +2277,12 @@
     const nach = fn(b.beleg.nach);
     if (nach && cy.getElementById(nach.id).empty() && cy.getElementById('fz:' + nach.pfad).nonempty()) { zustand.fAuf.add(nach.pfad); await zeichne(); }
     const e = cy.edges('.grenze').filter(x => x.source().id() === von.id && (x.target().id() === b.beleg.nach || x.target().id() === 'fz:' + (nach ? nach.pfad : '')));
-    if (e.nonempty()) { hebeKanteHervor(e[0]); fKanteDetails(e[0]); }
-    else { hebeFunktionHervor(von.id); befundDetails(b); }
+    if (e.nonempty()) {
+      hebeKanteHervor(e[0]);
+      // Lesbar auf die markierte Funktion zoomen; lange Kanten in großen Dateien wären sonst winzig.
+      fahre(fokusZiel(e[0].source(), e[0].connectedNodes(), 80));
+      fKanteDetails(e[0]);
+    } else { hebeFunktionHervor(von.id); befundDetails(b); }
   }
 
   // ---- Seitenleiste
