@@ -13,8 +13,14 @@ from typing import Any
 Knoten = dict[str, Any]
 Kante = dict[str, Any]
 
-EBENEN = ("modul", "paket", "datei")
-_ART_EBENE = {"modul": "modul", "ordner": "modul", "paket": "paket", "datei": "datei"}
+EBENEN = ("modul", "paket", "datei", "funktion")
+_ART_EBENE = {
+    "modul": "modul",
+    "ordner": "modul",
+    "paket": "paket",
+    "datei": "datei",
+    "funktion": "funktion",
+}
 BELEGE_JE_SCHRITT = 3
 
 
@@ -49,6 +55,9 @@ def _passt(knoten: Knoten, begriff: str) -> bool:
     if art == "datei":
         pfad = knoten["pfad"]
         return pfad == begriff or pfad.endswith("/" + begriff.lstrip("/"))
+    if art == "funktion":
+        kurz = knoten["id"].split("#", 1)[1]
+        return kurz == begriff or kurz.startswith(begriff + "/")
     return False
 
 
@@ -83,12 +92,17 @@ def _zugehoerig(daten: dict[str, Any], ebene: str) -> dict[str, str]:
     return zuordnung
 
 
-def _kanten_der_ebene(daten: dict[str, Any], ebene: str, mit_tests: bool) -> list[Kante]:
+def _kanten_der_ebene(
+    daten: dict[str, Any], ebene: str, mit_tests: bool, unsicher: bool = False
+) -> list[Kante]:
     knoten = {k["id"]: k for k in daten["knoten"]}
     ergebnis = []
     for k in daten["kanten"]:
         art = k["art"]
-        if art != "nutzt" and not (ebene == "modul" and art.startswith("gradle-")):
+        if ebene == "funktion":
+            if art != "ruft" or not (unsicher or k["sicher"]):
+                continue
+        elif art != "nutzt" and not (ebene == "modul" and art.startswith("gradle-")):
             continue
         if not mit_tests and k.get("rolle") != "produktiv":
             continue
@@ -113,6 +127,16 @@ def _belege(daten: dict[str, Any], ebene: str, kanten: list[Kante]) -> list[Any]
                         "zeile": b["zeile"],
                     }
                 )
+    if ebene == "funktion":
+        knoten = {k["id"]: k for k in daten["knoten"]}
+        for k in kanten:
+            datei = knoten[k["von"]]["datei"]
+            for b in k["beleg"]:
+                eintrag = {"datei": datei, "herkunft": b["herkunft"], "zeile": b["zeile"]}
+                if not b["sicher"]:
+                    eintrag["grund"] = b.get("grund")
+                belege.append(eintrag)
+        return belege[:BELEGE_JE_SCHRITT]
     nutzt = [k for k in kanten if k["art"] == "nutzt"]
     if ebene == "datei":
         for k in nutzt:
@@ -134,10 +158,18 @@ def _belege(daten: dict[str, Any], ebene: str, kanten: list[Kante]) -> list[Any]
 
 
 def suche_weg(
-    daten: dict[str, Any], von: Knoten, nach: Knoten, ebene: str, mit_tests: bool = False
+    daten: dict[str, Any],
+    von: Knoten,
+    nach: Knoten,
+    ebene: str,
+    mit_tests: bool = False,
+    unsicher: bool = False,
 ) -> list[Schritt] | None:
-    """Kürzester Weg (Breitensuche, Nachbarn nach Id sortiert); ``None``, wenn es keinen gibt."""
-    kanten = _kanten_der_ebene(daten, ebene, mit_tests)
+    """Kürzester Weg (Breitensuche, Nachbarn nach Id sortiert); ``None``, wenn es keinen gibt.
+
+    Auf der Funktionsebene zählen ``ruft``-Kanten, mit ``unsicher`` auch unsichere.
+    """
+    kanten = _kanten_der_ebene(daten, ebene, mit_tests, unsicher)
     nachbarn: dict[str, dict[str, list[Kante]]] = {}
     for k in kanten:
         nachbarn.setdefault(k["von"], {}).setdefault(k["nach"], []).append(k)
@@ -165,9 +197,14 @@ def suche_weg(
 
 
 def weg_als_json(
-    von: Knoten, nach: Knoten, ebene: str, mit_tests: bool, schritte: list[Schritt] | None
+    von: Knoten,
+    nach: Knoten,
+    ebene: str,
+    mit_tests: bool,
+    schritte: list[Schritt] | None,
+    unsicher: bool = False,
 ) -> dict[str, Any]:
-    return {
+    ergebnis = {
         "ebene": ebene,
         "mit_tests": mit_tests,
         "nach": nach["id"],
@@ -192,3 +229,76 @@ def weg_als_json(
             for s in schritte
         ],
     }
+    if ebene == "funktion":
+        ergebnis["unsicher"] = unsicher
+    return ergebnis
+
+
+# ---------------------------------------------------------------- daidalos aufrufe
+
+
+def aufrufbaum(
+    daten: dict[str, Any],
+    start: Knoten,
+    rueckwaerts: bool = False,
+    tiefe: int | None = None,
+    unsicher: bool = False,
+    mit_tests: bool = False,
+) -> list[str]:
+    """Baum der erreichbaren Funktionen als Textzeilen, ohne Wiederholungen.
+
+    Jede Funktion erscheint einmal voll; spätere Vorkommen sind Verweise („siehe oben“).
+    Je Zeile: Funktion, ihre Datei und Zeile, die Aufrufstellen und ob die Kante unsicher ist.
+    """
+    knoten = {k["id"]: k for k in daten["knoten"]}
+    nachbarn: dict[str, list[Kante]] = {}
+    for k in _kanten_der_ebene(daten, "funktion", mit_tests, unsicher):
+        ende = k["nach"] if rueckwaerts else k["von"]
+        nachbarn.setdefault(ende, []).append(k)
+
+    def kurz(knoten_id: str) -> str:
+        return knoten_id.split("#", 1)[1] if "#" in knoten_id else knoten_id
+
+    def ort(knoten_id: str) -> str:
+        k = knoten[knoten_id]
+        return f"{k['datei']}:{k['zeile_von']}"
+
+    zeilen = [f"{kurz(start['id'])}  {ort(start['id'])}"]
+    gesehen = {start["id"]}
+    # Tiefensuche in fester Reihenfolge (Nachbarn nach Id)
+    stapel: list[tuple[str, int, Kante]] = []
+
+    def kinder(knoten_id: str, stufe: int) -> None:
+        kanten = sorted(
+            nachbarn.get(knoten_id, []),
+            key=lambda k: k["von"] if rueckwaerts else k["nach"],
+        )
+        for k in reversed(kanten):
+            stapel.append((k["von"] if rueckwaerts else k["nach"], stufe, k))
+
+    kinder(start["id"], 1)
+    while stapel:
+        ziel, stufe, kante = stapel.pop()
+        aufrufer = kante["von"]
+        stellen = ", ".join(str(b["zeile"]) for b in kante["beleg"])
+        datei = knoten[aufrufer]["datei"].rsplit("/", 1)[-1]
+        merkmale = [f"Aufruf {datei}:{stellen}"]
+        if not kante["sicher"]:
+            gruende = sorted({b.get("grund") or "" for b in kante["beleg"]} - {""})
+            merkmale.append("unsicher" + (f": {', '.join(gruende)}" if gruende else ""))
+        einrueckung = "  " * stufe
+        pfeil = "←" if rueckwaerts else "→"
+        if kante["von"] == kante["nach"]:
+            zeilen.append(f"{einrueckung}{pfeil} {kurz(ziel)}  (Rekursion; {'; '.join(merkmale)})")
+            continue
+        if ziel in gesehen:
+            zeilen.append(f"{einrueckung}{pfeil} {kurz(ziel)}  (siehe oben; {'; '.join(merkmale)})")
+            continue
+        gesehen.add(ziel)
+        zeilen.append(f"{einrueckung}{pfeil} {kurz(ziel)}  {ort(ziel)}  ({'; '.join(merkmale)})")
+        if tiefe is not None and stufe >= tiefe:
+            if nachbarn.get(ziel):
+                zeilen.append(f"{einrueckung}  … ({len(nachbarn[ziel])} weitere, Tiefe erreicht)")
+            continue
+        kinder(ziel, stufe + 1)
+    return zeilen

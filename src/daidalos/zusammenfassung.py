@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from daidalos import __version__
-from daidalos.render import anzeigename
+from daidalos.render import anzeigename, ist_abdeckungsbefund, strukturansicht
 
 Knoten = dict[str, Any]
 
@@ -70,6 +70,7 @@ def wichtige_dateien(messung: dict[str, Any]) -> dict[str, list[str]]:
     die Dateien der Datei-Kanten unter der Trennstelle), Ende einer ``jni``-Kante oder Ende einer
     produktiven ``nutzt``-Datei-Kante mit Gewicht ≥ 3 zwischen verschiedenen Modulen/Ordnern.
     """
+    messung = strukturansicht(messung)
     knoten = {k["id"]: k for k in messung["knoten"]}
     kanten = {k["id"]: k for k in messung["kanten"]}
     gruende: dict[str, set[str]] = {}
@@ -179,7 +180,9 @@ def finde_offenes(
     """Abgleich der rohen ``deutung.json`` (oder ``None``) mit der Messung."""
     deutung = deutung or {}
     knoten = {k["id"]: k for k in messung["knoten"]}
-    befunde = {b["id"] for b in messung["befunde"]}
+    # Abdeckungsbefunde brauchen keine Einschätzung.
+    befunde = {b["id"] for b in messung["befunde"] if not ist_abdeckungsbefund(b)}
+    alle_befunde = {b["id"] for b in messung["befunde"]}
     kanten = {k["id"] for k in messung["kanten"]}
     offen = Offen()
 
@@ -202,7 +205,7 @@ def finde_offenes(
         if not isinstance(befund, str):
             continue
         bewertet.add(befund)
-        if befund not in befunde:
+        if befund not in alle_befunde:
             tote.add(f"einschaetzungen: {befund}")
     offen.befunde = sorted(befunde - bewertet)
 
@@ -255,6 +258,8 @@ class Zusammenfassung:
     deutung: dict[str, Any] | None
 
     def __post_init__(self) -> None:
+        self.voll = self.messung
+        self.messung = strukturansicht(self.messung)
         self.knoten = {k["id"]: k for k in self.messung["knoten"]}
         self.kanten = {k["id"]: k for k in self.messung["kanten"]}
         self.wichtig = wichtige_dateien(self.messung)
@@ -360,6 +365,50 @@ class Zusammenfassung:
             for b in self.messung["befunde"]
         ]
 
+    def messung_funktionen(self) -> dict[str, Any]:
+        """Abdeckung der Funktionsebene: Funktionen, ruft-Kanten, unaufgelöste Aufrufe."""
+        funktionen = [k for k in self.voll["knoten"] if k["art"] == "funktion"]
+        ruft = [k for k in self.voll["kanten"] if k["art"] == "ruft"]
+        abdeckung = [b for b in self.voll["befunde"] if ist_abdeckungsbefund(b)]
+        namen: dict[tuple[str, str], int] = {}
+        for b in abdeckung:
+            for n in b["beleg"]["namen"]:
+                schluessel = (n["name"], n["grund"])
+                namen[schluessel] = namen.get(schluessel, 0) + n["anzahl"]
+        haeufig = sorted(namen.items(), key=lambda e: (-e[1], e[0]))[:10]
+        return {
+            "funktionen": sum(1 for k in funktionen if k.get("rolle") == "produktiv"),
+            "funktionen_test": sum(1 for k in funktionen if k.get("rolle") == "test"),
+            "ruft_sicher": sum(1 for k in ruft if k["sicher"]),
+            "ruft_unsicher": sum(1 for k in ruft if not k["sicher"]),
+            "unaufgeloeste_aufrufe": sum(b["beleg"]["anzahl"] for b in abdeckung),
+            "unaufgeloeste_dateien": len(abdeckung),
+            "unaufgeloeste_namen": [
+                {"anzahl": anzahl, "grund": grund, "name": name}
+                for (name, grund), anzahl in haeufig
+            ],
+        }
+
+    def _messung_markdown(self) -> list[str]:
+        m = self.messung_funktionen()
+        aus = ["## Messung", ""]
+        aus.append(
+            f"Funktionen: {m['funktionen']} produktiv, {m['funktionen_test']} Test; "
+            f"ruft-Kanten: {m['ruft_sicher']} sicher, {m['ruft_unsicher']} unsicher."
+        )
+        if m["unaufgeloeste_aufrufe"]:
+            namen = ", ".join(
+                f"`{n['name']}` ({n['anzahl']}, {n['grund']})" for n in m["unaufgeloeste_namen"]
+            )
+            aus.append(
+                f"Unaufgelöste Aufrufe (Maß für die Abdeckung, kein Befund): "
+                f"{m['unaufgeloeste_aufrufe']} in {m['unaufgeloeste_dateien']} Dateien; "
+                f"häufigste: {namen}."
+            )
+        else:
+            aus.append("Unaufgelöste Aufrufe: keine.")
+        return aus
+
     # ------------------------------------------------------------ Ausgaben
 
     def als_json(self) -> dict[str, Any]:
@@ -371,6 +420,7 @@ class Zusammenfassung:
             "offen": self.offen.als_json(),
             "pakete": self.pakete(),
             "wichtige_dateien": self.wichtige(),
+            "messung": self.messung_funktionen(),
             "zahlen": self.zahlen(),
             "ziel": {
                 "git_aenderungen": ziel.get("git_aenderungen"),
@@ -440,6 +490,7 @@ class Zusammenfassung:
         for b in self.befunde():
             marke = "" if b["einschaetzung"] else " · ohne Einschätzung"
             aus.append(f"- `{b['id']}`: {b['kurz']}{marke}")
+        aus += ["", *self._messung_markdown()]
         aus += ["", *self._offen_markdown()]
         return "\n".join(aus) + "\n"
 

@@ -50,6 +50,49 @@ def lade_messung(pfad: Path) -> dict[str, Any]:
     return daten
 
 
+# ---------------------------------------------------------------- Strukturansicht
+
+# Kanten zwischen Funktionen; die Karte zeigt sie (noch) nicht.
+FUNKTIONSKANTEN = frozenset({"ruft", "ueberschreibt", "actual"})
+# Felder des Datei-Knotens, die nur die Funktionsebene betreffen
+_FUNKTIONSFELDER = ("annotationen", "funktionen", "klassen")
+
+
+def ist_abdeckungsbefund(befund: dict[str, Any]) -> bool:
+    """``unaufgeloest`` der Art ``aufruf`` misst die eigene Abdeckung, nicht den Zielcode."""
+    beleg = befund.get("beleg")
+    return (
+        befund.get("regel") == "unaufgeloest"
+        and isinstance(beleg, dict)
+        and beleg.get("art") == "aufruf"
+    )
+
+
+def strukturansicht(messung: dict[str, Any]) -> dict[str, Any]:
+    """Die Messung ohne Funktionsebene: ohne Funktionsknoten, ohne Kanten von oder zu Funktionen,
+    ohne Abdeckungsbefunde und ohne die Funktionsfelder der Datei-Knoten.
+
+    Karte, ``KARTE.md``, Zusammenfassung und Deutung arbeiten auf dieser Ansicht. Für eine
+    Messung ohne Funktionsebene ist sie inhaltlich gleich der Messung.
+    """
+    knoten = []
+    for k in messung["knoten"]:
+        if k["art"] == "funktion":
+            continue
+        if k["art"] == "datei" and any(f in k for f in _FUNKTIONSFELDER):
+            k = {s: w for s, w in k.items() if s not in _FUNKTIONSFELDER}
+        knoten.append(k)
+    kanten = [
+        k
+        for k in messung["kanten"]
+        if k["art"] not in FUNKTIONSKANTEN
+        and not k["von"].startswith("funktion:")
+        and not k["nach"].startswith("funktion:")
+    ]
+    befunde = [b for b in messung["befunde"] if not ist_abdeckungsbefund(b)]
+    return {**messung, "befunde": befunde, "kanten": kanten, "knoten": knoten}
+
+
 # ---------------------------------------------------------------- karte.html
 
 
@@ -126,7 +169,7 @@ def baue_karte(
         "LIZENZEN": _lizenzen(),
         "CSS": _paketdatei("karte.css"),
         "BIBLIOTHEKEN": _skripte(),
-        "DATEN": einbett_json(messung),
+        "DATEN": einbett_json(strukturansicht(messung)),
         "DEUTUNG": einbett_json(deutung),
         "EINSTELLUNGEN": einbett_json(einstellungen),
         "SKRIPT": _paketdatei("karte.js"),
@@ -148,6 +191,8 @@ def anzeigename(knoten: Knoten) -> str:
         return knoten["name"]
     if art == "ordner":
         return "(Wurzel)" if knoten["pfad"] == "." else f"{knoten['pfad']}/"
+    if art == "funktion":
+        return knoten["id"].split("#", 1)[1]
     return knoten["pfad"].rsplit("/", 1)[-1]
 
 
@@ -420,4 +465,4 @@ class _MdBauer:
 
 
 def baue_karte_md(messung: dict[str, Any], deutung: dict[str, Any] | None) -> str:
-    return _MdBauer(messung, deutung).baue()
+    return _MdBauer(strukturansicht(messung), deutung).baue()

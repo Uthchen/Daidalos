@@ -12,7 +12,7 @@ import pytest
 from conftest import BEISPIELE, ERWARTET
 from daidalos.cli import main
 from daidalos.deutung import gleiche_ab
-from daidalos.render import baue_karte, einbett_json, wurzel_relativ
+from daidalos.render import baue_karte, einbett_json, strukturansicht, wurzel_relativ
 
 BEISPIEL_NAMEN = ["mini_gradle", "mini_modulgraph"]
 
@@ -59,7 +59,8 @@ def test_eingebettete_daten(beispiel: str, tmp_path: Path, aktualisiere_golden: 
     deutung = eingebettet(html, "daidalos-deutung")
     # Inhalt gleich der Messung, Prüfsumme der eingebetteten Daten als Golden.
     messung = json.loads((ERWARTET / f"{beispiel}.daidalos.json").read_text(encoding="utf-8"))
-    assert json.loads(daten) == messung
+    # Die Karte bekommt die Messung ohne Funktionsebene (A07).
+    assert json.loads(daten) == strukturansicht(messung)
     summe = hashlib.sha256((daten + "\n" + deutung).encode("utf-8")).hexdigest() + "\n"
     golden = ERWARTET / f"{beispiel}.karte-daten.sha256"
     if aktualisiere_golden:

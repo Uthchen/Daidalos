@@ -84,6 +84,11 @@ Auswahlregel: produktiv, nicht fremd und mindestens eines: unter den 30 mit dem 
 - `befund:zyklus:datei:produktiv:f45327fbce97`: Zyklus, Ebene datei, produktiv, 3 Knoten, Trennstelle `kante:nutzt:datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Anfang.kt->datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt:produktiv` (Gewicht 1)
 - `befund:zyklus:paket:produktiv:99e6584ba329`: Zyklus, Ebene paket, produktiv, 2 Knoten, Trennstelle `kante:nutzt:paket::kern-labor/beispiel.kern.labor.protokoll->paket::kern-labor/beispiel.kern.labor.messung:produktiv` (Gewicht 1) · ohne Einschätzung
 
+## Messung
+
+Funktionen: 27 produktiv, 2 Test; ruft-Kanten: 14 sicher, 1 unsicher.
+Unaufgelöste Aufrufe: keine.
+
 ## Offen
 
 - Beschreibung fehlt: 23

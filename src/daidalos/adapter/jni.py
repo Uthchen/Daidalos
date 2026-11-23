@@ -10,6 +10,8 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
+from tree_sitter import Node
+
 from daidalos.adapter.baum import alle, parse, text, zeile
 
 PRAEFIX = "Java_"
@@ -20,6 +22,9 @@ _HEX = re.compile(r"[0-9a-fA-F]{4}")
 class CFunktion:
     name: str  # ``Java_…``
     zeile: int
+    zeile_bis: int = 0
+    parameter: tuple[tuple[str, str], ...] = ()  # (Name, Typ wie geschrieben)
+    text: str = ""
 
 
 @dataclass(frozen=True)
@@ -110,7 +115,7 @@ def dekodiere(name: str) -> JniName | None:
 def finde_c_funktionen(quelle: bytes) -> list[CFunktion]:
     """Funktionsdefinitionen, deren Name mit ``Java_`` beginnt (tree-sitter-c, auch für C++)."""
     wurzel = parse("c", quelle)
-    gefunden: dict[str, int] = {}
+    gefunden: dict[str, CFunktion] = {}
     for knoten in alle(wurzel):
         if knoten.type != "function_declarator":
             continue
@@ -124,6 +129,34 @@ def finde_c_funktionen(quelle: bytes) -> list[CFunktion]:
         if bezeichner is None or bezeichner.type != "identifier":
             continue
         name = text(bezeichner)
-        if name.startswith(PRAEFIX):
-            gefunden.setdefault(name, zeile(bezeichner))
-    return [CFunktion(name, z) for name, z in sorted(gefunden.items())]
+        if name.startswith(PRAEFIX) and name not in gefunden:
+            gefunden[name] = CFunktion(
+                name,
+                zeile(bezeichner),
+                oben.end_point[0] + 1,
+                _c_parameter(knoten),
+                text(oben),
+            )
+    return [gefunden[name] for name in sorted(gefunden)]
+
+
+def _c_parameter(deklarator: Node) -> tuple[tuple[str, str], ...]:
+    liste = deklarator.child_by_field_name("parameters")
+    if liste is None:
+        return ()
+    ergebnis: list[tuple[str, str]] = []
+    for p in liste.named_children:
+        if p.type != "parameter_declaration":
+            continue
+        typ = p.child_by_field_name("type")
+        innen = p.child_by_field_name("declarator")
+        name = ""
+        while innen is not None and innen.type != "identifier":
+            innen = innen.child_by_field_name("declarator")
+        if innen is not None:
+            name = text(innen)
+        typ_text = text(typ) if typ is not None else ""
+        if typ_text == "void" and not name:
+            continue
+        ergebnis.append((name, " ".join(typ_text.split())))
+    return tuple(ergebnis)

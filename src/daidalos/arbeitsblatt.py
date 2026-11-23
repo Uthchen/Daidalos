@@ -175,6 +175,10 @@ class Arbeitsblatt:
         self.wichtig = wichtige_dateien(messung)
         roh = (deutung or {}).get("beschreibungen")
         self.beschreibungen = roh if isinstance(roh, dict) else {}
+        self.funktionen: dict[str, list[Knoten]] = {}
+        for k in messung["knoten"]:
+            if k["art"] == "funktion":
+                self.funktionen.setdefault(k["datei"], []).append(k)
         self.raus: dict[str, list[dict[str, Any]]] = {}
         self.rein: dict[str, list[dict[str, Any]]] = {}
         for k in messung["kanten"]:
@@ -246,7 +250,21 @@ class Arbeitsblatt:
             z.append(f"  - … und {len(kanten) - KANTEN_JE_RICHTUNG} weitere")
         return z
 
-    def datei_voll(self, k: Knoten) -> list[str]:
+    def _funktionszeilen(self, k: Knoten) -> list[str]:
+        """Funktions-Ids der Datei mit Komplexität, nach Zeile."""
+        funktionen = sorted(
+            self.funktionen.get(k["pfad"], []), key=lambda f: (f["zeile_von"], f["id"])
+        )
+        z = []
+        for f in funktionen:
+            komplex = f.get("metriken", {}).get("komplexitaet")
+            merkmal = f"Komplexität {komplex}" if komplex is not None else "C"
+            if f.get("implizit"):
+                merkmal = "implizit"
+            z.append(f"  - `{f['id']}` (Z. {f['zeile_von']}, {merkmal})")
+        return z
+
+    def datei_voll(self, k: Knoten, mit_funktionen: bool = False) -> list[str]:
         gelesen = lies_quelle(self.ziel, k)
         kopf = [f"{k.get('zeilen', 0)} Zeilen", k["sprache"]]
         if k.get("quellsatz"):
@@ -275,6 +293,11 @@ class Arbeitsblatt:
             if ohne_doc:
                 teile = [f"{_ART_WORT.get(a, a)} {n} (Z. {nr})" for a, n, nr, _ in ohne_doc]
                 z.append("  - ohne KDoc: " + ", ".join(teile))
+        if mit_funktionen and self.funktionen.get(k["pfad"]):
+            if not gelesen.deklariert:
+                z.append("- deklariert:")
+            z.append("  - Funktionen:")
+            z += ["  " + zeile for zeile in self._funktionszeilen(k)]
         raus = self.raus.get(k["id"], [])
         rein = self.rein.get(k["id"], [])
         if raus:
@@ -400,7 +423,11 @@ class Arbeitsblatt:
 
     def baue(self, knoten: Knoten) -> str:
         if knoten["art"] == "datei":
-            z = [f"# Arbeitsblatt · Datei {knoten['pfad']}", "", *self.datei_voll(knoten)[2:]]
+            z = [
+                f"# Arbeitsblatt · Datei {knoten['pfad']}",
+                "",
+                *self.datei_voll(knoten, mit_funktionen=True)[2:],
+            ]
         elif knoten["art"] in ("modul", "ordner", "paket"):
             z = self.gruppe(knoten)
         else:

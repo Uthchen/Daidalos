@@ -9,7 +9,7 @@ import hashlib
 import os
 import subprocess
 from collections.abc import Iterable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, BinaryIO
 
@@ -41,6 +41,8 @@ class GitNichtVerfuegbar(Exception):
 class ScanErgebnis:
     daten: dict[str, Any]
     git_modus: bool
+    # Zählung der Aufrufstellen nach Ausgang (nur für stdout und Berichte)
+    aufrufe: dict[str, int] = field(default_factory=dict)
 
 
 # ---------------------------------------------------------------- Git
@@ -324,7 +326,7 @@ def scanne(ziel: Path, konfiguration: Konfiguration, warne: Warner = warne_stder
         "kanten": struktur.kanten,
         "befunde": struktur.befunde,
     }
-    return ScanErgebnis(daten=daten, git_modus=git_modus)
+    return ScanErgebnis(daten=daten, git_modus=git_modus, aufrufe=struktur.aufrufe or {})
 
 
 def zaehle_sprachen(knoten: Iterable[Knoten]) -> list[tuple[str, int]]:
