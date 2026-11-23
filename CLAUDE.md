@@ -51,6 +51,7 @@ uv run daidalos deutung uebernehmen E.json <zielrepo>   # Entwurf prüfen, Hashe
 uv run daidalos deutung pruefen <zielrepo>          # Exit 0, wenn nichts offen ist
 uv run playwright install chromium        # einmalig, für die Browser-Probe (Marker browser)
 uv run python werkzeuge/hole_vendor.py --pruefen   # Prüfsummen der eingebetteten Bibliotheken
+uv run python werkzeuge/ziel_auffrischen.py NAME  # Klon eines Ziels aus lokal/ziele.toml auffrischen, scannen, rendern
 uv run pytest                             # Tests
 uv run pytest --aktualisiere-golden       # Golden-Dateien unter tests/erwartet/ neu schreiben
 uv run ruff check                         # Lint
