@@ -45,6 +45,7 @@ uv sync                                   # Umgebung anlegen
 uv run daidalos scan <zielrepo>           # Zielrepo scannen
 uv run daidalos render <zielrepo>         # karte.html und KARTE.md erzeugen
 uv run daidalos pfad VON NACH --daten D   # kürzester belegter Weg
+uv run daidalos aufrufe ID --daten D      # Baum der erreichbaren Funktionen (--rueckwaerts, --tiefe N, --unsicher)
 uv run daidalos zusammenfassung <zielrepo>          # Übersicht und Offenes für den Skill
 uv run daidalos arbeitsblatt KNOTEN <zielrepo>      # Arbeitsblatt für Modul, Paket oder Datei
 uv run daidalos deutung uebernehmen E.json <zielrepo>   # Entwurf prüfen, Hashes einsetzen
@@ -63,14 +64,15 @@ uv run ruff format                        # Formatieren
 - `src/daidalos/`: `cli.py` (Befehlszeile), `konfiguration.py` (`daidalos.toml`), `scanner.py`
   (Dateien finden und messen), `sprachen.py` (Endungstabelle), `export.py` (JSON schreiben),
   `struktur.py` (Module, Pakete, Kanten, Befunde, Metriken zusammensetzen), `aufloeser.py`
-  (Kotlin-Namen → Datei-Kanten), `deutung.py` (`deutung.json` lesen und abgleichen), `render.py`
+  (Kotlin-Namen → Datei-Kanten), `aufrufgraph.py` (Funktionsknoten, `ruft`-Kanten), `deutung.py` (`deutung.json` lesen und abgleichen), `render.py`
   (`karte.html`, `KARTE.md`), `pfad.py` (`daidalos pfad`), `zusammenfassung.py` (Übersicht,
   wichtige Dateien, Offenes), `arbeitsblatt.py` (Arbeitsblätter); `deutung.py` auch für
   `deutung uebernehmen`.
 - `skills/daidalos/`: der Skill (`SKILL.md`, `vorlagen/`); `.claude-plugin/`: Plugin und Marketplace.
 - `src/daidalos/karte/`: `vorlage.html`, `karte.css`, `karte.js` (die Karte), `vendor/`
   (Cytoscape.js, elkjs, cytoscape-elk mit `HERKUNFT.md`; byte-genau, siehe `.gitattributes`).
-- `src/daidalos/adapter/`: `gradle.py`, `kotlin.py`, `jni.py` (tree-sitter), `baum.py` (Hilfen).
+- `src/daidalos/adapter/`: `gradle.py`, `kotlin.py`, `kotlin_funktionen.py` (Funktionen, Klassen,
+  Annotationen, rohe Aufrufe), `jni.py` (tree-sitter), `baum.py` (Hilfen).
 - `src/daidalos/analysen/`: `zyklen.py` (Zyklen, Einstiege, Trennstelle).
 - `tests/beispiele/`: erfundene Mini-Projekte; `tests/erwartet/`: Golden-Dateien;
   `tests/plausibilitaet.py`: Testhilfe (Datei-Kanten gegen Gradle-Kanten).
