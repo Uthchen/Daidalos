@@ -1,0 +1,12 @@
+Aufrufe vorwärts, auch unsichere Kanten, nur produktiv, ohne Tiefengrenze:
+Strich.zeichne/1  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt:37
+  → Punkt.<init>/2  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt:7  (Aufruf Strich.kt:41)
+  → Strich.male/2  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt:33  (Aufruf Strich.kt:40)
+  → Strich.sammle/1  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt:35  (Aufruf Strich.kt:41)
+  → Strich.setze/1  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt:27  (Aufruf Strich.kt:39)
+    → Strich.setze/2(Int,Float)  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt:29  (Aufruf Strich.kt:27; unsicher: ueberladung)
+    → Strich.setze/2(Punkt,Float)  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt:31  (Aufruf Strich.kt:27; unsicher: ueberladung)
+  → Strich.setze/2(Int,Float)  (siehe oben; Aufruf Strich.kt:43; unsicher: ueberladung)
+  → Strich.setze/2(Punkt,Float)  (siehe oben; Aufruf Strich.kt:43; unsicher: ueberladung)
+  → [Punkt]verschiebe/1  kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt:47  (Aufruf Strich.kt:42)
+    → Punkt.<init>/2  (siehe oben; Aufruf Strich.kt:47)

@@ -171,7 +171,14 @@ def quellsatz_sichtbar(von: str | None, ziel: str | None) -> bool:
 
 
 class Aufrufgraph:
-    def __init__(self, quellen: list[Quelle], c_quellen: list[CQuelle]) -> None:
+    def __init__(
+        self,
+        quellen: list[Quelle],
+        c_quellen: list[CQuelle],
+        abhaengig: dict[str, set[str]] | None = None,
+    ) -> None:
+        # Modul-Id → Module, von denen es laut Gradle (transitiv) abhängt; ``None``: alle sichtbar
+        self.abhaengig = abhaengig
         self.quellen = sorted(quellen, key=lambda q: q.pfad)
         self.c_quellen = sorted(c_quellen, key=lambda q: q.pfad)
         self.klassen: dict[str, list[KInfo]] = defaultdict(list)
@@ -322,12 +329,21 @@ class Aufrufgraph:
 
     # ------------------------------------------------------------ Sichtbarkeit
 
-    @staticmethod
-    def sichtbar(von: Quelle, ziel: Quelle | CQuelle) -> bool:
+    def sichtbar(self, von: Quelle, ziel: Quelle | CQuelle) -> bool:
+        """Produktiv sieht keinen Test; im selben Modul gelten die Quellsätze, zwischen Modulen
+        die Gradle-Abhängigkeiten (Ordner außerhalb von Modulen sehen alles)."""
         if von.rolle == PRODUKTIV and ziel.rolle == TEST:
             return False
-        if isinstance(ziel, Quelle) and von.container == ziel.container:
+        if not isinstance(ziel, Quelle):
+            return True
+        if von.container == ziel.container:
             return quellsatz_sichtbar(von.quellsatz, ziel.quellsatz)
+        if (
+            self.abhaengig is not None
+            and von.container.startswith("modul:")
+            and ziel.container.startswith("modul:")
+        ):
+            return ziel.container in self.abhaengig.get(von.container, set())
         return True
 
     def _f_sichtbar(self, von: Quelle, f: FInfo) -> bool:
@@ -782,6 +798,12 @@ class Aufrufgraph:
                 verschachtelt.extend(self.klassen.get(f"{k.voll}.{teil}", []))
             if verschachtelt:
                 return Typ("intern", klassen=self._k_sichtbar(q, verschachtelt), objekt=True)
+            # ``Enum.entries``: Liste der Standardbibliothek; ``Enum.EINTRAG``: die Enum-Klasse
+            if all(k.roh.art == "enum" for k in typ.klassen):
+                if teil == "entries":
+                    return Typ(_EXTERN, basis="List")
+                if all(teil in k.roh.eintraege for k in typ.klassen):
+                    return Typ("intern", klassen=typ.klassen)
             # Eigenschaft eines Objekts oder des Companion
             ziele = [
                 k if k.roh.art in {"objekt", "companion"} else self.companion(k)
@@ -822,10 +844,9 @@ class Aufrufgraph:
         }.get(e.herkunft or "", "eigenschaft")
         if e.art == "this":
             herkunft = "this"
-        elif e.art == "kette" and e.herkunft == "frei" and not e.rest:
-            herkunft = "objekt" if typ.objekt else "eigenschaft"
-        elif e.art == "kette" and typ.objekt:
-            herkunft = "objekt"
+        elif e.art == "kette" and e.herkunft == "frei" and e.name is not None:
+            erster = typ if not e.rest else self._freier_name(e.name, q, f, a.rahmen)
+            herkunft = "objekt" if erster.objekt or erster.art == "paket" else "eigenschaft"
         return self._auf_typ(typ, a, q, herkunft)
 
     def _auf_typ(self, typ: Typ, a: Aufruf, q: Quelle, herkunft: str) -> Ergebnis:
@@ -1128,9 +1149,14 @@ class Messung:
     statistik: Counter[str]
 
 
-def miss(quellen: list[Quelle], c_quellen: list[CQuelle], datei_ids: dict[str, str]) -> Messung:
+def miss(
+    quellen: list[Quelle],
+    c_quellen: list[CQuelle],
+    datei_ids: dict[str, str],
+    abhaengig: dict[str, set[str]] | None = None,
+) -> Messung:
     """Funktionsknoten, Kanten und Befunde aus allen Kotlin- und C-Dateien."""
-    graph = Aufrufgraph(quellen, c_quellen)
+    graph = Aufrufgraph(quellen, c_quellen, abhaengig)
     ergebnis = graph.baue()
     knoten: list[Knoten] = []
     kanten: list[Kante] = []

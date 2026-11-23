@@ -280,7 +280,8 @@ def aufrufbaum(
     while stapel:
         ziel, stufe, kante = stapel.pop()
         aufrufer = kante["von"]
-        stellen = ", ".join(str(b["zeile"]) for b in kante["beleg"])
+        belege = [b for b in kante["beleg"] if unsicher or b["sicher"]]
+        stellen = ", ".join(str(b["zeile"]) for b in belege)
         datei = knoten[aufrufer]["datei"].rsplit("/", 1)[-1]
         merkmale = [f"Aufruf {datei}:{stellen}"]
         if not kante["sicher"]:
@@ -298,7 +299,9 @@ def aufrufbaum(
         zeilen.append(f"{einrueckung}{pfeil} {kurz(ziel)}  {ort(ziel)}  ({'; '.join(merkmale)})")
         if tiefe is not None and stufe >= tiefe:
             if nachbarn.get(ziel):
-                zeilen.append(f"{einrueckung}  … ({len(nachbarn[ziel])} weitere, Tiefe erreicht)")
+                anzahl = len(nachbarn[ziel])
+                wort = "Funktion" if anzahl == 1 else "Funktionen"
+                zeilen.append(f"{einrueckung}  … Tiefe erreicht, {anzahl} {wort} nicht gezeigt")
             continue
         kinder(ziel, stufe + 1)
     return zeilen

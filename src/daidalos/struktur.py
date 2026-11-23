@@ -232,6 +232,7 @@ def baue_struktur(ziel: Path, dateien: list[Knoten], warne: Warner = warne_stder
             for pfad, liste in sorted(c_funktionen.items())
         ],
         {d["pfad"]: d["id"] for d in dateien},
+        _abhaengigkeiten(kanten),
     )
     knoten.extend(messung.knoten)
     kanten.extend(messung.kanten)
@@ -243,6 +244,25 @@ def baue_struktur(ziel: Path, dateien: list[Knoten], warne: Warner = warne_stder
     knoten.sort(key=lambda k: k["id"])
     befunde.sort(key=lambda b: b["id"])
     return Struktur(knoten, kanten, befunde, dict(messung.statistik))
+
+
+def _abhaengigkeiten(kanten: list[Kante]) -> dict[str, set[str]]:
+    """Modul-Id → alle Module, von denen es über Gradle-Kanten (jeder Art) transitiv abhängt."""
+    direkt: dict[str, set[str]] = defaultdict(set)
+    for k in kanten:
+        if k["art"].startswith("gradle-"):
+            direkt[k["von"]].add(k["nach"])
+    ergebnis: dict[str, set[str]] = {}
+    for modul in direkt:
+        gesehen: set[str] = set()
+        offen = list(direkt[modul])
+        while offen:
+            m = offen.pop()
+            if m not in gesehen:
+                gesehen.add(m)
+                offen.extend(direkt.get(m, set()))
+        ergebnis[modul] = gesehen
+    return ergebnis
 
 
 # ---------------------------------------------------------------- Knoten

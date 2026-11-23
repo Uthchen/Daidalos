@@ -65,6 +65,29 @@
         {
           "herkunft": "import",
           "sicher": true,
+          "symbol": "de.beispiel.aufrufe.Anlage",
+          "zeile": 3
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:app/src/main/kotlin/de/beispiel/app/Bedienung.kt->datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt:produktiv",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:app/src/main/kotlin/de/beispiel/app/Bedienung.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:app/src/main/kotlin/de/beispiel/app/Bedienung.kt->funktion:app/src/main/kotlin/de/beispiel/app/Bedienung.kt#bediene/1",
+      "nach": "funktion:app/src/main/kotlin/de/beispiel/app/Bedienung.kt#bediene/1",
+      "von": "datei:app/src/main/kotlin/de/beispiel/app/Bedienung.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "import",
+          "sicher": true,
           "symbol": "de.beispiel.aufrufe.Abgeleitet",
           "zeile": 3
         },
@@ -110,6 +133,47 @@
       "id": "kante:enthaelt:datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt->funktion:app/src/main/kotlin/de/beispiel/app/Haupt.kt#main/0",
       "nach": "funktion:app/src/main/kotlin/de/beispiel/app/Haupt.kt#main/0",
       "von": "datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt"
+    },
+    {
+      "art": "nutzt",
+      "beleg": [
+        {
+          "herkunft": "gleiches-paket",
+          "sicher": true,
+          "symbol": "de.beispiel.aufrufe.Strich",
+          "zeile": 12
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:nutzt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt->datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt:produktiv",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Anlage.<init>/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Anlage.<init>/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Modus.stufe/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Modus.stufe/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Werkbank.<init>/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Werkbank.<init>/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#lautstaerke/0",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#lautstaerke/0",
+      "von": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt"
     },
     {
       "art": "nutzt",
@@ -545,6 +609,22 @@
       "art": "ruft",
       "beleg": [
         {
+          "herkunft": "parameter",
+          "sicher": true,
+          "zeile": 7
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:app/src/main/kotlin/de/beispiel/app/Bedienung.kt#bediene/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.pruefe/0:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.pruefe/0",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:app/src/main/kotlin/de/beispiel/app/Bedienung.kt#bediene/1"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
           "herkunft": "konstruktor",
           "sicher": true,
           "zeile": 13
@@ -654,6 +734,54 @@
       "rolle": "produktiv",
       "sicher": true,
       "von": "funktion:app/src/main/kotlin/de/beispiel/app/Haupt.kt#main/0"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "konstruktor",
+          "sicher": true,
+          "zeile": 16
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Anlage.<init>/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Werkbank.<init>/0:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Werkbank.<init>/0",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Anlage.<init>/0"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "konstruktor",
+          "sicher": true,
+          "zeile": 12
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Werkbank.<init>/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.<init>/1:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.<init>/1",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Werkbank.<init>/0"
+    },
+    {
+      "art": "ruft",
+      "beleg": [
+        {
+          "herkunft": "objekt",
+          "sicher": true,
+          "zeile": 19
+        }
+      ],
+      "gewicht": 1,
+      "id": "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#lautstaerke/0->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Modus.stufe/0:produktiv",
+      "nach": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Modus.stufe/0",
+      "rolle": "produktiv",
+      "sicher": true,
+      "von": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#lautstaerke/0"
     },
     {
       "art": "ruft",
@@ -1325,6 +1453,12 @@
     },
     {
       "art": "enthaelt",
+      "id": "kante:enthaelt:modul::app->datei:app/src/main/kotlin/de/beispiel/app/Bedienung.kt",
+      "nach": "datei:app/src/main/kotlin/de/beispiel/app/Bedienung.kt",
+      "von": "modul::app"
+    },
+    {
+      "art": "enthaelt",
       "id": "kante:enthaelt:modul::app->datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt",
       "nach": "datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt",
       "von": "modul::app"
@@ -1349,8 +1483,8 @@
     },
     {
       "art": "nutzt",
-      "dateikanten": 2,
-      "gewicht": 4,
+      "dateikanten": 3,
+      "gewicht": 5,
       "id": "kante:nutzt:modul::app->modul::kern:produktiv",
       "nach": "modul::kern",
       "rolle": "produktiv",
@@ -1367,6 +1501,12 @@
       "art": "enthaelt",
       "id": "kante:enthaelt:modul::kern->datei:kern/build.gradle.kts",
       "nach": "datei:kern/build.gradle.kts",
+      "von": "modul::kern"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:modul::kern->datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt",
       "von": "modul::kern"
     },
     {
@@ -1467,19 +1607,31 @@
     },
     {
       "art": "enthaelt",
+      "id": "kante:enthaelt:paket::app/de.beispiel.app->datei:app/src/main/kotlin/de/beispiel/app/Bedienung.kt",
+      "nach": "datei:app/src/main/kotlin/de/beispiel/app/Bedienung.kt",
+      "von": "paket::app/de.beispiel.app"
+    },
+    {
+      "art": "enthaelt",
       "id": "kante:enthaelt:paket::app/de.beispiel.app->datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt",
       "nach": "datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt",
       "von": "paket::app/de.beispiel.app"
     },
     {
       "art": "nutzt",
-      "dateikanten": 2,
-      "gewicht": 4,
+      "dateikanten": 3,
+      "gewicht": 5,
       "id": "kante:nutzt:paket::app/de.beispiel.app->paket::kern/de.beispiel.aufrufe:produktiv",
       "nach": "paket::kern/de.beispiel.aufrufe",
       "rolle": "produktiv",
       "sicher": true,
       "von": "paket::app/de.beispiel.app"
+    },
+    {
+      "art": "enthaelt",
+      "id": "kante:enthaelt:paket::kern/de.beispiel.aufrufe->datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt",
+      "nach": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt",
+      "von": "paket::kern/de.beispiel.aufrufe"
     },
     {
       "art": "enthaelt",
@@ -1612,6 +1764,27 @@
     {
       "annotationen": [],
       "art": "datei",
+      "bytes": 185,
+      "funktionen": 1,
+      "hash": "sha256:b5067b3dd3d229e831fb139131b6c7a2a38460a3a266d8eb59c231802ba5c191",
+      "id": "datei:app/src/main/kotlin/de/beispiel/app/Bedienung.kt",
+      "klassen": [],
+      "metriken": {
+        "fan_in": 0,
+        "fan_out": 1,
+        "instabilitaet": 1.0
+      },
+      "modul": "modul::app",
+      "paket": "paket::app/de.beispiel.app",
+      "pfad": "app/src/main/kotlin/de/beispiel/app/Bedienung.kt",
+      "quellsatz": "main",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 8
+    },
+    {
+      "annotationen": [],
+      "art": "datei",
       "bytes": 388,
       "funktionen": 1,
       "hash": "sha256:92f1a26fdb7b400c6ee716e6c36120abc529ec27a31d2e7c112950756508ec61",
@@ -1661,6 +1834,49 @@
       "rolle": "produktiv",
       "sprache": "gradle-kotlin",
       "zeilen": 7
+    },
+    {
+      "annotationen": [],
+      "art": "datei",
+      "bytes": 341,
+      "funktionen": 4,
+      "hash": "sha256:e19857177b39e0cabc6176f114308231fad8c466ae4aa3221ba47c548f68feda",
+      "id": "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt",
+      "klassen": [
+        {
+          "annotationen": [],
+          "art": "klasse",
+          "name": "Anlage",
+          "obertypen": [],
+          "zeile": 15
+        },
+        {
+          "annotationen": [],
+          "art": "enum",
+          "name": "Modus",
+          "obertypen": [],
+          "zeile": 4
+        },
+        {
+          "annotationen": [],
+          "art": "klasse",
+          "name": "Werkbank",
+          "obertypen": [],
+          "zeile": 11
+        }
+      ],
+      "metriken": {
+        "fan_in": 1,
+        "fan_out": 1,
+        "instabilitaet": 0.5
+      },
+      "modul": "modul::kern",
+      "paket": "paket::kern/de.beispiel.aufrufe",
+      "pfad": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt",
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sprache": "kotlin",
+      "zeilen": 19
     },
     {
       "annotationen": [],
@@ -1765,9 +1981,9 @@
         }
       ],
       "metriken": {
-        "fan_in": 3,
+        "fan_in": 4,
         "fan_out": 1,
-        "instabilitaet": 0.25
+        "instabilitaet": 0.2
       },
       "modul": "modul::kern",
       "paket": "paket::kern/de.beispiel.aufrufe",
@@ -2033,6 +2249,41 @@
       "annotationen": [],
       "art": "funktion",
       "behaelter": "",
+      "datei": "app/src/main/kotlin/de/beispiel/app/Bedienung.kt",
+      "erweiterung": null,
+      "hash": "sha256:7dc918929d94478d52ef3e8d36affb81c6b2c0500c00b240eb49f48f9911a2b1",
+      "id": "funktion:app/src/main/kotlin/de/beispiel/app/Bedienung.kt#bediene/1",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 0,
+        "fan_in_unsicher": 0,
+        "fan_out": 1,
+        "fan_out_unsicher": 1,
+        "komplexitaet": 1,
+        "zeilen": 3
+      },
+      "modifikatoren": [],
+      "name": "bediene",
+      "parameter": [
+        {
+          "name": "anlage",
+          "typ": "Anlage",
+          "vararg": false,
+          "vorgabe": false
+        }
+      ],
+      "quellsatz": "main",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 1,
+      "zeile_bis": 8,
+      "zeile_von": 6
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "",
       "datei": "app/src/main/kotlin/de/beispiel/app/Haupt.kt",
       "erweiterung": null,
       "hash": "sha256:f5d3196a2d2798ae6e034d21d6bb9571ac0758ff85666ba672820a719b016c1d",
@@ -2056,6 +2307,118 @@
       "stelligkeit": 0,
       "zeile_bis": 14,
       "zeile_von": 9
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Anlage",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt",
+      "erweiterung": null,
+      "hash": "sha256:db9b50be74e6a40cfff016073f4022281c90c1454f4b3eae9c94ac00ef6954b8",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Anlage.<init>/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 0,
+        "fan_in_unsicher": 0,
+        "fan_out": 1,
+        "fan_out_unsicher": 1,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "<init>",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 16,
+      "zeile_von": 15
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Modus",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt",
+      "erweiterung": null,
+      "hash": "sha256:9713e7e7e0924a2059852a1f9a8073229ba4747235074ebb6dc111a54021bbba",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Modus.stufe/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 1,
+        "fan_in_unsicher": 1,
+        "fan_out": 0,
+        "fan_out_unsicher": 0,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "stufe",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 8,
+      "zeile_von": 8
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "Werkbank",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt",
+      "erweiterung": null,
+      "hash": "sha256:f223bc357090fbf800fc85fa44aa38bf1dd532a41b7ef34bd768ed9bc469387a",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#Werkbank.<init>/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 1,
+        "fan_in_unsicher": 1,
+        "fan_out": 1,
+        "fan_out_unsicher": 1,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "<init>",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 12,
+      "zeile_von": 11
+    },
+    {
+      "annotationen": [],
+      "art": "funktion",
+      "behaelter": "",
+      "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt",
+      "erweiterung": null,
+      "hash": "sha256:2a64a00365f7dd137fa21e5dc7cb6e1a0eb17efe09591bea3a77c12b45b961a7",
+      "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Anlage.kt#lautstaerke/0",
+      "metriken": {
+        "externe_aufrufe": 0,
+        "fan_in": 0,
+        "fan_in_unsicher": 0,
+        "fan_out": 1,
+        "fan_out_unsicher": 1,
+        "komplexitaet": 1,
+        "zeilen": 1
+      },
+      "modifikatoren": [],
+      "name": "lautstaerke",
+      "parameter": [],
+      "quellsatz": "commonMain",
+      "rolle": "produktiv",
+      "sichtbarkeit": "public",
+      "sprache": "kotlin",
+      "stelligkeit": 0,
+      "zeile_bis": 19,
+      "zeile_von": 19
     },
     {
       "annotationen": [],
@@ -2387,8 +2750,8 @@
       "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.<init>/1",
       "metriken": {
         "externe_aufrufe": 0,
-        "fan_in": 2,
-        "fan_in_unsicher": 2,
+        "fan_in": 3,
+        "fan_in_unsicher": 3,
         "fan_out": 3,
         "fan_out_unsicher": 3,
         "komplexitaet": 1,
@@ -2463,8 +2826,8 @@
       "id": "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.pruefe/0",
       "metriken": {
         "externe_aufrufe": 2,
-        "fan_in": 2,
-        "fan_in_unsicher": 2,
+        "fan_in": 3,
+        "fan_in_unsicher": 3,
         "fan_out": 0,
         "fan_out_unsicher": 0,
         "komplexitaet": 3,
@@ -3544,9 +3907,9 @@
     },
     {
       "art": "modul",
-      "dateien": 2,
+      "dateien": 3,
       "gradle_pfad": ":app",
-      "hash": "sha256:d79cb1bc7faf3a9ef823650fc58cb85fed4e6dd6dcf593ca178db87f58cfdfca",
+      "hash": "sha256:0bbcf545408799ed2d655e7bc99b7369bb7ca3d6da46dca4bec21d308fd43e9f",
       "id": "modul::app",
       "metriken": {
         "fan_in": 0,
@@ -3557,13 +3920,13 @@
       "plugins": [
         "org.jetbrains.kotlin.jvm"
       ],
-      "zeilen": 21
+      "zeilen": 29
     },
     {
       "art": "modul",
-      "dateien": 10,
+      "dateien": 11,
       "gradle_pfad": ":kern",
-      "hash": "sha256:77ab9d4f812573545999f6bdbd5d788794acd3631490ddb66f62b8a755cfa32d",
+      "hash": "sha256:84040f5e8457ea766bd4451ef79503da054441badb482d40bfbe20fe051a72aa",
       "id": "modul::kern",
       "metriken": {
         "fan_in": 1,
@@ -3574,7 +3937,7 @@
       "plugins": [
         "kotlin.multiplatform"
       ],
-      "zeilen": 199
+      "zeilen": 218
     },
     {
       "art": "ordner",
@@ -3591,8 +3954,8 @@
     },
     {
       "art": "paket",
-      "dateien": 1,
-      "hash": "sha256:d5d421b1077f2b9058c11d2ad978f8830e6eb19d2a217bdf533b091483dbab8c",
+      "dateien": 2,
+      "hash": "sha256:00fbb9da216c91af424f2a4f440fda1a71b3ebbae8a074a60853dbfbd918411c",
       "id": "paket::app/de.beispiel.app",
       "metriken": {
         "fan_in": 0,
@@ -3601,12 +3964,12 @@
       },
       "modul": "modul::app",
       "name": "de.beispiel.app",
-      "zeilen": 14
+      "zeilen": 22
     },
     {
       "art": "paket",
-      "dateien": 6,
-      "hash": "sha256:0b4284561807cb60761b701201958321d093e5087f770e29fb4e47dcbca350fd",
+      "dateien": 7,
+      "hash": "sha256:f0945230b9a7ddf5b1bd1388b294c32ccaf1979de682090656ea58bf894754ab",
       "id": "paket::kern/de.beispiel.aufrufe",
       "metriken": {
         "fan_in": 2,
@@ -3615,7 +3978,7 @@
       },
       "modul": "modul::kern",
       "name": "de.beispiel.aufrufe",
-      "zeilen": 171
+      "zeilen": 190
     },
     {
       "art": "paket",

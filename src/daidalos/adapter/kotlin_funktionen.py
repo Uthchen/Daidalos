@@ -205,6 +205,7 @@ class KlasseRoh:
     modifikatoren: list[str]
     companion: str | None = None  # Kette des Companion
     konstruktor_knoten: bool = False  # ob ein ``<init>``-Knoten für den primären entsteht
+    eintraege: list[str] = field(default_factory=list)  # Einträge einer ``enum class``
 
 
 @dataclass
@@ -997,6 +998,12 @@ class _Leser:
         self.ergebnis.klassen.append(klasse)
         neue_ketten = [*ketten, kette]
         koerper = _koerper(knoten)
+        if koerper is not None and koerper.type == "enum_class_body":
+            for eintrag in koerper.named_children:
+                if eintrag.type == "enum_entry":
+                    name = next((k for k in eintrag.named_children if k.type == "identifier"), None)
+                    if name is not None:
+                        klasse.eintraege.append(text(name))
         # Teile des primären Konstruktors: init-Blöcke und Initialisierer der Eigenschaften
         init_teile: list[Node] = []
         if koerper is not None:
