@@ -76,6 +76,19 @@ Auswahlregel: produktiv, nicht fremd und mindestens eines: unter den 30 mit dem 
 | `datei:nativ/src/main/kotlin/beispiel/nativ/Insel.kt` | 7 | 1 | 0 | fan-in, befund, jni | fehlt |
 | `datei:nativ/src/main/cpp/insel_jni.c` | 7 | 0 | 0 | jni | fehlt |
 
+## Wichtige Funktionen
+
+Auswahlregel: produktiv, nicht fremd; die 20 mit dem höchsten sicheren Fan-in (fan-in) und jede markierte Funktion mit einer Grenzkante der Markierungs-Kette (grenzkante), höchstens 40. Je Funktion ein Satz; den Körper zeigen die Zeilen (von–bis).
+
+| Id | Zeilen | Fan-in | Komplexität | Grund | Deutung |
+| --- | --- | ---: | ---: | --- | --- |
+| `funktion:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt#Strich.<init>/0` | 4–5 | 1 | 1 | fan-in | fehlt |
+| `funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#Hilfen.kennung/0` | 10 | 1 | 1 | fan-in | fehlt |
+| `funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#[Punkt]verschoben/1` | 5 | 1 | 1 | fan-in | fehlt |
+| `funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#abstand/2` | 3 | 1 | 1 | fan-in | fehlt |
+| `funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt#Mitte.<init>/0` | 3–4 | 1 | 1 | fan-in | fehlt |
+| `funktion:nativ/src/main/kotlin/beispiel/nativ/Insel.kt#Insel.rechne_schnell/1` | 4 | 1 | 1 | fan-in | fehlt |
+
 ## Befunde
 
 - `befund:jni-ohne-gegenstueck:nativ/src/main/kotlin/beispiel/nativ/Insel.kt:beispiel.nativ.Insel.fehlt`: JNI ohne Gegenstück (kotlin): beispiel.nativ.Insel.fehlt
@@ -91,7 +104,7 @@ Unaufgelöste Aufrufe: keine.
 
 ## Offen
 
-- Beschreibung fehlt: 23
+- Beschreibung fehlt: 29
   - `datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt`
   - `datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/messung/Messung.kt`
   - `datei:kern-labor/src/commonMain/kotlin/beispiel/kern/labor/protokoll/Eintrag.kt`
@@ -103,6 +116,12 @@ Unaufgelöste Aufrufe: keine.
   - `datei:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt`
   - `datei:nativ/src/main/cpp/insel_jni.c`
   - `datei:nativ/src/main/kotlin/beispiel/nativ/Insel.kt`
+  - `funktion:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt#Strich.<init>/0`
+  - `funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#Hilfen.kennung/0`
+  - `funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#[Punkt]verschoben/1`
+  - `funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#abstand/2`
+  - `funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt#Mitte.<init>/0`
+  - `funktion:nativ/src/main/kotlin/beispiel/nativ/Insel.kt#Insel.rechne_schnell/1`
   - `modul::kern-labor`
   - `modul::nativ`
   - `modul::regeln`

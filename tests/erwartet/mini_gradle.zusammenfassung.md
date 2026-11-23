@@ -37,6 +37,16 @@ Auswahlregel: produktiv, nicht fremd und mindestens eines: unter den 30 mit dem 
 | `datei:core/src/main/kotlin/de/beispiel/zeichnen/Punkt.kt` | 3 | 2 | 0 | fan-in | fehlt |
 | `datei:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt` | 11 | 1 | 1 | fan-in | fehlt |
 
+## Wichtige Funktionen
+
+Auswahlregel: produktiv, nicht fremd; die 20 mit dem höchsten sicheren Fan-in (fan-in) und jede markierte Funktion mit einer Grenzkante der Markierungs-Kette (grenzkante), höchstens 40. Je Funktion ein Satz; den Körper zeigen die Zeilen (von–bis).
+
+| Id | Zeilen | Fan-in | Komplexität | Grund | Deutung |
+| --- | --- | ---: | ---: | --- | --- |
+| `funktion:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt#Strich.<init>/0` | 3–4 | 1 | 1 | fan-in | fehlt |
+| `funktion:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt#Strich.fuegeHinzu/1` | 6–8 | 1 | 1 | fan-in | fehlt |
+| `funktion:core/src/main/kotlin/de/beispiel/zeichnen/Strich.kt#Strich.laenge/0` | 10 | 1 | 1 | fan-in | fehlt |
+
 ## Befunde
 
 Keine.
@@ -48,4 +58,4 @@ Unaufgelöste Aufrufe: keine.
 
 ## Offen
 
-- Beschreibung fehlt: alle 9 (Module, Ordner, Pakete und wichtige Dateien; siehe Spalte Deutung)
+- Beschreibung fehlt: alle 12 (Module, Ordner, Pakete, wichtige Dateien und wichtige Funktionen; siehe Spalte Deutung)

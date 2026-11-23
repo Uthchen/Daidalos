@@ -172,6 +172,30 @@
         "stand": "fehlt"
       },
       {
+        "id": "funktion:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt#Strich.<init>/0",
+        "stand": "fehlt"
+      },
+      {
+        "id": "funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#Hilfen.kennung/0",
+        "stand": "fehlt"
+      },
+      {
+        "id": "funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#[Punkt]verschoben/1",
+        "stand": "fehlt"
+      },
+      {
+        "id": "funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#abstand/2",
+        "stand": "fehlt"
+      },
+      {
+        "id": "funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt#Mitte.<init>/0",
+        "stand": "fehlt"
+      },
+      {
+        "id": "funktion:nativ/src/main/kotlin/beispiel/nativ/Insel.kt#Insel.rechne_schnell/1",
+        "stand": "fehlt"
+      },
+      {
         "id": "modul::anwendung",
         "stand": "veraltet"
       },
@@ -449,6 +473,86 @@
       "zeilen": 7
     }
   ],
+  "wichtige_funktionen": [
+    {
+      "datei": "kern/src/commonMain/kotlin/beispiel/kern/Strich.kt",
+      "deutung": "fehlt",
+      "fan_in": 1,
+      "gruende": [
+        "fan-in"
+      ],
+      "id": "funktion:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt#Strich.<init>/0",
+      "komplexitaet": 1,
+      "markiert": false,
+      "zeile_bis": 5,
+      "zeile_von": 4
+    },
+    {
+      "datei": "kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt",
+      "deutung": "fehlt",
+      "fan_in": 1,
+      "gruende": [
+        "fan-in"
+      ],
+      "id": "funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#Hilfen.kennung/0",
+      "komplexitaet": 1,
+      "markiert": false,
+      "zeile_bis": 10,
+      "zeile_von": 10
+    },
+    {
+      "datei": "kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt",
+      "deutung": "fehlt",
+      "fan_in": 1,
+      "gruende": [
+        "fan-in"
+      ],
+      "id": "funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#[Punkt]verschoben/1",
+      "komplexitaet": 1,
+      "markiert": false,
+      "zeile_bis": 5,
+      "zeile_von": 5
+    },
+    {
+      "datei": "kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt",
+      "deutung": "fehlt",
+      "fan_in": 1,
+      "gruende": [
+        "fan-in"
+      ],
+      "id": "funktion:kern/src/commonMain/kotlin/beispiel/kern/Werkzeug.kt#abstand/2",
+      "komplexitaet": 1,
+      "markiert": false,
+      "zeile_bis": 3,
+      "zeile_von": 3
+    },
+    {
+      "datei": "kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt",
+      "deutung": "fehlt",
+      "fan_in": 1,
+      "gruende": [
+        "fan-in"
+      ],
+      "id": "funktion:kern/src/commonMain/kotlin/beispiel/kern/zyklus/Mitte.kt#Mitte.<init>/0",
+      "komplexitaet": 1,
+      "markiert": false,
+      "zeile_bis": 4,
+      "zeile_von": 3
+    },
+    {
+      "datei": "nativ/src/main/kotlin/beispiel/nativ/Insel.kt",
+      "deutung": "fehlt",
+      "fan_in": 1,
+      "gruende": [
+        "fan-in"
+      ],
+      "id": "funktion:nativ/src/main/kotlin/beispiel/nativ/Insel.kt#Insel.rechne_schnell/1",
+      "komplexitaet": 1,
+      "markiert": false,
+      "zeile_bis": 4,
+      "zeile_von": 4
+    }
+  ],
   "zahlen": {
     "befunde": 5,
     "dateien": 27,
@@ -458,6 +562,7 @@
     "ordner": 2,
     "pakete": 9,
     "wichtige_dateien": 12,
+    "wichtige_funktionen": 6,
     "zeilen": 202
   },
   "ziel": {

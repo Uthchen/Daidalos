@@ -213,8 +213,10 @@ def test_mit_deutung_nichts_offen(aufbau: tuple[Path, Path]) -> None:
 # ---------------------------------------------------------------- A08: detekt im Klon
 
 SCHREIBE_SARIF = """\
-import json, pathlib, sys
+import json, os, pathlib, sys
 klon = pathlib.Path.cwd()
+# umgebung aus ziele.toml, ohne Variablen-Ersetzung
+assert os.environ["DAIDALOS_PROBE"] == "Wert mit $HOME", os.environ.get("DAIDALOS_PROBE")
 assert (klon / "lokal.properties").read_text(encoding="utf-8") == "sdk=erfunden"
 ziel = klon / "core" / "build" / "reports" / "detekt" / "detekt.sarif"
 ziel.parent.mkdir(parents=True)
@@ -242,6 +244,7 @@ def _mit_detekt(aufbau: tuple[Path, Path], argumente: str = "") -> Path:
         datei.write(
             f'konfiguration = "{toml.as_posix()}"\nkopiere = ["lokal.properties"]\n'
             f"detekt = {befehl}\n"
+            'umgebung = { DAIDALOS_PROBE = "Wert mit $HOME" }\n'
         )
     return wurzel
 
@@ -281,6 +284,17 @@ def test_mit_detekt_ohne_befehl_ist_fehler(
     _, wurzel = aufbau
     assert _lauf(wurzel, "--mit-detekt") == 2
     assert "detekt = [...]" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize("wert", ['"JAVA_HOME"', "{ JAVA_HOME = 17 }", "[1]"])
+def test_umgebung_muss_tabelle_text_sein(
+    aufbau: tuple[Path, Path], capsys: pytest.CaptureFixture[str], wert: str
+) -> None:
+    _, wurzel = aufbau
+    with (wurzel / "lokal" / "ziele.toml").open("a", encoding="utf-8") as datei:
+        datei.write(f"umgebung = {wert}\n")
+    assert _lauf(wurzel) == 2
+    assert "umgebung muss eine Tabelle" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize("pfad", ["../geheim.txt", "a/../../b", "/abs/datei"])

@@ -28,6 +28,10 @@ WICHTIG_FAN_IN_ANZAHL = 30
 WICHTIG_MODULKANTE_AB = 3
 # Gründe in fester Reihenfolge
 GRUENDE = ("fan-in", "befund", "einstieg", "trennstelle", "jni", "modulkante")
+# Auswahlregel für wichtige Funktionen (seit A09)
+WICHTIG_FUNKTIONEN_FAN_IN = 20
+WICHTIG_FUNKTIONEN_HOECHSTENS = 40
+GRUENDE_FUNKTION = ("fan-in", "grenzkante")
 # Bis zu so vielen offenen Einträgen je Gruppe werden Ids aufgezählt, sonst nur gezählt.
 OFFEN_AUFZAEHLEN_BIS = 40
 
@@ -143,6 +147,49 @@ def wichtige_dateien(messung: dict[str, Any]) -> dict[str, list[str]]:
     }
 
 
+def _zeilen(f: dict[str, Any]) -> str:
+    """``12`` oder ``12–20``."""
+    von, bis = f["zeile_von"], f["zeile_bis"]
+    return str(von) if von == bis else f"{von}–{bis}"
+
+
+def wichtige_funktionen(messung: dict[str, Any]) -> dict[str, list[str]]:
+    """Funktions-Id → Gründe (seit A09); braucht die volle Messung mit Funktionsebene.
+
+    Kandidaten sind produktive Funktionen mit ``hash`` (ohne implizite Konstruktoren) außerhalb
+    von Fremdcode. Aufgenommen werden die 20 mit dem höchsten sicheren Fan-in (Fan-in > 0,
+    Gleichstand nach Id) und jede markierte Funktion, von der eine Grenzkante der
+    Markierungs-Kette ausgeht (``von``), nach Zahl ihrer Grenzkanten, dann Id; höchstens 40
+    insgesamt, die Fan-in-Auswahl zuerst.
+    """
+    fremd = {k["pfad"] for k in messung["knoten"] if k["art"] == "datei" and k.get("fremd")}
+    kandidaten = {
+        k["id"]: k
+        for k in messung["knoten"]
+        if k["art"] == "funktion"
+        and k.get("rolle") == "produktiv"
+        and k.get("hash")
+        and datei_der_funktion(k) not in fremd
+    }
+    nach_fan_in = sorted(
+        (k for k in kandidaten.values() if k.get("metriken", {}).get("fan_in", 0) > 0),
+        key=lambda k: (-k["metriken"]["fan_in"], k["id"]),
+    )[:WICHTIG_FUNKTIONEN_FAN_IN]
+    grenzen: dict[str, int] = {}
+    for b in messung["befunde"]:
+        if b["regel"] == "markierung-verlassen" and b["beleg"]["von"] in kandidaten:
+            grenzen[b["beleg"]["von"]] = grenzen.get(b["beleg"]["von"], 0) + 1
+    gruende: dict[str, list[str]] = {}
+    for k in nach_fan_in:
+        gruende[k["id"]] = ["fan-in"]
+    for funktion_id in sorted(grenzen, key=lambda i: (-grenzen[i], i)):
+        if funktion_id in gruende:
+            gruende[funktion_id].append("grenzkante")
+        elif len(gruende) < WICHTIG_FUNKTIONEN_HOECHSTENS:
+            gruende[funktion_id] = ["grenzkante"]
+    return dict(sorted(gruende.items()))
+
+
 # ---------------------------------------------------------------- Offen
 
 
@@ -171,15 +218,19 @@ class Offen:
         }
 
 
-def zu_beschreiben(messung: dict[str, Any], wichtig: dict[str, list[str]]) -> list[str]:
+def zu_beschreiben(
+    messung: dict[str, Any],
+    wichtig: dict[str, list[str]],
+    funktionen: dict[str, list[str]] | None = None,
+) -> list[str]:
     """Ids, die eine Beschreibung brauchen: Module, Ordner und Pakete ohne reinen Fremdcode,
-    dazu die wichtigen Dateien."""
+    dazu die wichtigen Dateien und (seit A09) die wichtigen Funktionen."""
     ids = [
         k["id"]
         for k in messung["knoten"]
         if k["art"] in ("modul", "ordner", "paket") and not k.get("fremd")
     ]
-    return sorted([*ids, *wichtig])
+    return sorted([*ids, *wichtig, *(funktionen or {})])
 
 
 def stand_der_beschreibung(eintrag: Any, knoten: Knoten) -> str:
@@ -192,8 +243,13 @@ def stand_der_beschreibung(eintrag: Any, knoten: Knoten) -> str:
 def finde_offenes(
     messung: dict[str, Any], deutung: dict[str, Any] | None, wichtig: dict[str, list[str]]
 ) -> Offen:
-    """Abgleich der rohen ``deutung.json`` (oder ``None``) mit der Messung."""
+    """Abgleich der rohen ``deutung.json`` (oder ``None``) mit der vollen Messung.
+
+    Seit A09 brauchen auch die wichtigen Funktionen eine Beschreibung; Hash und Abgleich wie bei
+    Dateien über den ``hash`` des Funktionsknotens.
+    """
     deutung = deutung or {}
+    funktionen = wichtige_funktionen(messung)
     knoten = {k["id"]: k for k in messung["knoten"]}
     # Abdeckungs- und detekt-Befunde brauchen keine Einschätzung.
     befunde = {b["id"] for b in messung["befunde"] if not braucht_keine_einschaetzung(b)}
@@ -203,7 +259,7 @@ def finde_offenes(
 
     beschreibungen = deutung.get("beschreibungen")
     beschreibungen = beschreibungen if isinstance(beschreibungen, dict) else {}
-    for knoten_id in zu_beschreiben(messung, wichtig):
+    for knoten_id in zu_beschreiben(messung, wichtig, funktionen):
         stand = stand_der_beschreibung(beschreibungen.get(knoten_id), knoten[knoten_id])
         if stand != "ok":
             offen.beschreibungen[knoten_id] = stand
@@ -291,7 +347,9 @@ class Zusammenfassung:
         self.knoten = {k["id"]: k for k in self.messung["knoten"]}
         self.kanten = {_kid(k): k for k in self.messung["kanten"]}
         self.wichtig = wichtige_dateien(self.messung)
-        self.offen = finde_offenes(self.messung, self.deutung, self.wichtig)
+        self.wichtig_funktionen = wichtige_funktionen(self.voll)
+        self.offen = finde_offenes(self.voll, self.deutung, self.wichtig)
+        self.voll_knoten = {k["id"]: k for k in self.voll["knoten"]}
         roh = (self.deutung or {}).get("beschreibungen")
         self.beschreibungen = roh if isinstance(roh, dict) else {}
 
@@ -316,6 +374,7 @@ class Zusammenfassung:
             "ordner": sum(1 for k in knoten if k["art"] == "ordner"),
             "pakete": sum(1 for k in knoten if k["art"] == "paket"),
             "wichtige_dateien": len(self.wichtig),
+            "wichtige_funktionen": len(self.wichtig_funktionen),
             "zeilen": sum(k.get("zeilen", 0) for k in dateien),
         }
 
@@ -377,6 +436,27 @@ class Zusammenfassung:
                     "gruende": gruende,
                     "id": knoten_id,
                     "zeilen": k.get("zeilen", 0),
+                }
+            )
+        zeilen.sort(key=lambda z: (-z["fan_in"], z["id"]))
+        return zeilen
+
+    def funktionen_wichtig(self) -> list[dict[str, Any]]:
+        zeilen = []
+        for funktion_id, gruende in self.wichtig_funktionen.items():
+            k = self.voll_knoten[funktion_id]
+            m = k.get("metriken", {})
+            zeilen.append(
+                {
+                    "datei": datei_der_funktion(k),
+                    "deutung": stand_der_beschreibung(self.beschreibungen.get(funktion_id), k),
+                    "fan_in": m.get("fan_in", 0),
+                    "gruende": gruende,
+                    "id": funktion_id,
+                    "komplexitaet": m.get("komplexitaet"),
+                    "markiert": bool(k.get("markiert")),
+                    "zeile_bis": k["zeile_bis"],
+                    "zeile_von": k["zeile_von"],
                 }
             )
         zeilen.sort(key=lambda z: (-z["fan_in"], z["id"]))
@@ -480,6 +560,7 @@ class Zusammenfassung:
             "offen": self.offen.als_json(),
             "pakete": self.pakete(),
             "wichtige_dateien": self.wichtige(),
+            "wichtige_funktionen": self.funktionen_wichtig(),
             "messung": self.messung_funktionen(),
             "zahlen": self.zahlen(),
             "ziel": {
@@ -544,6 +625,7 @@ class Zusammenfassung:
                 f"| `{w['id']}` | {w['zeilen']} | {w['fan_in']} | {w['fan_out']} | "
                 f"{', '.join(w['gruende'])} | {w['deutung']} |"
             )
+        aus += self._funktionen_markdown()
         aus += ["", "## Befunde", ""]
         if not self.bewertbare():
             aus.append("Keine.")
@@ -554,6 +636,27 @@ class Zusammenfassung:
         aus += ["", *self._offen_markdown()]
         return "\n".join(aus) + "\n"
 
+    def _funktionen_markdown(self) -> list[str]:
+        zeilen = self.funktionen_wichtig()
+        if not zeilen:
+            return []
+        aus = ["", "## Wichtige Funktionen", ""]
+        aus.append(
+            f"Auswahlregel: produktiv, nicht fremd; die {WICHTIG_FUNKTIONEN_FAN_IN} mit dem "
+            "höchsten sicheren Fan-in (fan-in) und jede markierte Funktion mit einer Grenzkante "
+            f"der Markierungs-Kette (grenzkante), höchstens {WICHTIG_FUNKTIONEN_HOECHSTENS}. Je "
+            "Funktion ein Satz; den Körper zeigen die Zeilen (von–bis)."
+        )
+        aus += ["", "| Id | Zeilen | Fan-in | Komplexität | Grund | Deutung |"]
+        aus.append("| --- | --- | ---: | ---: | --- | --- |")
+        for f in zeilen:
+            komplex = "–" if f["komplexitaet"] is None else f["komplexitaet"]
+            aus.append(
+                f"| `{f['id']}` | {_zeilen(f)} | {f['fan_in']} | "
+                f"{komplex} | {', '.join(f['gruende'])} | {f['deutung']} |"
+            )
+        return aus
+
     def _offen_markdown(self) -> list[str]:
         offen = self.offen
         aus = ["## Offen", ""]
@@ -561,11 +664,11 @@ class Zusammenfassung:
             return [*aus, "Nichts offen. Die Deutung ist aktuell."]
         fehlt = sorted(i for i, s in offen.beschreibungen.items() if s == "fehlt")
         veraltet = sorted(i for i, s in offen.beschreibungen.items() if s == "veraltet")
-        alle = zu_beschreiben(self.messung, self.wichtig)
+        alle = zu_beschreiben(self.messung, self.wichtig, self.wichtig_funktionen)
         if fehlt and len(fehlt) == len(alle):
             aus.append(
-                f"- Beschreibung fehlt: alle {len(alle)} (Module, Ordner, Pakete und wichtige "
-                "Dateien; siehe Spalte Deutung)"
+                f"- Beschreibung fehlt: alle {len(alle)} (Module, Ordner, Pakete, wichtige "
+                "Dateien und wichtige Funktionen; siehe Spalte Deutung)"
             )
         else:
             aus += self._liste("Beschreibung fehlt", fehlt)

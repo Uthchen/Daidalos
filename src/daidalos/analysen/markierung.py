@@ -46,6 +46,48 @@ def _sichere_namen(annotationen: list[dict[str, Any]] | None) -> set[str]:
     return {a["name"] for a in annotationen or [] if a.get("sicher")}
 
 
+def _markierung(
+    namen: tuple[str, ...], f: Knoten, eigene: set[str], umgebend: list[set[str]], datei: set[str]
+) -> tuple[str, str] | None:
+    """(Annotation, Träger) der Markierung; ``<init>`` deckt nur die eigene Annotation."""
+    for name in namen:
+        if name in eigene:
+            return name, "funktion"
+    if f["name"] == "<init>":
+        return None
+    for stufe in umgebend:
+        for name in namen:
+            if name in stufe:
+                return name, "klasse"
+    for name in namen:
+        if name in datei:
+            return name, "datei"
+    return None
+
+
+def markierung_der_funktion(
+    funktion: Knoten, datei: Knoten, namen: tuple[str, ...]
+) -> tuple[str, str] | None:
+    """(Annotation, Träger) für eine Funktion; ``namen`` aus ``[markierungen].annotationen``.
+
+    Dieselbe Regel wie in der Kette; ``datei`` ist der Datei-Knoten mit ``klassen`` und
+    ``annotationen``.
+    """
+    klassen = {k["name"]: k for k in datei.get("klassen", [])}
+    teile = funktion["behaelter"].split(".") if funktion["behaelter"] else []
+    umgebend = [
+        _sichere_namen(klassen.get(".".join(teile[:i]), {}).get("annotationen"))
+        for i in range(len(teile), 0, -1)
+    ]
+    return _markierung(
+        namen,
+        funktion,
+        _sichere_namen(funktion.get("annotationen")),
+        umgebend,
+        _sichere_namen(datei.get("annotationen")),
+    )
+
+
 class _Kette:
     def __init__(
         self,
@@ -110,21 +152,7 @@ class _Kette:
     def _markierung(
         self, f: Knoten, eigene: set[str], umgebend: list[set[str]], datei: set[str]
     ) -> tuple[str, str] | None:
-        """(Annotation, Träger) der Markierung; ``<init>`` deckt nur die eigene Annotation."""
-        namen = self.konfiguration.annotationen
-        for name in namen:
-            if name in eigene:
-                return name, "funktion"
-        if f["name"] == "<init>":
-            return None
-        for stufe in umgebend:
-            for name in namen:
-                if name in stufe:
-                    return name, "klasse"
-        for name in namen:
-            if name in datei:
-                return name, "datei"
-        return None
+        return _markierung(self.konfiguration.annotationen, f, eigene, umgebend, datei)
 
     # ------------------------------------------------------------ Graph
 

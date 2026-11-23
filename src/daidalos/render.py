@@ -14,6 +14,7 @@ from urllib.parse import quote
 
 from daidalos import __version__
 from daidalos.ids import kanten_id as _kid
+from daidalos.karte_funktionen import funktionsblock
 from daidalos.konfiguration import STANDARD_EDITOR_LINK
 from daidalos.scanner import SCHEMA
 
@@ -53,7 +54,7 @@ def lade_messung(pfad: Path) -> dict[str, Any]:
 
 # ---------------------------------------------------------------- Strukturansicht
 
-# Kanten zwischen Funktionen; die Karte zeigt sie (noch) nicht.
+# Kanten zwischen Funktionen; die Karte zeigt sie seit A09 aus dem eigenen Funktionsblock.
 FUNKTIONSKANTEN = frozenset({"ruft", "ueberschreibt", "actual"})
 # Felder des Datei-Knotens, die nur die Funktionsebene betreffen
 _FUNKTIONSFELDER = ("annotationen", "eigenschaften", "funktionen", "klassen")
@@ -184,7 +185,10 @@ def baue_karte(
     messung: dict[str, Any],
     deutung: dict[str, Any] | None,
     einstellungen: dict[str, Any] | None = None,
+    markierungen: tuple[str, ...] = (),
 ) -> str:
+    """``karte.html``; ``markierungen`` (``[markierungen].annotationen``) bestimmt im
+    Funktionsblock den Träger einer Markierung."""
     if einstellungen is None:
         einstellungen = einstellungen_fuer_karte(STANDARD_EDITOR_LINK, None)
     werte = {
@@ -195,6 +199,8 @@ def baue_karte(
         "DATEN": einbett_json(strukturansicht(messung)),
         "DEUTUNG": einbett_json(deutung),
         "EINSTELLUNGEN": einbett_json(einstellungen),
+        # Erst beim ersten Öffnen der Funktionsebene gelesen (seit A09).
+        "FUNKTIONEN": einbett_json(funktionsblock(messung, markierungen)),
         "SKRIPT": _paketdatei("karte.js"),
         "VERSION": _html_text(__version__),
     }

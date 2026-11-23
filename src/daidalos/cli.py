@@ -346,7 +346,12 @@ def _befehl_render(argumente: argparse.Namespace) -> int:
     einstellungen = einstellungen_fuer_karte(
         konfiguration.editor.link, wurzel_relativ(ziel, ausgabe)
     )
-    karte = baue_karte(messung, deutung, einstellungen)
+    karte = baue_karte(
+        messung,
+        deutung,
+        einstellungen,
+        konfiguration.markierungen.annotationen if konfiguration.markierungen else (),
+    )
     schreibe_text(karte, ausgabe / "karte.html")
     schreibe_text(baue_karte_md(messung, deutung), ausgabe / "KARTE.md")
     dauer = time.perf_counter() - beginn
