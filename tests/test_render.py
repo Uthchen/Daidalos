@@ -113,9 +113,9 @@ def test_maskierung_von_script_ende() -> None:
 
 def test_bibliotheken_in_fester_anzahl_von_script_tags(tmp_path: Path) -> None:
     html = (rendere("mini_modulgraph", tmp_path) / "karte.html").read_text(encoding="utf-8")
-    # 4 Datenblöcke (seit A09 mit dem Funktionsblock), 3 Bibliotheken, der Quelltext des
-    # ELK-Workers und die Worker-Hülle (seit A09b), 1 Kartenskript.
-    assert html.count("</script>") == 10
+    # 5 Datenblöcke (seit A09 mit dem Funktionsblock, seit A10 mit den Führungen), 3 Bibliotheken,
+    # der Quelltext des ELK-Workers und die Worker-Hülle (seit A09b), 1 Kartenskript.
+    assert html.count("</script>") == 11
 
 
 def test_elk_worker_als_text_vor_der_huelle(tmp_path: Path) -> None:

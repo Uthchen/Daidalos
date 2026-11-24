@@ -1,4 +1,5 @@
-"""Befehlszeile von Daidalos: scan, render, pfad, zusammenfassung, arbeitsblatt, deutung."""
+"""Befehlszeile von Daidalos: scan, render, pfad, zusammenfassung, arbeitsblatt, deutung,
+fuehrung."""
 
 from __future__ import annotations
 
@@ -21,6 +22,17 @@ from daidalos.deutung import (
     uebernimm,
 )
 from daidalos.export import als_json, schreibe_json, schreibe_text
+from daidalos.fuehrung import (
+    NAME_MUSTER,
+    STAND_OK,
+    Index,
+    fuer_karte,
+    lies_fuehrungen,
+    stand_der_fuehrung,
+)
+from daidalos.fuehrung import ORDNER as FUEHRUNGS_ORDNER
+from daidalos.fuehrung import EntwurfFehler as FuehrungsEntwurfFehler
+from daidalos.fuehrung import uebernimm as uebernimm_fuehrung
 from daidalos.konfiguration import (
     DATEINAME,
     Konfiguration,
@@ -173,7 +185,42 @@ def _baue_parser() -> argparse.ArgumentParser:
         "pruefen", help="veraltete, fehlende und tote Einträge melden (Exit-Code 1, wenn offen)"
     )
     _ziel_daten_deutung(pruefen)
+
+    fuehrung = befehle.add_parser(
+        "fuehrung", help="Führungen durch die Karte übernehmen und prüfen"
+    )
+    fuehrung_befehle = fuehrung.add_subparsers(
+        dest="fuehrung_befehl", metavar="AKTION", parser_class=_Parser, required=True
+    )
+    f_uebernehmen = fuehrung_befehle.add_parser(
+        "uebernehmen", help="Führung prüfen, Hashes einsetzen und nach fuehrungen/ schreiben"
+    )
+    f_uebernehmen.add_argument("entwurf", metavar="ENTWURF", help="Führung (JSON ohne hashes)")
+    _ziel_daten_ausgabe(f_uebernehmen)
+    f_pruefen = fuehrung_befehle.add_parser(
+        "pruefen", help="veraltete und kaputte Schritte melden (Exit-Code 1, wenn es welche gibt)"
+    )
+    f_pruefen.add_argument(
+        "name_oder_ziel", nargs="?", metavar="NAME", help="nur diese Führung (Standard: alle)"
+    )
+    _ziel_daten_ausgabe(f_pruefen)
+    f_liste = fuehrung_befehle.add_parser("liste", help="Führungen mit Titel, Schritten und Stand")
+    _ziel_daten_ausgabe(f_liste)
     return parser
+
+
+def _ziel_daten_ausgabe(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "ziel", nargs="?", default=None, metavar="ZIEL", help="Zielrepo (Standard: .)"
+    )
+    parser.add_argument(
+        "--daten", metavar="DATEI", help="Messung (Standard: <ZIEL>/docs/daidalos/daidalos.json)"
+    )
+    parser.add_argument(
+        "--ausgabe",
+        metavar="ORDNER",
+        help="Ordner mit fuehrungen/ (Standard: <ZIEL>/docs/daidalos/)",
+    )
 
 
 def _ziel_daten_deutung(parser: argparse.ArgumentParser) -> None:
@@ -343,6 +390,7 @@ def _befehl_render(argumente: argparse.Namespace) -> int:
         return EXIT_BEDIENFEHLER
 
     beginn = time.perf_counter()
+    fuehrungen = _fuehrungen_fuer_karte(ausgabe / FUEHRUNGS_ORDNER, messung)
     einstellungen = einstellungen_fuer_karte(
         konfiguration.editor.link, wurzel_relativ(ziel, ausgabe)
     )
@@ -351,16 +399,46 @@ def _befehl_render(argumente: argparse.Namespace) -> int:
         deutung,
         einstellungen,
         konfiguration.markierungen.annotationen if konfiguration.markierungen else (),
+        fuehrungen,
     )
     schreibe_text(karte, ausgabe / "karte.html")
-    schreibe_text(baue_karte_md(messung, deutung), ausgabe / "KARTE.md")
+    schreibe_text(baue_karte_md(messung, deutung, fuehrungen), ausgabe / "KARTE.md")
     dauer = time.perf_counter() - beginn
     groesse = len(karte.encode("utf-8")) / 1024 / 1024
     print(f"Deutung:   {_anzeigepfad(deutung_pfad) if deutung_pfad else '-'}")
+    if fuehrungen:
+        nicht_ok = sum(1 for f in fuehrungen if f["stand"] != STAND_OK)
+        print(f"Führungen: {len(fuehrungen)} (veraltet oder kaputt: {nicht_ok})")
     print(f"Karte:     {_anzeigepfad(ausgabe / 'karte.html')} ({groesse:.2f} MiB)")
     print(f"Bericht:   {_anzeigepfad(ausgabe / 'KARTE.md')}")
     print(f"Laufzeit:  {dauer:.2f} s")
     return EXIT_OK
+
+
+def _fuehrungen_fuer_karte(ordner: Path, messung: dict[str, Any]) -> list[dict[str, Any]]:
+    fuehrungen, warnungen = lies_fuehrungen(ordner)
+    for warnung in warnungen:
+        print(f"Warnung: Führung übersprungen: {warnung}", file=sys.stderr)
+    return fuer_karte(fuehrungen, messung)
+
+
+def _fuehrungs_staende(ordner: Path, messung: dict[str, Any]) -> list[dict[str, Any]]:
+    """Stand je Führung für die Zusammenfassung: Name, Stand, Nummern der Schritte nicht ok."""
+    fuehrungen, warnungen = lies_fuehrungen(ordner)
+    for warnung in warnungen:
+        print(f"Warnung: Führung übersprungen: {warnung}", file=sys.stderr)
+    index = Index.aus(messung)
+    staende = []
+    for f in fuehrungen:
+        stand = stand_der_fuehrung(f, index)
+        staende.append(
+            {
+                "name": stand.name,
+                "schritte": [n for n, (s, _) in enumerate(stand.schritte, 1) if s != STAND_OK],
+                "stand": stand.stand,
+            }
+        )
+    return staende
 
 
 def _pfad_fehler(fehler: PfadFehler) -> int:
@@ -488,7 +566,8 @@ def _befehl_zusammenfassung(argumente: argparse.Namespace) -> int:
     except (RenderFehler, DeutungsFehler) as fehler:
         print(f"Fehler: {fehler}", file=sys.stderr)
         return EXIT_BEDIENFEHLER
-    zusammenfassung = Zusammenfassung(messung, roh)
+    staende = _fuehrungs_staende(deutung.parent / FUEHRUNGS_ORDNER, messung)
+    zusammenfassung = Zusammenfassung(messung, roh, staende)
     if argumente.json:
         print(als_json(zusammenfassung.als_json()), end="")
     else:
@@ -575,6 +654,74 @@ def _deutung_pruefen(argumente: argparse.Namespace) -> int:
     return EXIT_OK if offen.leer else EXIT_UNERWARTET
 
 
+def _befehl_fuehrung(argumente: argparse.Namespace) -> int:
+    if argumente.fuehrung_befehl == "pruefen":
+        # NAME und ZIEL sind beide optional: Ein einzelner Wert ist ein Ziel, wenn er ein Ordner
+        # ist oder kein gültiger Name sein kann, sonst der Name einer Führung.
+        wert = argumente.name_oder_ziel
+        if (
+            wert is not None
+            and argumente.ziel is None
+            and (Path(wert).is_dir() or not NAME_MUSTER.fullmatch(wert))
+        ):
+            argumente.ziel, argumente.name_oder_ziel = wert, None
+    ziel = Path(argumente.ziel or ".")
+    daten = Path(argumente.daten) if argumente.daten else ziel / STANDARD_AUSGABE
+    basis = Path(argumente.ausgabe) if argumente.ausgabe else ziel / STANDARD_ORDNER
+    ordner = basis / FUEHRUNGS_ORDNER
+    try:
+        messung = lade_messung(daten)
+        if argumente.fuehrung_befehl == "uebernehmen":
+            neu = uebernimm_fuehrung(lies_json(Path(argumente.entwurf)), messung)
+    except (RenderFehler, DeutungsFehler) as fehler:
+        print(f"Fehler: {fehler}", file=sys.stderr)
+        return EXIT_BEDIENFEHLER
+    except FuehrungsEntwurfFehler as fehler:
+        print(f"Fehler: {fehler}; nichts geschrieben.", file=sys.stderr)
+        for problem in fehler.probleme:
+            print(f"  {problem}", file=sys.stderr)
+        return EXIT_BEDIENFEHLER
+    if argumente.fuehrung_befehl == "uebernehmen":
+        pfad = ordner / f"{neu['name']}.json"
+        schreibe_json(neu, pfad)
+        hashes = sum(len(s["hashes"]) for s in neu["schritte"])
+        print(f"Übernommen: {neu['name']} ({len(neu['schritte'])} Schritte, {hashes} Hashes)")
+        print(f"Führung:    {_anzeigepfad(pfad)}")
+        print(f"Sprung:     karte.html#fuehrung={neu['name']}")
+        return EXIT_OK
+
+    fuehrungen, warnungen = lies_fuehrungen(ordner)
+    for warnung in warnungen:
+        print(f"Warnung: {warnung}", file=sys.stderr)
+    index = Index.aus(messung)
+    staende = [stand_der_fuehrung(f, index) for f in fuehrungen]
+    if argumente.fuehrung_befehl == "liste":
+        if not staende:
+            print(f"Keine Führungen in {_anzeigepfad(ordner)}.")
+        for s in staende:
+            print(f"{s.name}  {s.titel}  ({len(s.schritte)} Schritte, {s.stand})")
+        return EXIT_OK
+
+    name = argumente.name_oder_ziel
+    if name is not None:
+        staende = [s for s in staende if s.name == name]
+        if not staende:
+            print(f"Fehler: keine Führung {name} in {_anzeigepfad(ordner)}", file=sys.stderr)
+            return EXIT_BEDIENFEHLER
+    offen = 0
+    for s in staende:
+        print(f"{s.name}: {s.stand} ({len(s.schritte)} Schritte)")
+        for nr, (stand, gruende) in enumerate(s.schritte, 1):
+            if stand == STAND_OK:
+                continue
+            offen += 1
+            print(f"  Schritt {nr} {stand}: {'; '.join(gruende)}")
+    if not staende:
+        print(f"Keine Führungen in {_anzeigepfad(ordner)}.")
+    print(f"Veraltet oder kaputt: {offen} Schritte")
+    return EXIT_OK if offen == 0 and not warnungen else EXIT_UNERWARTET
+
+
 BEFEHLE = {
     "scan": _befehl_scan,
     "render": _befehl_render,
@@ -584,6 +731,7 @@ BEFEHLE = {
     "zusammenfassung": _befehl_zusammenfassung,
     "arbeitsblatt": _befehl_arbeitsblatt,
     "deutung": _befehl_deutung,
+    "fuehrung": _befehl_fuehrung,
 }
 
 
