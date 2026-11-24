@@ -5,7 +5,9 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import shutil
 from pathlib import Path
+from urllib.parse import quote
 
 import pytest
 
@@ -111,8 +113,66 @@ def test_maskierung_von_script_ende() -> None:
 
 def test_bibliotheken_in_fester_anzahl_von_script_tags(tmp_path: Path) -> None:
     html = (rendere("mini_modulgraph", tmp_path) / "karte.html").read_text(encoding="utf-8")
-    # 4 Datenblöcke (seit A09 mit dem Funktionsblock), 3 Bibliotheken, 1 Kartenskript.
-    assert html.count("</script>") == 8
+    # 4 Datenblöcke (seit A09 mit dem Funktionsblock), 3 Bibliotheken, der Quelltext des
+    # ELK-Workers und die Worker-Hülle (seit A09b), 1 Kartenskript.
+    assert html.count("</script>") == 10
+
+
+def test_elk_worker_als_text_vor_der_huelle(tmp_path: Path) -> None:
+    """Der Worker-Quelltext steht als Text in der Karte; die Hülle ersetzt ELK, bevor
+    cytoscape-elk es übernimmt (A09b)."""
+    html = (rendere("mini_modulgraph", tmp_path) / "karte.html").read_text(encoding="utf-8")
+    worker = html.index('<script type="text/plain" id="elk-worker">')
+    api = html.index("<!-- elkjs 0.9.3 (EPL-2.0) -->")
+    huelle = html.index("<!-- daidalos: ELK im Web Worker -->")
+    cy_elk = html.index("<!-- cytoscape-elk 2.4.0 (MIT) -->")
+    assert worker < api < huelle < cy_elk
+    assert html.count("gwtOnLoad(null, 'elk', null)") == 1  # nur einmal, als Worker-Text
+    quelle = (
+        Path(__file__).parent.parent / "src" / "daidalos" / "karte" / "vendor" / "elk-worker.min.js"
+    ).read_text(encoding="utf-8")
+    assert quelle in html
+
+
+def test_karte_md_wichtige_funktionen(tmp_path: Path) -> None:
+    """Beschriebene Funktionen stehen mit Name, Datei:Zeile und Satz in KARTE.md (A09b)."""
+    ziel = tmp_path / "mini_aufrufe"
+    shutil.copytree(BEISPIELE / "mini_aufrufe", ziel)
+    daten = ziel / "docs" / "daidalos" / "daidalos.json"
+    daten.parent.mkdir(parents=True, exist_ok=True)
+    daten.write_bytes((ERWARTET / "mini_aufrufe.daidalos.json").read_bytes())
+    messung = json.loads(daten.read_text(encoding="utf-8"))
+    funktionen = sorted(
+        (k for k in messung["knoten"] if k["art"] == "funktion" and k.get("hash")),
+        key=lambda k: k["id"],
+    )
+    zweite, erste = funktionen[0], funktionen[1]
+    deutung = {
+        "schema": 1,
+        "beschreibungen": {
+            zweite["id"]: {"text": "Bedient die Anlage.", "hash": zweite["hash"]},
+            erste["id"]: {"text": "Rechnet | etwas.", "hash": "sha256:alt"},
+        },
+    }
+    (daten.parent / "deutung.json").write_text(json.dumps(deutung), encoding="utf-8")
+    assert main(["render", str(ziel)]) == 0
+    text = (daten.parent / "KARTE.md").read_text(encoding="utf-8")
+    teil = text[text.index("## Wichtige Funktionen") :].split("\n## ")[0]
+    zeilen = [z for z in teil.splitlines() if z.startswith("| [")]
+    assert len(zeilen) == 2
+    pfad = zweite["id"].split(":", 1)[1].split("#")[0]
+    name = zweite["id"].split("#", 1)[1]
+    erwartet = (
+        f"| [{name}](karte.html#funktion={quote(zweite['id'], safe='')}) | "
+        f"`{pfad}:{zweite['zeile_von']}` | Bedient die Anlage. |"
+    )
+    assert erwartet in zeilen
+    assert any(z.endswith("| Rechnet \\| etwas. *(veraltet)* |") for z in zeilen)
+
+
+def test_karte_md_ohne_funktionsbeschreibung_ohne_abschnitt(tmp_path: Path) -> None:
+    text = (rendere("mini_modulgraph", tmp_path) / "KARTE.md").read_text(encoding="utf-8")
+    assert "## Wichtige Funktionen" not in text
 
 
 def _messung() -> dict:

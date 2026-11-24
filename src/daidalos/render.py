@@ -13,6 +13,7 @@ from typing import Any
 from urllib.parse import quote
 
 from daidalos import __version__
+from daidalos.ids import datei_der_funktion
 from daidalos.ids import kanten_id as _kid
 from daidalos.karte_funktionen import funktionsblock
 from daidalos.konfiguration import STANDARD_EDITOR_LINK
@@ -23,9 +24,11 @@ Knoten = dict[str, Any]
 # Reihenfolge der Bibliotheken in karte.html: (Datei, Lizenzdatei, Name)
 BIBLIOTHEKEN = (
     ("cytoscape.min.js", "cytoscape.LICENSE", "Cytoscape.js 3.28.1 (MIT)"),
-    ("elk.bundled.js", "elkjs.LICENSE.md", "elkjs 0.9.3 (EPL-2.0)"),
+    ("elk-api.js", "elkjs.LICENSE.md", "elkjs 0.9.3 (EPL-2.0)"),
     ("cytoscape-elk.js", "cytoscape-elk.LICENSE", "cytoscape-elk 2.4.0 (MIT)"),
 )
+# Quelltext des ELK-Workers: als Text eingebettet, die Karte startet daraus einen Web Worker (A09b).
+ELK_WORKER = "elk-worker.min.js"
 _PLATZHALTER = re.compile(r"\{\{([A-Z_]+)\}\}")
 _EBENEN_TITEL = {"datei": "Dateiebene", "paket": "Paketebene", "modul": "Modulebene"}
 
@@ -153,13 +156,26 @@ def _lizenzen() -> str:
     return "<!--\nEingebettete Bibliotheken und ihre Lizenzen\n\n" + trenner.join(teile) + "\n-->"
 
 
+def _script(datei: str, code: str, attribute: str = "") -> str:
+    if "</script" in code.lower() or "<!--" in code:
+        raise RenderFehler(f"{datei} enthält eine Zeichenfolge, die das Script-Tag stört")
+    return f"<script{attribute}>\n{code}\n</script>"
+
+
 def _skripte() -> str:
-    teile = []
-    for datei, _, name in BIBLIOTHEKEN:
-        code = _vendor(datei)
-        if "</script" in code.lower() or "<!--" in code:
-            raise RenderFehler(f"{datei} enthält eine Zeichenfolge, die das Script-Tag stört")
-        teile.append(f"<!-- {name} -->\n<script>\n{code}\n</script>")
+    """Bibliotheken in Ladereihenfolge. Der Worker-Quelltext steht als Text vorn; zwischen
+    elk-api.js und cytoscape-elk.js setzt ``elk_lauf.js`` die Worker-Hülle für ELK ein, die
+    cytoscape-elk beim Laden übernimmt."""
+    (cy_datei, _, cy_name), (api_datei, _, elk_name), (cye_datei, _, cye_name) = BIBLIOTHEKEN
+    teile = [
+        f"<!-- {cy_name} -->\n" + _script(cy_datei, _vendor(cy_datei)),
+        f"<!-- {elk_name}: Quelltext des Workers -->\n"
+        + _script(ELK_WORKER, _vendor(ELK_WORKER), ' type="text/plain" id="elk-worker"'),
+        f"<!-- {elk_name} -->\n" + _script(api_datei, _vendor(api_datei)),
+        "<!-- daidalos: ELK im Web Worker -->\n"
+        + _script("elk_lauf.js", _paketdatei("elk_lauf.js")),
+        f"<!-- {cye_name} -->\n" + _script(cye_datei, _vendor(cye_datei)),
+    ]
     return "\n".join(teile)
 
 
@@ -247,8 +263,15 @@ def _zahl(wert: float | None, stellen: int = 2) -> str:
 
 
 class _MdBauer:
-    def __init__(self, messung: dict[str, Any], deutung: dict[str, Any] | None) -> None:
+    def __init__(
+        self,
+        messung: dict[str, Any],
+        deutung: dict[str, Any] | None,
+        funktionen: dict[str, Knoten] | None = None,
+    ) -> None:
         self.messung = messung
+        # Funktionsknoten der vollen Messung (die Strukturansicht hat keine), nach Id.
+        self.funktionen = funktionen or {}
         self.deutung = deutung or {
             "bereiche": [],
             "beschreibungen": {},
@@ -320,6 +343,7 @@ class _MdBauer:
         z += self.module()
         z += self.gradle()
         z += self.bereiche()
+        z += self.wichtige_funktionen()
         z += self.befunde_md()
         return "\n".join(z).rstrip("\n") + "\n"
 
@@ -416,6 +440,33 @@ class _MdBauer:
             if b["beschreibung"]:
                 z += [_md(b["beschreibung"]), ""]
             z.append("Knoten: " + (", ".join(self.kn(k) for k in b["knoten"]) or "–"))
+        return z
+
+    def wichtige_funktionen(self) -> list[str]:
+        """Funktionen mit Beschreibung in der Deutung (seit A09b); der Skill beschreibt die
+        wichtigen Funktionen. Nach Datei und Zeile, damit Nachbarn beieinander stehen."""
+        beschrieben = [
+            self.funktionen[i] for i in self.deutung["beschreibungen"] if i in self.funktionen
+        ]
+        if not beschrieben:
+            return []
+        beschrieben.sort(key=lambda f: (datei_der_funktion(f), f["zeile_von"], f["id"]))
+        z = [
+            "",
+            "## Wichtige Funktionen",
+            "",
+            "Aus der Deutung, je ein Satz aus dem Körper der Funktion.",
+            "",
+            "| Funktion | Datei:Zeile | Beschreibung |",
+            "| --- | --- | --- |",
+        ]
+        for f in beschrieben:
+            name = f["id"].split("#", 1)[-1]
+            ort = f"{datei_der_funktion(f)}:{f['zeile_von']}"
+            z.append(
+                f"| [{_md(name)}]({sprungadresse('funktion', f['id'])}) | `{ort}` | "
+                f"{self.beschreibung(f['id'])} |"
+            )
         return z
 
     def einschaetzung(self, marke: str, e: dict[str, Any]) -> list[str]:
@@ -558,4 +609,5 @@ class _MdBauer:
 
 
 def baue_karte_md(messung: dict[str, Any], deutung: dict[str, Any] | None) -> str:
-    return _MdBauer(strukturansicht(messung), deutung).baue()
+    funktionen = {k["id"]: k for k in messung["knoten"] if k["art"] == "funktion"}
+    return _MdBauer(strukturansicht(messung), deutung, funktionen).baue()

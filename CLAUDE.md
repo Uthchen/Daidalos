@@ -72,7 +72,8 @@ uv run ruff format                        # Formatieren
   wichtige Dateien, Offenes), `arbeitsblatt.py` (Arbeitsblätter); `deutung.py` auch für
   `deutung uebernehmen`.
 - `skills/daidalos/`: der Skill (`SKILL.md`, `vorlagen/`); `.claude-plugin/`: Plugin und Marketplace.
-- `src/daidalos/karte/`: `vorlage.html`, `karte.css`, `karte.js` (die Karte), `vendor/`
+- `src/daidalos/karte/`: `vorlage.html`, `karte.css`, `karte.js` (die Karte), `elk_lauf.js` (ELK im Web
+  Worker mit Zeitgrenze), `vendor/`
   (Cytoscape.js, elkjs, cytoscape-elk mit `HERKUNFT.md`; byte-genau, siehe `.gitattributes`).
 - `src/daidalos/adapter/`: `gradle.py`, `kotlin.py`, `kotlin_funktionen.py` (Funktionen, Klassen,
   Annotationen, rohe Aufrufe), `jni.py` (tree-sitter), `detekt.py` (SARIF), `baum.py` (Hilfen).

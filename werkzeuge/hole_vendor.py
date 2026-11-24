@@ -29,9 +29,14 @@ DATEIEN: list[tuple[str, str, str]] = [
         "ac2a446d6e1b489d9568def4ba7790ab81f5023ebba335d49a77dbff1960232e",
     ),
     (
-        "elk.bundled.js",
-        "elkjs@0.9.3/lib/elk.bundled.js",
-        "b0745abd7f23cd91690a1587e377edbe19fd7233c783300290936720546216d4",
+        "elk-api.js",
+        "elkjs@0.9.3/lib/elk-api.js",
+        "b5866a7495d7d4731d4ec66342e2a090061f95fe9c80817846e807f0bb38a785",
+    ),
+    (
+        "elk-worker.min.js",
+        "elkjs@0.9.3/lib/elk-worker.min.js",
+        "114c4f17aea4b297a2d3dd6c86bdfccb45e12040da964ea8f9766345fce4f538",
     ),
     (
         "elkjs.LICENSE.md",

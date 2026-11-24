@@ -24,6 +24,8 @@ pytestmark = pytest.mark.browser
 sync_api = pytest.importorskip("playwright.sync_api")
 
 BEREIT = "document.documentElement.dataset.zustand === 'bereit'"
+# Lokale Adressen; blob: ist der ELK-Worker aus dem eingebetteten Quelltext (A09b).
+LOKAL = ("file:", "data:", "blob:")
 CODE = {"kotlin", "java", "c", "cpp"}
 STRICH = "datei:kern/src/commonMain/kotlin/beispiel/kern/Strich.kt"
 START = "datei:anwendung/src/main/kotlin/beispiel/anwendung/Start.kt"
@@ -102,9 +104,7 @@ def _neue_seite(browser: Any, **optionen: Any) -> tuple[Any, Any, list[str]]:
     s.on("pageerror", lambda e: fehler.append(str(e)))
     s.on(
         "request",
-        lambda r: (
-            fehler.append("Netz: " + r.url) if not r.url.startswith(("file:", "data:")) else None
-        ),
+        lambda r: fehler.append("Netz: " + r.url) if not r.url.startswith(LOKAL) else None,
     )
     return kontext, s, fehler
 
@@ -564,7 +564,7 @@ def test_fokus_zoom_haelt_dateinamen_lesbar(browser: Any, karte: Path) -> None:
     )
     assert mindest * schrift == pytest.approx(11)
     s.add_style_tag(content="#cy { width: 300px !important; height: 220px !important; }")
-    s.evaluate("daidalos.cy.resize()")
+    s.evaluate("void daidalos.cy.resize()")
     s.evaluate(f"daidalos.zeigeKnoten('{STRICH}')")
     warte(s, 100)
     r = s.evaluate(FOKUS_ZOOM % json.dumps(STRICH))
@@ -581,7 +581,7 @@ def test_fokus_zoom_haelt_dateinamen_lesbar(browser: Any, karte: Path) -> None:
     if r["passend"] < mindest:
         assert abs(r["dx"]) < 1 and abs(r["dy"]) < 1
     # Auf der vollen Fläche: nie unter dem Mindestzoom.
-    s.evaluate("document.querySelector('style:last-of-type').remove(); daidalos.cy.resize()")
+    s.evaluate("document.querySelector('style:last-of-type').remove(); void daidalos.cy.resize()")
     s.evaluate(f"daidalos.zeigeKnoten('{STRICH}')")
     warte(s, 100)
     r = s.evaluate(FOKUS_ZOOM % json.dumps(STRICH))
@@ -965,4 +965,87 @@ def test_markierung_und_detekt_schalter(
     warte(s, 400)
     text = s.locator("#seite").inner_text()
     assert "Zahl ohne Namen" in text and "rechneSicher/1" in text
+    assert fehler == []
+
+
+# ---------------------------------------------------------------- ELK im Worker (A09b)
+
+
+def test_elk_rechnet_im_worker(seite: tuple[Any, list[str]], karte: Path) -> None:
+    s, fehler = seite
+    oeffne(s, karte, "#ebene=datei")
+    assert s.evaluate("daidalosElk.zeitgrenze") == 5000
+    assert s.evaluate("daidalosElk.zaehler.layouts") >= 1
+    assert s.evaluate("document.documentElement.dataset.anordnung") == "elk"
+    assert s.evaluate("document.getElementById('anordnung').hidden")
+    assert fehler == []
+
+
+ABBRUCH = """async () => {
+  const z = daidalos.zustand, elk = daidalosElk;
+  const bis = async b => {
+    for (let i = 0; i < 200 && !b(); i++) await new Promise(r => setTimeout(r, 10));
+  };
+  elk.testHaengen(true);
+  z.ebene = 'paket';
+  const a = daidalos.zeichne();
+  await bis(() => elk.laeuft());
+  const lief = elk.laeuft();
+  elk.testHaengen(false);
+  z.ebene = 'datei';
+  const b = daidalos.zeichne();
+  return { lief, a: await a, b: await b, abgebrochen: elk.zaehler.abgebrochen,
+           zeitgrenze: elk.zaehler.zeitgrenze,
+           anordnung: document.documentElement.dataset.anordnung };
+}"""
+
+
+def test_neues_layout_bricht_laufendes_ab(seite: tuple[Any, list[str]], karte: Path) -> None:
+    s, fehler = seite
+    oeffne(s, karte, "#ebene=modul")
+    r = s.evaluate(ABBRUCH)
+    assert r["lief"] is True
+    assert r["a"] is False and r["b"] is True
+    assert r["abgebrochen"] >= 1 and r["zeitgrenze"] == 0
+    assert r["anordnung"] == "elk"
+    # Das abgebrochene Layout setzt nachträglich nichts mehr.
+    s.wait_for_timeout(400)
+    assert s.evaluate("daidalos.zustand.ebene") == "datei"
+    assert s.evaluate("document.documentElement.dataset.anordnung") == "elk"
+    assert s.evaluate("daidalosElk.zaehler.zeitgrenze") == 0
+    assert fehler == []
+
+
+ZEITGRENZE = """async () => {
+  const elk = daidalosElk;
+  elk.zeitgrenze = 300;
+  elk.testHaengen(true);
+  daidalos.zustand.ebene = 'paket';
+  const beginn = performance.now();
+  const ok = await daidalos.zeichne();
+  const xy = daidalos.cy.nodes().filter(n => n.isChildless())
+    .map(n => Math.round(n.position().x) + ',' + Math.round(n.position().y));
+  return { ok, ms: performance.now() - beginn, zeitgrenze: elk.zaehler.zeitgrenze,
+           anordnung: document.documentElement.dataset.anordnung,
+           verschieden: new Set(xy).size, knoten: xy.length };
+}"""
+
+
+def test_zeitgrenze_fuehrt_zum_ersatzlayout(seite: tuple[Any, list[str]], karte: Path) -> None:
+    """Ein künstlich hängender Worker (Testhaken) wird nach der Zeitgrenze beendet; es greift
+    das Ersatzlayout mit dem Hinweis „vereinfachte Anordnung“."""
+    s, fehler = seite
+    oeffne(s, karte, "#ebene=modul")
+    r = s.evaluate(ZEITGRENZE)
+    assert r["ok"] is True and r["zeitgrenze"] == 1 and r["anordnung"] == "ersatz"
+    assert 300 <= r["ms"] < 3000
+    assert r["knoten"] > 1 and r["verschieden"] == r["knoten"]
+    assert not s.evaluate("document.getElementById('anordnung').hidden")
+    assert "vereinfachte Anordnung" in s.inner_text("#anordnung")
+    assert s.evaluate("document.documentElement.dataset.zustand") == "bereit"
+    # Wieder mit ELK: Hinweis weg.
+    s.evaluate("daidalosElk.testHaengen(false); daidalos.zustand.ebene = 'datei'")
+    assert s.evaluate("daidalos.zeichne()") is True
+    assert s.evaluate("document.getElementById('anordnung').hidden")
+    assert s.evaluate("document.documentElement.dataset.anordnung") == "elk"
     assert fehler == []

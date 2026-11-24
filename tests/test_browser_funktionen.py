@@ -24,6 +24,8 @@ pytestmark = pytest.mark.browser
 sync_api = pytest.importorskip("playwright.sync_api")
 
 BEREIT = "document.documentElement.dataset.zustand === 'bereit'"
+# Lokale Adressen; blob: ist der ELK-Worker aus dem eingebetteten Quelltext (A09b).
+LOKAL = ("file:", "data:", "blob:")
 AUFRUFE = "kern/src/commonMain/kotlin/de/beispiel/aufrufe/"
 KETTE = "kern/src/main/kotlin/de/beispiel/kette/"
 
@@ -74,9 +76,7 @@ def seite(browser: Any) -> Iterator[tuple[Any, list[str]]]:
     s.on("pageerror", lambda e: fehler.append(str(e)))
     s.on(
         "request",
-        lambda r: (
-            fehler.append("Netz: " + r.url) if not r.url.startswith(("file:", "data:")) else None
-        ),
+        lambda r: fehler.append("Netz: " + r.url) if not r.url.startswith(LOKAL) else None,
     )
     yield s, fehler
     kontext.close()
@@ -485,7 +485,7 @@ def test_grenze_150_fasst_zusammen(grosse_karte: Path, seite: tuple[Any, list[st
     assert "fn:" + AUFRUFE + "gross/Ziel00.kt" in ids(s, '[typ="fnachbar"]')
     # Ein Klick klappt einzeln auf
     erste = zu[0]
-    s.evaluate("(id) => daidalos.cy.fit(daidalos.cy.getElementById(id), 200)", erste)
+    s.evaluate("(id) => void daidalos.cy.fit(daidalos.cy.getElementById(id), 200)", erste)
     x, y = mitte(s, erste)
     s.mouse.click(x, y)
     warte(s, 300)
@@ -525,3 +525,86 @@ def test_startzeit_mit_und_ohne_funktionsblock(aufrufe: Path, browser: Any, tmp_
             kontext.close()
     mit_ms, ohne_ms = statistics.median(zeiten["mit"]), statistics.median(zeiten["ohne"])
     assert mit_ms <= ohne_ms * 1.5 + 150, zeiten
+
+
+# ---------------------------------------------------------------- Wegmodus (A09b)
+
+IM_BILD = """() => { const cy = daidalos.cy, b = cy.width(), h = cy.height();
+  return cy.nodes('[typ="funktion"]').filter(n => {
+    const r = n.renderedBoundingBox({ includeLabels: false });
+    return r.x1 < 0 || r.y1 < 0 || r.x2 > b || r.y2 > h; }).length; }"""
+HAUPT = "app/src/main/kotlin/de/beispiel/app/Haupt.kt"
+
+
+def test_wegmodus_zeigt_ganzen_weg_ohne_fluss(aufrufe: Path, seite: tuple[Any, list[str]]) -> None:
+    s, fehler = seite
+    start = f(HAUPT, "main/0")
+    oeffne(s, karte(aufrufe), "#funktion=" + quote(start, safe="") + "&weg=vor&tiefe=2")
+    # Alle Kästen des Wegs im Bild, keine Hinweiszeile, Start gewählt, aber ohne Fluss.
+    assert s.evaluate(IM_BILD) == 0
+    assert s.evaluate("document.getElementById('weiter').hidden")
+    assert s.evaluate("(id) => daidalos.cy.getElementById(id).hasClass('gewaehlt')", start)
+    stand = s.evaluate("daidalos.fluss()")
+    assert not stand["laeuft"] and stand["kanten"] == [] and stand["kanten2"] == []
+    # Zählzeile und „wer … nutzt“ stehen in einer Leiste untereinander, ohne sich zu überdecken.
+    a = s.evaluate("document.getElementById('weginfo').getBoundingClientRect().toJSON()")
+    b = s.evaluate("document.getElementById('pfadinfo').getBoundingClientRect().toJSON()")
+    assert a["height"] > 0 and b["height"] > 0 and a["bottom"] <= b["top"]
+    # Wählt man eine andere Funktion, läuft der Fluss.
+    andere = s.evaluate(
+        "(id) => daidalos.cy.nodes('[typ=\"funktion\"]').filter(n => n.id() !== id)[0].id()",
+        start,
+    )
+    s.evaluate("(id) => daidalos.zeigeFunktion(id)", andere)
+    warte(s)
+    assert s.evaluate("daidalos.fluss()")["kanten"]
+    assert fehler == []
+
+
+def test_wegmodus_zu_breit_startspalte_links_lesbar(
+    aufrufe: Path, seite: tuple[Any, list[str]]
+) -> None:
+    """Passt der Weg nur unter der Lesegrenze ins Bild, steht die Startspalte links bündig bei
+    lesbarem Zoom, und eine Zeile nennt, was rechts außerhalb liegt."""
+    s, fehler = seite
+    s.set_viewport_size({"width": 470, "height": 900})
+    start = f(HAUPT, "main/0")
+    oeffne(s, karte(aufrufe), "#funktion=" + quote(start, safe="") + "&weg=vor&tiefe=3")
+    assert s.evaluate("daidalos.cy.zoom()") == pytest.approx(s.evaluate("daidalos.LESBAR"))
+    links = s.evaluate(
+        "(id) => daidalos.cy.getElementById(id).parent().renderedBoundingBox().x1", start
+    )
+    assert 20 <= links <= 40
+    assert not s.evaluate("document.getElementById('weiter').hidden")
+    rechts = s.evaluate(
+        """() => { const cy = daidalos.cy; return cy.nodes('[typ="funktion"]').filter(n =>
+          n.renderedBoundingBox({ includeLabels: false }).x2 > cy.width()).length; }"""
+    )
+    assert rechts > 0
+    assert f"weiter rechts: {rechts} Funktion" in s.inner_text("#weiter")
+    assert not s.evaluate("daidalos.fluss()")["laeuft"]
+    assert fehler == []
+
+
+def test_lesezugriffe_ab_markierter_start_funktion(
+    markierung: Path, seite: tuple[Any, list[str]]
+) -> None:
+    s, fehler = seite
+    oeffne(s, karte(markierung), "#ebene=funktion")
+    markiert = s.evaluate("daidalos.fdaten().fn.find(f => f.markiert && !f.test).id")
+    unmarkiert = s.evaluate("daidalos.fdaten().fn.find(f => !f.markiert && !f.test).id")
+    oeffne(s, karte(markierung), "#funktion=" + quote(markiert, safe="") + "&weg=vor&tiefe=3")
+    assert s.is_checked("#k-lesen")
+    # Der gemerkte Stand bleibt aus: zurück in der Datei ist der Schalter wieder aus.
+    assert s.evaluate("daidalos.zustand.fLesen") is False
+    s.click("#weginfo [data-zur-datei]")
+    warte(s, 150)
+    assert not s.is_checked("#k-lesen")
+    # Ab einer unmarkierten Funktion gilt der gemerkte Stand.
+    s.evaluate("(id) => daidalos.zeigeWeg(id, 'vor', 3)", unmarkiert)
+    warte(s)
+    assert not s.is_checked("#k-lesen")
+    s.check("#k-lesen")
+    warte(s, 150)
+    assert s.evaluate("daidalos.zustand.fLesen") is True
+    assert fehler == []

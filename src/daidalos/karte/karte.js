@@ -105,7 +105,8 @@
     weg: null,                 // { art: 'weg', start, richtung: 'vor' | 'rueck', tiefe } | { art: 'pfad', von, nach }
     wegErgebnis: null,
     fTiefe: 3,
-    fLesen: false,             // Lesezugriffe (lesen/schreiben) zeigen und folgen
+    fLesen: false,             // Lesezugriffe (lesen/schreiben) zeigen und folgen (gemerkter Stand)
+    wegLesen: false,           // Wegmodus: Lesezugriffe; ab markierter Start-Funktion an (A09b)
     fUnsicher: true,           // Dateiansicht: unsichere Kanten zeigen (Standard an)
     wegUnsicher: false,        // Wegmodus: unsicheren Kanten folgen (Standard aus, wie daidalos aufrufe)
     fAuf: new Set(),           // einzeln aufgeklappte Nachbardateien
@@ -323,7 +324,7 @@
     if (zustand.ebene === 'funktion') {
       const w = zustand.weg;
       const weg = !w ? '' : w.art === 'weg' ? [w.start, w.richtung, w.tiefe].join('~') : ['pfad', w.von, w.nach].join('~');
-      return ['funktion', zustand.fDatei, weg, zustand.fLesen ? 'l' : '', unsicherAn() ? 'u' : '', zustand.mitTests ? 't' : 'p',
+      return ['funktion', zustand.fDatei, weg, lesenAn() ? 'l' : '', unsicherAn() ? 'u' : '', zustand.mitTests ? 't' : 'p',
         zustand.markierung ? 'm' : '', [...zustand.fAuf].sort().join(','), zustand.kantenfuehrung].join('|');
     }
     const a = zustand.arten[zustand.ebene];
@@ -339,6 +340,10 @@
     'elk.spacing.edgeEdge': 14
   };
   const BEHAELTER_OPTIONEN = Object.assign({ 'elk.padding': '[top=30,left=14,bottom=14,right=14]' }, KANTEN_ABSTAND);
+  // Wegmodus (A09b): Optionen gegen den Kabelstrang am Start, an Sketchorus verglichen (Bericht).
+  // Kanten gleicher Quelle laufen als ein Strang und fächern sich erst vor der Zielspalte auf
+  // (mergeEdges); verteilte Ports (portConstraints) ließen 18 Kanten nebeneinander laufen.
+  const WEG_ELK = { 'elk.layered.mergeEdges': true };
   const ELK = Object.assign({
     algorithm: 'layered',
     'elk.direction': 'DOWN',
@@ -350,8 +355,13 @@
     'elk.randomSeed': 1
   }, KANTEN_ABSTAND);
 
-  // Zeichnet die aktuelle Ebene neu. Liefert ein Promise, das nach dem Layout erfüllt ist.
+  // Zeichnet die aktuelle Ebene neu. Liefert ein Promise, das nach dem Layout erfüllt ist (true)
+  // oder mit false, wenn ein neueres Zeichnen es abgelöst hat. ELK rechnet im Web Worker
+  // (elk_lauf.js); ein laufendes Layout wird abgebrochen, sobald ein neues beginnt. Braucht ELK
+  // länger als die Zeitgrenze, greift ein Ersatzlayout mit dem Hinweis „vereinfachte Anordnung“.
   let gezeichnet = null;
+  let offenesLayout = null;    // fertig() des laufenden Layouts
+  const elkLauf = window.daidalosElk;
   // Passt die gezeichnete Karte nicht mehr zum Zustand (Ebene, Schalter, ausgeklappte Module)?
   const veraltet = () => layoutSchluessel() !== gezeichnet || cy.nodes().empty();
   function zeichne() {
@@ -359,21 +369,26 @@
     const schluessel = layoutSchluessel();
     gezeichnet = schluessel;
     const beginn = performance.now();
+    elkLauf.abbrechen();
+    if (offenesLayout) { const f = offenesLayout; offenesLayout = null; f(false); }
     fluss.stopp();
     document.documentElement.dataset.zustand = 'rechnet';
     cy.batch(() => { cy.elements().remove(); cy.add(elemente()); });
     cy.style(stil());
     zeigeSchalter();
     return new Promise(fertig => {
-      const ende = () => {
+      offenesLayout = fertig;
+      const ende = ersatz => {
         if (nr !== lauf) return fertig(false);
+        offenesLayout = null;
+        zeigeAnordnung(ersatz);
         wendePositionenAn();
         sperren();
         fKlassen();
         if (zustand.ebene === 'datei' && !zustand.auswahl) startAnsicht();
         else if (zustand.ebene === 'funktion') fStartAnsicht();
         else einpassen(cy.elements(), 30);
-        if (!gespeichert) zeiten[schluessel] = Math.round(performance.now() - beginn);
+        if (!gespeichert && !ersatz) zeiten[schluessel] = Math.round(performance.now() - beginn);
         // Startzeit: vom Beginn der Navigation bis zur ersten fertigen Ansicht (A09).
         if (zeiten.bereit === undefined) zeiten.bereit = Math.round(performance.now());
         document.getElementById('lade').hidden = true;
@@ -395,9 +410,14 @@
       const layout = cy.elements().not('.ohneLayout').layout({
         name: 'elk', fit: false, animate: false, nodeDimensionsIncludeLabels: false,
         useElkEdgeGeometry: elk,
-        elk: Object.assign({}, ELK, elk ? { 'elk.edgeRouting': 'ORTHOGONAL' } : {}, funktion ? { 'elk.direction': 'RIGHT' } : {}),
+        elk: Object.assign({}, ELK, elk ? { 'elk.edgeRouting': 'ORTHOGONAL' } : {}, funktion ? { 'elk.direction': 'RIGHT' } : {}, funktion && zustand.weg ? WEG_ELK : {}),
         nodeLayoutOptions: n => n.isParent() ? Object.assign({}, BEHAELTER_OPTIONEN) : undefined
       });
+      elkLauf.beiAbbruch = grund => {
+        if (nr !== lauf) return;
+        ersatzLayout();
+        ende(grund);
+      };
       layout.one('layoutstop', () => {
         if (nr === lauf) {
           const pos = {}, routen = {};
@@ -413,6 +433,24 @@
       // Das Layout erst nach dem nächsten Bild starten, damit „Layout wird berechnet“ sichtbar wird.
       requestAnimationFrame(() => setTimeout(() => { if (nr === lauf) layout.run(); else fertig(false); }, 0));
     });
+  }
+
+  // Ersatz, wenn ELK nicht rechtzeitig fertig wird: Cytoscape „breadthfirst“, mit Rahmen (Behältern)
+  // „grid“, die Kinder eines Rahmens nebeneinander. Wird nicht zwischengespeichert.
+  function ersatzLayout() {
+    const els = cy.elements().not('.ohneLayout');
+    const mitRahmen = cy.nodes(':parent').nonempty();
+    const pfadVon = n => n.ancestors().map(a => a.id()).reverse().concat(n.id()).join('/');
+    els.layout(mitRahmen
+      ? { name: 'grid', fit: false, animate: false, avoidOverlap: true, avoidOverlapPadding: 24, sort: (a, b) => pfadVon(a) < pfadVon(b) ? -1 : pfadVon(a) > pfadVon(b) ? 1 : 0 }
+      : { name: 'breadthfirst', directed: true, fit: false, animate: false, spacingFactor: 1.2 }).run();
+  }
+  const anordnung = document.getElementById('anordnung');
+  function zeigeAnordnung(grund) {
+    const ersatz = !!grund;
+    anordnung.textContent = !ersatz ? '' : 'vereinfachte Anordnung: ' + (grund === 'zeitgrenze' ? 'ELK hat das Layout nicht in ' + elkLauf.zeitgrenze / 1000 + ' s geschafft' : grund === 'kein-worker' ? 'ELK ließ sich nicht starten' : 'ELK meldete einen Fehler');
+    anordnung.hidden = !ersatz;
+    document.documentElement.dataset.anordnung = ersatz ? 'ersatz' : 'elk';
   }
 
   // Dateiebene beim Öffnen: Wird beim Einpassen alles unlesbar klein (Dateinamen unter etwa 9 px),
@@ -1270,7 +1308,7 @@
       const c = document.getElementById('k-' + a);
       const moeglich = zustand.ebene === 'funktion';
       c.disabled = !moeglich;
-      c.checked = a === 'lesen' ? zustand.fLesen : unsicherAn();
+      c.checked = a === 'lesen' ? lesenAn() : unsicherAn();
       c.closest('label').classList.toggle('aus', !moeglich);
     });
     const pl = document.getElementById('k-plugin');
@@ -1336,7 +1374,12 @@
     neuZeichnen();
   }));
   document.getElementById('k-plugin').addEventListener('change', e => { zustand.plugins = e.target.checked; neuZeichnen(); });
-  document.getElementById('k-lesen').addEventListener('change', e => { zustand.fLesen = e.target.checked; neuZeichnen(); });
+  // Im Wegmodus ab markierter Funktion bleibt der gemerkte Stand unberührt (siehe zeigeWeg).
+  document.getElementById('k-lesen').addEventListener('change', e => {
+    if (zustand.weg) zustand.wegLesen = e.target.checked;
+    if (!zustand.weg || !wegAbMarkiert()) zustand.fLesen = e.target.checked;
+    neuZeichnen();
+  });
   document.getElementById('k-unsicher').addEventListener('change', e => { if (zustand.weg) zustand.wegUnsicher = e.target.checked; else zustand.fUnsicher = e.target.checked; neuZeichnen(); });
   document.getElementById('u-zyklen').addEventListener('change', e => { zustand.zyklen = e.target.checked; cy.style(stil()); });
   ['markierung', 'detekt'].forEach(schalter => document.getElementById('u-' + schalter).addEventListener('change', e => {
@@ -1854,9 +1897,16 @@
 
   // Schalter „unsicher“: Dateiansicht und Wegmodus haben eigene Stände.
   function unsicherAn() { return zustand.weg ? zustand.wegUnsicher : zustand.fUnsicher; }
+  // Schalter „Lesezugriffe“: Ein Wirkungsweg ab einer markierten Funktion zeigt sie standardmäßig,
+  // weil die Markierungs-Kette sie mitzählt (A09b); sonst gilt der gemerkte Stand.
+  function lesenAn() { return zustand.weg ? zustand.wegLesen : zustand.fLesen; }
+  function wegAbMarkiert() {
+    const w = zustand.weg;
+    return !!w && w.art === 'weg' && !!fn(w.start) && !!fn(w.start).markiert;
+  }
   // Kanten der Funktionsebene nach den Schaltern „Lesezugriffe“, „unsicher“ und „mit Tests“.
   function fKanteSichtbar(k) {
-    if ((k.art === 'lesen' || k.art === 'schreiben') && !zustand.fLesen) return false;
+    if ((k.art === 'lesen' || k.art === 'schreiben') && !lesenAn()) return false;
     if (!k.sicher && !unsicherAn()) return false;
     if (!zustand.mitTests && FD.fn[k.v].test) return false;
     return true;
@@ -2149,14 +2199,14 @@
   function zeigeWegInfo() {
     const w = zustand.ebene === 'funktion' && zustand.weg ? zustand.wegErgebnis : null;
     document.querySelector('.flaeche').classList.toggle('mitweg', !!w);
-    if (!w) { weginfo.hidden = true; return; }
+    if (!w) { weginfo.hidden = true; weiter.hidden = true; return; }
     const erreicht = [...w.stufe.keys()].filter(i => i !== w.start);
     const dateien = new Set([...w.stufe.keys()].map(i => FD.fn[i].pfad));
     const markiert = erreicht.filter(i => FD.fn[i].markiert).length;
     let text;
     if (zustand.weg.art === 'pfad') {
       text = w.pfad ? 'Weg ' + kurzFunktion(zustand.weg.von) + ' → ' + kurzFunktion(zustand.weg.nach) + ': ' + (w.stufe.size - 1) + ' Schritte über ' + dateien.size + ' Dateien'
-        : kurzFunktion(zustand.weg.von) + ' ruft ' + kurzFunktion(zustand.weg.nach) + ' nicht (über ' + (unsicherAn() ? 'sichere und unsichere' : 'sichere') + ' Kanten' + (zustand.fLesen ? ' mit Lesezugriffen' : '') + ').';
+        : kurzFunktion(zustand.weg.von) + ' ruft ' + kurzFunktion(zustand.weg.nach) + ' nicht (über ' + (unsicherAn() ? 'sichere und unsichere' : 'sichere') + ' Kanten' + (lesenAn() ? ' mit Lesezugriffen' : '') + ').';
     } else {
       text = 'Wirkungsweg ' + (w.vor ? 'vorwärts' : 'rückwärts') + ' ab ' + kurzFunktion(zustand.weg.start) + ', Tiefe ' + w.tiefe + ': ' + erreicht.length + ' Funktionen in ' + dateien.size + ' Dateien erreicht · davon markiert ' + markiert + ', unmarkiert ' + (erreicht.length - markiert);
       if (w.tiefe < zustand.weg.tiefe) text += ' · Tiefe auf ' + w.tiefe + ' gekürzt (Grenze ' + GRENZE_KAESTEN + ' Kästen), ' + w.fehlt + ' Funktionen bis Tiefe ' + zustand.weg.tiefe + ' nicht gezeigt';
@@ -2174,6 +2224,7 @@
 
   // Ansicht beim Öffnen: alles, wenn es lesbar ist, sonst die eigene Datei bzw. der Start.
   function fStartAnsicht() {
+    if (zustand.weg) { wegAnsicht(); return; }
     if (ziel(cy.elements(), 30).zoom >= LESBAR) { einpassen(cy.elements(), 30); return; }
     const kern = zustand.weg ? cy.getElementById(fn(zustand.weg.start || zustand.weg.von) ? fn(zustand.weg.start || zustand.weg.von).id : '') : cy.getElementById('ff:' + zustand.fDatei);
     if (kern.empty()) { einpassen(cy.elements(), 30); return; }
@@ -2182,6 +2233,71 @@
     const bb = kern.boundingBox();
     cy.viewport({ zoom, pan: { x: cy.width() / 2 - zoom * (bb.x1 + bb.w / 2), y: bb.h * zoom <= cy.height() - 60 ? cy.height() / 2 - zoom * (bb.y1 + bb.h / 2) : 40 - zoom * bb.y1 } });
   }
+
+  // Wegmodus beim Öffnen (A09b): eingepasst auf den ganzen Weg, mit Rand und Platz unter der
+  // Infoleiste. Der lesbare Mindestzoom des Fokus (MIN_ZOOM_FOKUS) gilt hier nicht. Wäre die Schrift
+  // beim Einpassen kleiner als LESBAR (9 px), steht die Startspalte bei diesem Zoom bündig am Rand
+  // (vorwärts links, rückwärts rechts), senkrecht um den Start; die Zeile „weiter rechts: N
+  // Funktionen“ nennt, was außerhalb liegt. Gewählt nach Proben an Sketchorus, siehe Bericht A09b.
+  const RAND_WEG = 30;
+  function wegAnsicht() {
+    const w = zustand.weg;
+    const startId = w ? (fn(w.start || w.von) ? fn(w.start || w.von).id : '') : '';
+    const alles = cy.elements();
+    if (alles.empty()) return;
+    const bb = alles.boundingBox();
+    const leiste = document.getElementById('infoleiste');
+    const oben = Math.max(RAND_WEG, leiste.offsetTop + leiste.offsetHeight + 14);
+    const legende = document.querySelector('.flaeche .legende');
+    const unten = Math.max(RAND_WEG, legende && legende.offsetHeight ? legende.offsetHeight + 16 : 0);
+    const breite = Math.max(1, cy.width() - 2 * RAND_WEG), hoehe = Math.max(1, cy.height() - oben - unten);
+    let zoom = Math.min(MAX_ZOOM_PASSEN, breite / Math.max(1, bb.w), hoehe / Math.max(1, bb.h));
+    let pan;
+    const start = cy.getElementById(startId);
+    if (zoom >= LESBAR || start.empty()) {
+      pan = { x: RAND_WEG + (breite - zoom * bb.w) / 2 - zoom * bb.x1, y: oben + (hoehe - zoom * bb.h) / 2 - zoom * bb.y1 };
+    } else {
+      zoom = LESBAR;
+      // Platz für die Zeile „weiter …“ unter der Leiste.
+      const oben2 = oben + 30, hoehe2 = Math.max(1, cy.height() - oben2 - unten);
+      const spalte = start.parent().nonempty() ? start.parent() : start;
+      const sb = spalte.boundingBox(), sp = start.position();
+      const links = sp.x <= bb.x1 + bb.w / 2;
+      const x = links ? RAND_WEG - zoom * sb.x1 : cy.width() - RAND_WEG - zoom * sb.x2;
+      let y;
+      if (bb.h * zoom <= hoehe2) y = oben2 + (hoehe2 - zoom * bb.h) / 2 - zoom * bb.y1;
+      else {
+        y = oben2 + hoehe2 / 2 - zoom * sp.y;
+        y = Math.min(oben2 - zoom * bb.y1, Math.max(cy.height() - unten - zoom * bb.y2, y));
+      }
+      pan = { x, y };
+    }
+    cy.stop(true, true);
+    cy.viewport({ zoom, pan });
+    zaehleWeiter();
+  }
+  // Zeile „weiter rechts: N Funktionen“: Funktionen des Wegs, die nicht ganz im Bild liegen.
+  const weiter = document.getElementById('weiter');
+  function zaehleWeiter() {
+    if (zustand.ebene !== 'funktion' || !zustand.weg) { weiter.hidden = true; return; }
+    const b = cy.width(), h = cy.height();
+    let rechts = 0, links = 0, sonst = 0;
+    cy.nodes('[typ="funktion"]').forEach(n => {
+      const r = n.renderedBoundingBox({ includeLabels: false });
+      if (r.x2 > b) rechts++;
+      else if (r.x1 < 0) links++;
+      else if (r.y1 < 0 || r.y2 > h) sonst++;
+    });
+    const fkt = n => n + (n === 1 ? ' Funktion' : ' Funktionen');
+    const teile = [];
+    if (rechts) teile.push('weiter rechts: ' + fkt(rechts));
+    if (links) teile.push('weiter links: ' + fkt(links));
+    if (sonst) teile.push('darüber oder darunter: ' + fkt(sonst));
+    weiter.textContent = teile.join(' · ');
+    weiter.hidden = !teile.length;
+  }
+  let weiterBild = 0;
+  cy.on('viewport', () => { if (!weiterBild) weiterBild = requestAnimationFrame(() => { weiterBild = 0; zaehleWeiter(); }); });
 
   // ---- Öffnen
   async function zeigeFunktionsDatei(pfad, opt) {
@@ -2219,10 +2335,11 @@
     if (!opt || !opt.ohneFokus) hebeFunktionHervor(id);
     funktionsDetails(id);
   }
-  function hebeFunktionHervor(id) {
+  function hebeFunktionHervor(id, opt) {
     const f = fn(id);
-    if (cy.getElementById(id).nonempty()) fokus([id], { titel: kurzFunktion(id) });
-    else if (f && cy.getElementById('fz:' + f.pfad).nonempty()) fokus(['fz:' + f.pfad], { titel: kurzFunktion(id) });
+    const o = Object.assign({ titel: kurzFunktion(id) }, opt);
+    if (cy.getElementById(id).nonempty()) fokus([id], o);
+    else if (f && cy.getElementById('fz:' + f.pfad).nonempty()) fokus(['fz:' + f.pfad], o);
     else leeren();
     zeigeWegInfo();
   }
@@ -2232,16 +2349,21 @@
     zustand.ebene = 'funktion';
     zustand.fDatei = zustand.fDatei || f.pfad;
     zustand.fTiefe = tiefe;
+    const neuerStart = !zustand.weg || zustand.weg.art !== 'weg' || zustand.weg.start !== id;
     zustand.weg = { art: 'weg', start: id, richtung, tiefe };
+    if (neuerStart) zustand.wegLesen = f.markiert ? true : zustand.fLesen;
     setzeAuswahl({ art: 'funktion', id });
     if (veraltet()) await zeichne();
-    hebeFunktionHervor(id);
+    // Start gewählt, aber ohne Fluss und ohne Fokus-Zoom: Die Ansicht zeigt den ganzen Weg.
+    hebeFunktionHervor(id, { ohneFluss: true, ohneZoom: true });
+    wegAnsicht();
     funktionsDetails(id);
   }
   async function zeigeFunktionsPfad(von, nach) {
     fdaten();
     zustand.ebene = 'funktion';
     zustand.weg = { art: 'pfad', von, nach };
+    zustand.wegLesen = zustand.fLesen;
     zustand.fDatei = zustand.fDatei || fn(von).pfad;
     setzeAuswahl({ art: 'pfad', von, nach, ebene: 'funktion' });
     if (veraltet()) await zeichne();
@@ -2445,7 +2567,7 @@
   window.daidalos = {
     cy, zustand, zeiten, zeichne, zeigeBefund, zeigeKnoten, zeigeKante, zeigePfad, sucheWeg, editorLink,
     zeigeFunktion, zeigeFunktionsDatei, zeigeWeg, zeigeFunktionsPfad, zeigeGrenze, fdaten, positionsEbene,
-    funktionsBlockGelesen: () => FD !== null, GRENZE_KAESTEN,
+    funktionsBlockGelesen: () => FD !== null, GRENZE_KAESTEN, LESBAR, WEG_ELK, wegAnsicht,
     kartenDateien, gross, SAMMEL, MIN_ZOOM_FOKUS, sperre, sperren, speicherName,
     fluss: () => fluss.stand(),
     letzterLink: () => letzterLink
