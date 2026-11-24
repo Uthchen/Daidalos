@@ -16,7 +16,7 @@ from urllib.parse import quote
 
 import pytest
 
-from conftest import BEISPIELE
+from conftest import BEISPIELE, js
 from daidalos.cli import main
 from daidalos.karte_funktionen import funktionsblock
 
@@ -608,3 +608,62 @@ def test_lesezugriffe_ab_markierter_start_funktion(
     warte(s, 150)
     assert s.evaluate("daidalos.zustand.fLesen") is True
     assert fehler == []
+
+
+def test_einpassen_im_wegmodus_wie_beim_oeffnen(
+    aufrufe: Path, seite: tuple[Any, list[str]]
+) -> None:
+    """„Einpassen“ im Wegmodus nutzt die Regel des Öffnens (A10): Startspalte links bündig bei
+    lesbarem Zoom statt alles winzig klein."""
+    s, fehler = seite
+    s.set_viewport_size({"width": 470, "height": 900})
+    start = f(HAUPT, "main/0")
+    oeffne(s, karte(aufrufe), "#funktion=" + quote(start, safe="") + "&weg=vor&tiefe=3")
+    beim_oeffnen = s.evaluate("({ zoom: daidalos.cy.zoom(), pan: daidalos.cy.pan() })")
+    js(s, "daidalos.cy.viewport({ zoom: 0.2, pan: { x: 0, y: 0 } })")
+    s.click("#einpassen")
+    s.wait_for_timeout(50)
+    nachher = s.evaluate("({ zoom: daidalos.cy.zoom(), pan: daidalos.cy.pan() })")
+    assert nachher["zoom"] == pytest.approx(beim_oeffnen["zoom"])
+    assert nachher["pan"]["x"] == pytest.approx(beim_oeffnen["pan"]["x"])
+    assert nachher["pan"]["y"] == pytest.approx(beim_oeffnen["pan"]["y"])
+    assert not s.evaluate("document.getElementById('weiter').hidden")
+    assert fehler == []
+
+
+def test_strang_mit_grenzkante_traegt_befundfarbe(
+    markierung: Path, seite: tuple[Any, list[str]]
+) -> None:
+    """Im Wegmodus laufen Kanten gleicher Quelle als ein Strang (mergeEdges); eine Grenzkante darin
+    liegt über den anderen, damit der Strang die Farbe der Markierung trägt (A10)."""
+    s, fehler = seite
+    oeffne(s, karte(markierung), "#ebene=funktion")
+    # Start: die markierte Quelle einer sicheren Grenzkante, die noch weitere Funktionen ruft.
+    markiert = s.evaluate(
+        """() => { const fd = daidalos.fdaten();
+          const M = JSON.parse(document.getElementById('daidalos-daten').textContent);
+          return M.befunde.filter(b => b.regel === 'markierung-verlassen' && !b.beleg.unsicher)
+            .map(b => b.beleg.von)
+            .find(v => fd.raus[fd.nachId.get(v).i].filter(k => k.art === 'ruft' && k.sicher)
+              .length > 1); }"""
+    )
+    oeffne(s, karte(markierung), "#funktion=" + quote(markiert, safe="") + "&weg=vor&tiefe=2")
+    r = s.evaluate(
+        """() => {
+          const g = daidalos.cy.edges('.grenze');
+          const andere = daidalos.cy.edges().not(g).filter(e => g.sources().contains(e.source()));
+          return { grenzen: g.length, andere: andere.length,
+            zg: g.map(e => +e.style('z-index')), za: andere.map(e => +e.style('z-index')),
+            farbe: g.length ? g[0].style('line-color') : null };
+        }"""
+    )
+    assert r["grenzen"] >= 1 and r["andere"] >= 1, r
+    assert min(r["zg"]) > max(r["za"])
+    warn = s.evaluate("getComputedStyle(document.documentElement).getPropertyValue('--warn')")
+    assert r["farbe"].replace(" ", "") == _rgb(warn.strip())
+    assert fehler == []
+
+
+def _rgb(hex_farbe: str) -> str:
+    h = hex_farbe.lstrip("#")
+    return "rgb(" + ",".join(str(int(h[i : i + 2], 16)) for i in (0, 2, 4)) + ")"

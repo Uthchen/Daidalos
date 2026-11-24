@@ -103,8 +103,23 @@ input.suche { font: inherit; font-size: 13px; color: var(--fg); background: var(
 .pfadinfo { font-size: 13px; background: var(--accent-soft); color: var(--fg); padding: 6px 10px; border-radius: 6px; font-family: var(--mono); overflow-wrap: anywhere; z-index: 2; }
 .lade { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 8px 14px; font-size: 13px; color: var(--muted); z-index: 3; }
 
-aside { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: grid; gap: 16px; align-content: start; min-width: 0; height: calc(100vh - 190px); min-height: 560px; overflow: auto; }
-@media (max-width: 900px) { aside { height: auto; min-height: 0; } }
+/* Rechte Spalte: oben die Führung (seit A10), darunter die Seitenleiste. */
+.spalte { display: flex; flex-direction: column; gap: 12px; min-width: 0; height: calc(100vh - 190px); min-height: 560px; }
+aside { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: grid; gap: 16px; align-content: start; min-width: 0; flex: 1 1 0; min-height: 0; overflow: auto; }
+@media (max-width: 900px) { .spalte { height: auto; min-height: 0; } aside { flex: none; } }
+.fuehrung { flex: 0 1 auto; max-height: 62%; overflow: auto; background: var(--panel); border: 1px solid var(--accent); border-radius: 8px; padding: 12px 16px; display: grid; gap: 10px; }
+.fuehrung .f-kopf { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--muted); }
+.fuehrung .f-kopf b { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); font-weight: 600; }
+.fuehrung h2 { font-size: 16px; margin: 0; font-weight: 600; text-wrap: balance; }
+.fuehrung .f-text { font-size: 14.5px; line-height: 1.5; }
+.fuehrung .f-hinweis { font-size: 12.5px; color: var(--warn); background: var(--warn-soft); padding: 4px 8px; border-radius: 4px; }
+.fuehrung .f-knoepfe, .fuehrung .f-vorlesen { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 13px; }
+.fuehrung .f-knoepfe .btn[disabled] { opacity: .45; cursor: default; }
+.fuehrung .f-vorlesen select, .fuehrung .f-vorlesen input[type="range"] { font: inherit; font-size: 12.5px; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; max-width: 12em; }
+.fuehrung .f-vorlesen label { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.fuehrung .f-vorlesen label.aus { color: var(--muted); }
+.fuehrung ul.liste { font-size: 12.5px; }
+.fknopf[aria-pressed="true"] { background: var(--accent); color: var(--panel); }
 aside h2 { font-size: 16px; margin: 0; font-weight: 600; text-wrap: balance; overflow-wrap: anywhere; }
 aside h3 { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 6px; font-weight: 600; display: flex; justify-content: space-between; gap: 8px; }
 aside h3 em { font-style: normal; font-family: var(--mono); text-transform: none; letter-spacing: 0; font-weight: 400; }

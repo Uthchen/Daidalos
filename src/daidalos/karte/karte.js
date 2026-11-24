@@ -7,7 +7,8 @@
    2. Zustand              6. Hervorheben, Fokus    10. Sperren und Positionen
    3. Elemente je Ebene    7. Seitenleiste          11. Pfad-Suche
    4. Zeichnen und Layout  8. Sprungadressen        12. Editor-Links
-                                                    13. Funktionsebene (seit A09) */
+                                                    13. Funktionsebene (seit A09)
+                                                    14. Führungen (seit A10) */
 (function () {
   'use strict';
 
@@ -539,7 +540,10 @@
       { selector: 'node.gewaehlt', style: { 'border-color': tok('--accent'), 'border-width': 3 } },
       { selector: 'edge.kgewaehlt', style: { 'line-color': tok('--accent'), 'target-arrow-color': tok('--accent'), width: 5, opacity: 1 } },
       { selector: 'node.einstieg', style: { 'border-color': tok('--warn'), 'border-width': 3.5 } },
-      { selector: 'edge.einstieg', style: { 'line-color': tok('--warn'), 'target-arrow-color': tok('--warn'), width: 2.4, opacity: 1, label: 'Einstieg', color: tok('--warn') } }
+      { selector: 'edge.einstieg', style: { 'line-color': tok('--warn'), 'target-arrow-color': tok('--warn'), width: 2.4, opacity: 1, label: 'Einstieg', color: tok('--warn') } },
+      // Führung (A10): der Reihe nach hervorgehoben, Rand wie eine Auswahl, immer voll sichtbar.
+      { selector: 'node.fhl', style: { 'border-color': tok('--accent'), 'border-width': 3.5, opacity: 1, 'overlay-color': tok('--accent'), 'overlay-opacity': 0.16, 'overlay-padding': 6 } },
+      { selector: 'edge.fhl', style: { 'line-color': tok('--accent'), 'target-arrow-color': tok('--accent'), width: 4.5, opacity: 1, 'z-index': 20 } }
     );
     if (zustand.zyklen) regeln.push({ selector: 'edge.zyk.hl', style: { 'line-color': tok('--crit'), 'target-arrow-color': tok('--crit'), width: 3 } });
     // Grenzkanten behalten ihre Farbe auch im Fokus.
@@ -576,7 +580,9 @@
       { selector: 'edge.zugriff', style: { 'line-color': tok('--muted'), 'target-arrow-color': tok('--muted'), 'arrow-scale': 0.6, opacity: 0.7 } },
       { selector: 'edge.punkt', style: { 'line-style': 'dotted', 'line-dash-pattern': [1, 3], 'target-arrow-shape': 'triangle-backcurve' } },
       { selector: 'node.grenzziel', style: { 'border-color': tok('--warn'), 'border-width': 3 } },
-      { selector: 'edge.grenze', style: { 'line-color': tok('--warn'), 'target-arrow-color': tok('--warn'), width: 2.6, opacity: 1 } }
+      // Über den anderen Kanten: Im Wegmodus laufen Kanten gleicher Quelle als ein Strang
+      // (mergeEdges); läuft eine Grenzkante darin, trägt der Strang so die Farbe der Markierung.
+      { selector: 'edge.grenze', style: { 'line-color': tok('--warn'), 'target-arrow-color': tok('--warn'), width: 2.6, opacity: 1, 'z-index': 10 } }
     );
     return regeln;
   }
@@ -646,9 +652,12 @@
     return { zoom, pan: { x: cy.width() / 2 - zoom * (bb.x1 + bb.w / 2), y: cy.height() / 2 - zoom * (bb.y1 + bb.h / 2) } };
   }
   function einpassen(eles, padding) { if (eles.nonempty()) cy.viewport(ziel(eles, padding)); }
+  // Während eine Führung die Ansicht eines Schritts aufbaut, springt die Kamera sofort; die Führung
+  // gleitet danach selbst vom alten zum neuen Ausschnitt (A10).
+  let kameraSofort = false;
   function fahre(v) {
     cy.stop(true, true);
-    if (ruhig()) cy.viewport(v); else cy.animate(Object.assign(v, { duration: 300 }));
+    if (ruhig() || kameraSofort) cy.viewport(v); else cy.animate(Object.assign(v, { duration: 300 }));
   }
   function passen(eles, padding) { if (eles.nonempty()) fahre(ziel(eles, padding)); }
 
@@ -1235,7 +1244,9 @@
   function schreibeAdresse() {
     const a = zustand.auswahl;
     let hash;
-    if (!a) hash = 'ebene=' + zustand.ebene;
+    // Während einer Führung bleibt ihre Adresse stehen, auch wenn der Nutzer etwas auswählt.
+    if (tour.f) hash = fuehrungsAdresse();
+    else if (!a) hash = 'ebene=' + zustand.ebene;
     else if (a.art === 'kante') hash = 'ebene=' + a.ebene + '&kante=' + encodeURIComponent(a.id);
     else if (a.art === 'pfad') hash = 'ebene=' + a.ebene + '&von=' + encodeURIComponent(a.von) + '&nach=' + encodeURIComponent(a.nach);
     else if (a.art === 'fdatei') hash = 'datei-funktionen=' + encodeURIComponent(a.id);
@@ -1248,15 +1259,22 @@
     if (location.hash === '#' + hash) return;
     try {
       // Jede neue Auswahl wird ein Eintrag im Verlauf, damit „Zurück“ zur vorherigen führt.
-      if (ausAdresse || !location.hash) history.replaceState(null, '', '#' + hash);
+      if (ausAdresse || tour.f || !location.hash) history.replaceState(null, '', '#' + hash);
       else history.pushState(null, '', '#' + hash);
     } catch (e) { /* ohne History */ }
   }
 
-  async function leseAdresse() {
+  // Liest die Adresse der Seite oder (Führung) die Sprungadresse eines Schritts.
+  async function leseAdresse(text) {
+    const vonSeite = typeof text !== 'string';
+    const p = new URLSearchParams((vonSeite ? location.hash : text).replace(/^#/, ''));
+    if (vonSeite && p.get('fuehrung') !== null) {
+      const f = fuehrungNachName.get(p.get('fuehrung'));
+      if (f) { await starteFuehrung(f.name, (parseInt(p.get('schritt'), 10) || 1) - 1); return; }
+      zeigeHinweis('Keine Führung mit dem Namen ' + p.get('fuehrung') + '.');
+    } else if (vonSeite && tour.f) beendeFuehrung({ ohneAdresse: true });
     ausAdresse = true;
     try {
-      const p = new URLSearchParams(location.hash.replace(/^#/, ''));
       const ebene = p.get('ebene');
       if (ebene && ARTEN_JE_EBENE[ebene] && ebene !== 'funktion') zustand.ebene = ebene;
       // Adressen ohne Funktion verlassen den Wegmodus.
@@ -1395,7 +1413,10 @@
     if (a && a.art === 'knoten') knotenDetails(a.id);
     else if (!a || a.art !== 'befund') uebersicht();
   }));
-  document.getElementById('einpassen').addEventListener('click', () => passen(cy.elements(), 30));
+  // Im Wegmodus nach derselben Regel wie beim Öffnen (Leiste, Lesegrenze, Startspalte, A10).
+  document.getElementById('einpassen').addEventListener('click', () => {
+    if (zustand.ebene === 'funktion' && zustand.weg) wegAnsicht(); else passen(cy.elements(), 30);
+  });
   document.getElementById('zuruecksetzen').addEventListener('click', async () => {
     loeschePositionen(positionsEbene());
     await neuZeichnen();
@@ -1518,9 +1539,9 @@
   }
   cy.on('tap', e => { if (e.target === cy) aufheben(); });
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && !(e.target instanceof HTMLInputElement)) aufheben();
+    if (e.key === 'Escape' && !(e.target instanceof HTMLInputElement) && !tour.f) aufheben();
   });
-  window.addEventListener('popstate', leseAdresse);
+  window.addEventListener('popstate', () => leseAdresse());
   window.addEventListener('resize', () => cy.resize());
 
   // Hinweise (z. B. ausgegraute Symbole)
@@ -2246,6 +2267,9 @@
     const alles = cy.elements();
     if (alles.empty()) return;
     const bb = alles.boundingBox();
+    // Die Zeile „weiter …“ hat unten ihren eigenen Platz (oben2); gemessen wird die Leiste ohne sie,
+    // damit „Einpassen“ dasselbe Bild ergibt wie das Öffnen (A10).
+    document.getElementById('weiter').hidden = true;
     const leiste = document.getElementById('infoleiste');
     const oben = Math.max(RAND_WEG, leiste.offsetTop + leiste.offsetHeight + 14);
     const legende = document.querySelector('.flaeche .legende');
@@ -2549,6 +2573,336 @@
     seite.querySelectorAll('[data-zur-datei-seite]').forEach(x => x.addEventListener('click', () => { zustand.weg = null; zeigeFunktionsDatei(zustand.fDatei); }));
   }
 
+  // ------------------------------------------------------------ 14. Führungen (seit A10)
+  // Eine Führung (vom Skill geschrieben, von `daidalos fuehrung uebernehmen` geprüft) ist eine Folge
+  // von Schritten. Jeder Schritt öffnet eine Sprungadresse der Karte, gleitet mit der Kamera dorthin
+  // und hebt seine Ids der Reihe nach hervor. Kaputte Schritte (Id fehlt) werden übersprungen.
+  // Vorlesen nur mit Stimmen auf diesem Rechner (localService), sonst ginge der Text ins Netz.
+  const FUEHRUNGEN = JSON.parse(document.getElementById('daidalos-fuehrungen').textContent) || [];
+  const fuehrungNachName = new Map(FUEHRUNGEN.map(f => [f.name, f]));
+  const fBox = document.getElementById('fuehrung');
+  const fKnopf = document.getElementById('fuehrungen-knopf');
+  const HERVOR_TAKT = 400, KAMERA_MS = 600, AUTO_PAUSE = 1500;
+  const TEMPO_MIN = 0.8, TEMPO_MAX = 1.4;
+  const tour = { f: null, nr: 0, lauf: 0, takt: [], hervor: [], fehlt: [], uebersprungen: [], auto: false, pause: false, spricht: null, gesprochen: false, autoTimer: 0, gesagt: [] };
+  const sprache = { an: false, stimmen: [], stimme: null, tempo: 1, grund: '' };
+
+  const fuehrungsAdresse = () => 'fuehrung=' + encodeURIComponent(tour.f.name) + '&schritt=' + (tour.nr + 1);
+  const kaputt = (f, n) => f.schritte[n].stand === 'kaputt';
+  function naechster(n, richtung) {
+    const f = tour.f;
+    for (let i = n; i >= 0 && i < f.schritte.length; i += richtung) if (!kaputt(f, i)) return i;
+    return -1;
+  }
+
+  // ---- Ids eines Schritts → Elemente der aktuellen Karte
+  function knotenSammlung(ids) {
+    let c = cy.collection();
+    ids.forEach(id => {
+      const n = cy.getElementById(id);
+      if (n.nonempty()) { c = c.union(n); return; }
+      if (zustand.ebene === 'funktion') {
+        const f = id.startsWith('funktion:') ? fn(id) : null;
+        if (f) { c = c.union(cy.getElementById('fz:' + f.pfad)); return; }
+        // Datei als Rahmen (eigene Datei, Nachbar, Spalte des Wegs) oder zusammengefasst.
+        c = c.union(cy.nodes().filter(x => x.data('ref') === id && ['fdatei', 'fnachbar', 'fzu'].includes(x.data('typ'))));
+        return;
+      }
+      const s = sichtbarerKnoten(id.startsWith('funktion:') ? dateiDerFunktion(id) : id);
+      if (s) c = c.union(cy.getElementById(s));
+    });
+    return c;
+  }
+  // kante:<art>:<von>-><nach>[:<rolle>] (Ableitung aus A08)
+  function kantenTeile(id) {
+    const m = /^kante:([^:]+):(.+?)->(.+?)(?::(produktiv|test))?$/.exec(id);
+    return m ? { art: m[1], von: m[2], nach: m[3] } : null;
+  }
+  function kantenZwischen(von, nach, art) {
+    const a = fn(von), b = fn(nach);
+    if (!a || !b || !FD) return cy.collection();
+    const ids = new Set(FD.raus[a.i].filter(k => k.n === b.i && (!art || k.art === art)).map(k => k.id));
+    return cy.edges().filter(e => (e.data('kanten') || []).some(i => ids.has(i)));
+  }
+  function fuehrungsElemente(id) {
+    const direkt = cy.getElementById(id);
+    if (direkt.nonempty()) return direkt;
+    if (id.startsWith('befund:')) {
+      const b = befundNachId.get(id);
+      if (!b) return cy.collection();
+      if (b.regel === 'zyklus') return kantenMit(b.beleg.kanten).union(knotenSammlung(b.knoten));
+      if (istMarkierung(b)) {
+        const ersatz = cy.edges().filter(e => e.data('befund') === id);
+        return kantenZwischen(b.beleg.von, b.beleg.nach).union(ersatz).union(knotenSammlung([b.beleg.von, b.beleg.nach]));
+      }
+      return knotenSammlung(b.knoten);
+    }
+    if (id.startsWith('kante:')) {
+      const ks = cy.edges().filter(e => (e.data('kanten') || []).includes(id));
+      if (ks.nonempty()) return ks;
+      const t = kantenTeile(id);
+      return t && zustand.ebene === 'funktion' ? kantenZwischen(t.von, t.nach, t.art) : cy.collection();
+    }
+    return knotenSammlung([id]);
+  }
+
+  // ---- Kamera und Hervorhebung
+  function imBild(eles, v) {
+    const bb = eles.boundingBox();
+    const x1 = bb.x1 * v.zoom + v.pan.x, x2 = bb.x2 * v.zoom + v.pan.x;
+    const y1 = bb.y1 * v.zoom + v.pan.y, y2 = bb.y2 * v.zoom + v.pan.y;
+    return x1 >= 0 && y1 >= 0 && x2 <= cy.width() && y2 <= cy.height();
+  }
+  function gleite(von, nach) {
+    cy.stop(true, true);
+    if (!von || ruhig()) { cy.viewport(nach); return; }
+    cy.viewport(von);
+    cy.animate({ zoom: nach.zoom, pan: nach.pan, duration: KAMERA_MS, easing: 'ease-in-out-cubic' });
+  }
+  function hebeFuehrungHervor(e) {
+    cy.batch(() => {
+      e.removeClass('blass blassB n1 n2').addClass('fhl');
+      e.ancestors().removeClass('blass blassB');
+    });
+  }
+  function stoppeTakt() {
+    tour.takt.forEach(clearTimeout);
+    tour.takt = [];
+  }
+
+  // ---- Schritte
+  async function zeigeSchritt(nr, richtung) {
+    const f = tour.f;
+    if (!f) return;
+    const r = richtung || 1;
+    let n = naechster(Math.max(0, Math.min(f.schritte.length - 1, nr)), r);
+    if (n < 0) n = naechster(Math.max(0, Math.min(f.schritte.length - 1, nr)), -r);
+    const lauf = ++tour.lauf;
+    stoppeTakt();
+    stoppeSprechen();
+    if (n < 0) {
+      fBox.innerHTML = `<div class="f-kopf"><span><b>Führung</b> · ${esc(f.titel)}</span></div><p class="f-hinweis">Alle Schritte dieser Führung sind kaputt: Ids fehlen in der Messung. Der Skill kann sie neu schreiben.</p><div class="f-knoepfe"><button type="button" class="btn" data-f="ende">Beenden</button></div>`;
+      fBox.querySelector('[data-f="ende"]').addEventListener('click', () => beendeFuehrung());
+      document.documentElement.dataset.fuehrung = 'fertig';
+      return;
+    }
+    const uebersprungen = [];
+    for (let i = nr; i !== n && i >= 0 && i < f.schritte.length; i += (n > nr ? 1 : -1)) if (kaputt(f, i)) uebersprungen.push(i + 1);
+    tour.nr = n;
+    tour.uebersprungen = uebersprungen;
+    tour.hervor = [];
+    tour.fehlt = [];
+    tour.gesprochen = false;
+    document.documentElement.dataset.fuehrung = 'laeuft';
+    const s = f.schritte[n];
+    zeigeFuehrungsLeiste();
+    const vorher = cy.nodes().nonempty() ? { zoom: cy.zoom(), pan: Object.assign({}, cy.pan()) } : null;
+    cy.elements().removeClass('fhl');
+    kameraSofort = true;
+    try { await leseAdresse(s.ansicht); } finally { kameraSofort = false; }
+    if (lauf !== tour.lauf || tour.f !== f) return;
+    schreibeAdresse();
+    cy.elements().removeClass('fhl');
+    const els = s.hervorheben.map(id => ({ id, e: fuehrungsElemente(id) }));
+    tour.fehlt = els.filter(x => x.e.empty()).map(x => x.id);
+    const alle = els.reduce((c, x) => c.union(x.e), cy.collection());
+    let nachher = { zoom: cy.zoom(), pan: Object.assign({}, cy.pan()) };
+    if (alle.nonempty() && !imBild(alle, nachher)) nachher = ziel(alle.union(alle.connectedNodes()), 60);
+    gleite(vorher, nachher);
+    zeigeFuehrungsLeiste();
+    const zuZeigen = els.filter(x => x.e.nonempty());
+    zuZeigen.forEach((x, i) => tour.takt.push(setTimeout(() => {
+      if (lauf !== tour.lauf) return;
+      hebeFuehrungHervor(x.e);
+      tour.hervor.push({ id: x.id, zeit: Math.round(performance.now()), elemente: x.e.map(e => e.id()).sort() });
+      if (i === zuZeigen.length - 1) document.documentElement.dataset.fuehrung = 'fertig';
+    }, i * HERVOR_TAKT)));
+    if (!zuZeigen.length) document.documentElement.dataset.fuehrung = 'fertig';
+    if (sprache.an) sprichSchritt(lauf);
+  }
+  function weiterSchritt() {
+    if (!tour.f) return;
+    const n = naechster(tour.nr + 1, 1);
+    if (n < 0) { if (tour.auto) { tour.auto = false; zeigeFuehrungsLeiste(); } return; }
+    zeigeSchritt(tour.nr + 1, 1);
+  }
+  function zurueckSchritt() {
+    if (tour.f && naechster(tour.nr - 1, -1) >= 0) zeigeSchritt(tour.nr - 1, -1);
+  }
+  async function starteFuehrung(name, nr) {
+    const f = fuehrungNachName.get(name);
+    if (!f) return;
+    const neu = tour.f !== f;
+    tour.f = f;
+    tour.pause = false;
+    if (neu) tour.auto = false;
+    fBox.hidden = false;
+    fKnopf.setAttribute('aria-pressed', 'true');
+    // Der Einstieg wird ein Eintrag im Verlauf; die Schritte ersetzen ihn.
+    const ziel = '#fuehrung=' + encodeURIComponent(f.name) + '&schritt=' + ((nr || 0) + 1);
+    try { if (location.hash !== ziel && !/^#fuehrung=/.test(location.hash)) history.pushState(null, '', ziel); } catch (e) { /* ohne History */ }
+    await zeigeSchritt(nr || 0, 1);
+  }
+  function beendeFuehrung(opt) {
+    if (!tour.f) return;
+    tour.lauf++;
+    stoppeTakt();
+    stoppeSprechen();
+    tour.f = null;
+    tour.auto = false;
+    fBox.hidden = true;
+    fBox.innerHTML = '';
+    fKnopf.setAttribute('aria-pressed', 'false');
+    cy.elements().removeClass('fhl');
+    document.documentElement.dataset.fuehrung = 'aus';
+    if (!opt || !opt.ohneAdresse) schreibeAdresse();
+  }
+
+  // ---- Leiste der Führung
+  function zeigeFuehrungsLeiste() {
+    const f = tour.f, s = f.schritte[tour.nr];
+    const hinweise = [];
+    if (s.stand === 'veraltet') hinweise.push('Code hat sich geändert, Text evtl. veraltet.');
+    if (tour.uebersprungen.length) hinweise.push((tour.uebersprungen.length === 1 ? 'Schritt ' : 'Schritte ') + tour.uebersprungen.join(', ') + ' übersprungen: kaputt, eine Id fehlt in der Messung.');
+    if (tour.fehlt.length) hinweise.push('In dieser Ansicht nicht zu sehen: ' + tour.fehlt.map(name).join(', ') + '.');
+    const belege = (s.belege || []).map(b => `<li><code>${esc(b.datei)}:${esc(b.zeile)}</code> ${editorKnopf(b.datei, b.zeile, true)}</li>`).join('');
+    const zurueck = naechster(tour.nr - 1, -1) >= 0, weiter = naechster(tour.nr + 1, 1) >= 0;
+    fBox.innerHTML = `<div class="f-kopf"><span><b>Führung</b> · ${esc(f.titel)}</span><span data-f-zahl>Schritt ${tour.nr + 1} von ${f.schritte.length}</span></div>
+      <h2>${esc(s.titel)}</h2>
+      ${hinweise.map(h => `<p class="f-hinweis">${esc(h)}</p>`).join('')}
+      <p class="f-text">${esc(s.text)}</p>
+      ${belege ? `<div><p class="leer">Belege</p><ul class="liste kette">${belege}</ul></div>` : ''}
+      <div class="f-knoepfe"><button type="button" class="btn" data-f="zurueck"${zurueck ? '' : ' disabled'}>← Zurück</button><button type="button" class="btn" data-f="weiter"${weiter ? '' : ' disabled'}>Weiter →</button><button type="button" class="btn" data-f="ansicht" title="Ansicht dieses Schritts wiederherstellen">Ansicht</button><button type="button" class="btn" data-f="ende">Beenden</button></div>
+      <div class="f-vorlesen" id="f-vorlesen"></div>`;
+    fBox.querySelector('[data-f="zurueck"]').addEventListener('click', zurueckSchritt);
+    fBox.querySelector('[data-f="weiter"]').addEventListener('click', weiterSchritt);
+    fBox.querySelector('[data-f="ansicht"]').addEventListener('click', () => zeigeSchritt(tour.nr, 1));
+    fBox.querySelector('[data-f="ende"]').addEventListener('click', () => beendeFuehrung());
+    fBox.querySelectorAll('a[data-editor]').forEach(a => a.addEventListener('click', ev => { ev.preventDefault(); oeffneEditor(a.getAttribute('href')); }));
+    zeigeVorlesen();
+  }
+  function zeigeVorlesen() {
+    const box = document.getElementById('f-vorlesen');
+    if (!box) return;
+    const aus = !!sprache.grund;
+    const titel = aus ? sprache.grund : 'Liest jeden Schritt mit einer Stimme dieses Rechners vor';
+    box.innerHTML = `<label class="${aus ? 'aus' : ''}" title="${esc(titel)}"><input type="checkbox" id="f-an"${aus ? ' disabled' : ''}${sprache.an ? ' checked' : ''}> Vorlesen</label>
+      <label class="${sprache.an ? '' : 'aus'}"><input type="checkbox" id="f-auto"${sprache.an ? '' : ' disabled'}${tour.auto ? ' checked' : ''}> Automatisch</label>
+      <button type="button" class="btn" id="f-pause"${sprache.an ? '' : ' disabled'}>${tour.pause ? 'Fortsetzen' : 'Pause'}</button>
+      ${aus ? `<span class="leer" id="f-grund">${esc(sprache.grund)}</span>` : `<select id="f-stimme" aria-label="Stimme">${sprache.stimmen.map((v, i) => `<option value="${i}"${v === sprache.stimme ? ' selected' : ''}>${esc(v.name)}</option>`).join('')}</select>
+      <label title="Geschwindigkeit">Tempo <input type="range" id="f-tempo" min="${TEMPO_MIN}" max="${TEMPO_MAX}" step="0.1" value="${sprache.tempo}"></label>`}`;
+    box.querySelector('#f-an').addEventListener('change', e => {
+      sprache.an = e.target.checked && !!sprache.stimme;
+      if (!sprache.an) { tour.auto = false; tour.pause = false; stoppeSprechen(); } else { tour.pause = false; sprichSchritt(tour.lauf); }
+      zeigeVorlesen();
+    });
+    box.querySelector('#f-auto').addEventListener('change', e => {
+      tour.auto = e.target.checked;
+      // Schon zu Ende gesprochen: nach der Pause weiter.
+      if (tour.auto && tour.gesprochen && !tour.pause) planeWeiter(tour.lauf);
+      if (!tour.auto) clearTimeout(tour.autoTimer);
+    });
+    box.querySelector('#f-pause').addEventListener('click', () => {
+      const ss = window.speechSynthesis;
+      tour.pause = !tour.pause;
+      if (tour.pause) { clearTimeout(tour.autoTimer); if (ss && ss.pause) ss.pause(); }
+      else if (tour.gesprochen) { if (tour.auto) planeWeiter(tour.lauf); }
+      else if (ss && ss.resume) ss.resume();
+      zeigeVorlesen();
+    });
+    const wahl = box.querySelector('#f-stimme');
+    if (wahl) wahl.addEventListener('change', e => {
+      sprache.stimme = sprache.stimmen[+e.target.value] || sprache.stimme;
+      try { localStorage.setItem('daidalos-stimme', sprache.stimme.voiceURI || sprache.stimme.name); } catch (err) { /* ohne Speicher */ }
+      if (sprache.an) sprichSchritt(tour.lauf);
+    });
+    const tempo = box.querySelector('#f-tempo');
+    if (tempo) tempo.addEventListener('change', e => {
+      sprache.tempo = Math.min(TEMPO_MAX, Math.max(TEMPO_MIN, +e.target.value || 1));
+      try { localStorage.setItem('daidalos-tempo', String(sprache.tempo)); } catch (err) { /* ohne Speicher */ }
+    });
+  }
+
+  // ---- Vorlesen (Web Speech API, nur lokale deutsche Stimmen)
+  function ladeStimmen() {
+    const ss = window.speechSynthesis;
+    if (!ss || typeof window.SpeechSynthesisUtterance !== 'function') {
+      sprache.stimmen = [];
+      sprache.grund = 'Dieser Browser kann nicht vorlesen.';
+    } else {
+      const alle = ss.getVoices() || [];
+      // Netzstimmen (localService false) senden den Text an einen Dienst: nie verwenden.
+      sprache.stimmen = alle.filter(v => v.localService === true && /^de([-_]|$)/i.test(v.lang || ''));
+      sprache.grund = sprache.stimmen.length ? ''
+        : alle.length ? 'Keine deutsche Stimme auf diesem Rechner; Stimmen aus dem Netz würden den Text versenden.'
+          : 'Keine Stimme auf diesem Rechner gefunden.';
+    }
+    let gemerkt = null, tempo = null;
+    try { gemerkt = localStorage.getItem('daidalos-stimme'); tempo = parseFloat(localStorage.getItem('daidalos-tempo')); } catch (e) { /* ohne Speicher */ }
+    if (tempo >= TEMPO_MIN && tempo <= TEMPO_MAX) sprache.tempo = tempo;
+    sprache.stimme = sprache.stimmen.find(v => (v.voiceURI || v.name) === gemerkt) ||
+      sprache.stimmen.find(v => v.lang === 'de-DE') || sprache.stimmen[0] || null;
+    if (!sprache.stimme) { sprache.an = false; tour.auto = false; }
+    zeigeVorlesen();
+  }
+  function stoppeSprechen() {
+    clearTimeout(tour.autoTimer);
+    const ss = window.speechSynthesis;
+    if (tour.spricht) {
+      tour.spricht.onend = null;
+      if (ss) ss.cancel();
+    }
+    tour.spricht = null;
+  }
+  function planeWeiter(lauf) {
+    clearTimeout(tour.autoTimer);
+    tour.autoTimer = setTimeout(() => { if (lauf === tour.lauf && tour.auto && !tour.pause) weiterSchritt(); }, AUTO_PAUSE);
+  }
+  function sprichSchritt(lauf) {
+    stoppeSprechen();
+    if (!sprache.an || !sprache.stimme || !tour.f) return;
+    const s = tour.f.schritte[tour.nr];
+    const u = new window.SpeechSynthesisUtterance(s.titel + '. ' + s.text);
+    u.lang = 'de-DE';
+    u.voice = sprache.stimme;
+    u.rate = sprache.tempo;
+    u.onend = () => {
+      if (lauf !== tour.lauf || !tour.f) return;
+      tour.spricht = null;
+      tour.gesprochen = true;
+      if (tour.auto && !tour.pause) planeWeiter(lauf);
+    };
+    tour.spricht = u;
+    tour.gesagt.push({ stimme: sprache.stimme.name, schritt: tour.nr + 1 });
+    window.speechSynthesis.speak(u);
+  }
+  if (window.speechSynthesis) {
+    const ss = window.speechSynthesis;
+    if (typeof ss.addEventListener === 'function') ss.addEventListener('voiceschanged', ladeStimmen);
+    else ss.onvoiceschanged = ladeStimmen;
+  }
+  ladeStimmen();
+
+  // ---- Liste, Knopf, Tastatur
+  function fuehrungsListe() {
+    const standText = { veraltet: ' · teils veraltet', kaputt: ' · mit kaputten Schritten' };
+    seite.innerHTML = `<div><h2>Führungen</h2><p class="leer">Eine Führung zeigt einen Ablauf Schritt für Schritt: Die Karte wechselt die Ansicht, hebt die beteiligten Teile der Reihe nach hervor und erklärt sie. Weiter mit → oder Leertaste, zurück mit ←, Ende mit Esc.</p></div>
+      <div><h3 class="quelle-d">Führungen <em>gedeutet · fuehrungen/</em></h3><ol class="befunde" id="f-liste">${FUEHRUNGEN.map(f => `<li><button type="button" data-fuehrung="${esc(f.name)}"><span class="prio ${f.stand === 'ok' ? 'adr' : 'warn'}">${f.schritte.length}</span><span class="bt">${esc(f.titel)}</span><span class="bd">${esc(f.frage)}</span><span class="bm">${f.schritte.length} Schritte${standText[f.stand] || ''}</span></button></li>`).join('')}</ol></div>`;
+    seite.querySelectorAll('[data-fuehrung]').forEach(b => b.addEventListener('click', () => starteFuehrung(b.dataset.fuehrung, 0)));
+  }
+  fKnopf.hidden = !FUEHRUNGEN.length;
+  fKnopf.setAttribute('aria-pressed', 'false');
+  fKnopf.addEventListener('click', fuehrungsListe);
+  document.addEventListener('keydown', e => {
+    if (!tour.f || e.altKey || e.ctrlKey || e.metaKey) return;
+    const t = e.target;
+    if (t instanceof HTMLSelectElement || t instanceof HTMLTextAreaElement) return;
+    if (t instanceof HTMLInputElement && t.type !== 'checkbox') return;
+    if (e.key === 'ArrowRight' || (e.key === ' ' && !(t instanceof HTMLButtonElement))) { e.preventDefault(); weiterSchritt(); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); zurueckSchritt(); }
+    else if (e.key === 'Escape') { e.preventDefault(); beendeFuehrung(); }
+  });
+
   // ------------------------------------------------------------ Start
   let gemerkt = null;
   try { gemerkt = localStorage.getItem('daidalos-thema'); } catch (e) { /* ohne Speicher */ }
@@ -2570,7 +2924,13 @@
     funktionsBlockGelesen: () => FD !== null, GRENZE_KAESTEN, LESBAR, WEG_ELK, wegAnsicht,
     kartenDateien, gross, SAMMEL, MIN_ZOOM_FOKUS, sperre, sperren, speicherName,
     fluss: () => fluss.stand(),
-    letzterLink: () => letzterLink
+    letzterLink: () => letzterLink,
+    fuehrung: {
+      starte: starteFuehrung, weiter: weiterSchritt, zurueck: zurueckSchritt, beende: beendeFuehrung, ladeStimmen,
+      HERVOR_TAKT, KAMERA_MS, AUTO_PAUSE,
+      stand: () => ({ name: tour.f ? tour.f.name : null, nr: tour.nr + 1, hervor: tour.hervor.slice(), fehlt: tour.fehlt.slice(), auto: tour.auto, pause: tour.pause }),
+      sprache: () => ({ an: sprache.an, grund: sprache.grund, stimme: sprache.stimme ? sprache.stimme.name : null, stimmen: sprache.stimmen.map(v => v.name), tempo: sprache.tempo, gesagt: tour.gesagt.slice() })
+    }
   };
   leseAdresse();
 })();
