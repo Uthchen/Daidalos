@@ -766,6 +766,85 @@ seit A06b mit einem kleinen, gedämpften Zeichen „nachrangig“ statt einer Pr
 Befundliste und Seitenleiste); `KARTE.md` führt sie als Aufzählung `- <sub>nachrangig</sub> …` nach
 der nummerierten Liste.
 
+## Führungen `fuehrungen/<name>.json`, `schema: 1` (seit A10)
+
+Ablage: `<zielrepo>/docs/daidalos/fuehrungen/<name>.json`, allgemein `fuehrungen/` im
+Ausgabeordner (neben `deutung.json` und `karte.html`). Eine Führung ist Deutung: Den Inhalt schreibt
+der Skill als Entwurf; `daidalos fuehrung uebernehmen` prüft ihn, setzt nur die Hashes ein und
+speichert. Das Programm erfindet keine Schritte.
+
+```json
+{
+  "schema": 1,
+  "name": "stift-bis-strich",
+  "titel": "Vom aufgelegten Stift bis zum Strich",
+  "frage": "Was passiert zwischen Berührung und sichtbarem Strich?",
+  "schritte": [
+    {
+      "ansicht": "#funktion=funktion%3Aapp%2F…%23Eingabe.beruehrt%2F1&weg=vor&tiefe=2",
+      "hervorheben": ["funktion:app/…#Eingabe.beruehrt/1", "datei:app/…/Eingabe.kt"],
+      "titel": "Die Berührung kommt an",
+      "text": "Ein bis drei kurze Sätze in einfacher Sprache.",
+      "belege": [{ "datei": "app/…/Eingabe.kt", "zeile": 42 }],
+      "hashes": { "funktion:app/…#Eingabe.beruehrt/1": "sha256:…" }
+    }
+  ]
+}
+```
+
+| Feld | Bedeutung |
+| --- | --- |
+| `schema` | `1` |
+| `name` | Kleinbuchstaben, Ziffern und `-` (`[a-z0-9]+(-[a-z0-9]+)*`); gleich dem Dateinamen ohne `.json` |
+| `titel`, `frage` | nicht leer |
+| `schritte` | 3 bis 15 Schritte |
+| `ansicht` | Sprungadresse der Karte mit `#`, wie ein Mensch sie aufruft (siehe [Sprungadressen](#karte-html-und-karte-md)); Werte URL-kodiert wie in der Karte (`encodeURIComponent`) |
+| `hervorheben` | 1 bis 8 verschiedene Ids von Knoten (auch Funktionen), Kanten oder Befunden, in der Reihenfolge, in der die Karte sie hervorhebt. Kanten der Funktionsebene als `kante:<art>:<von>-><nach>:<rolle>` (Ableitung seit A08) |
+| `titel`, `text` | nicht leer; `text` ein bis drei kurze Sätze (Regel des Skills, nicht geprüft) |
+| `belege` | mindestens ein Beleg `{ "datei": "<pfad>", "zeile": <n> }`; die Datei muss ein Datei-Knoten sein, `zeile` ≥ 1 und nicht größer als `zeilen` der Datei |
+| `hashes` | setzt das Programm: Knoten-Id → `hash` für jeden Knoten aus `hervorheben` und für die Datei jedes Belegs (Schlüssel `datei:<pfad>`). Knoten ohne `hash` (implizite Konstruktoren) sowie Kanten und Befunde fehlen |
+
+**Sprungadressen, die eine Führung nutzen darf** (Schlüssel und Prüfung gegen die Messung):
+`ebene` (`modul`, `paket`, `datei`, `funktion`), `knoten` (Knoten der Strukturansicht oder
+`sammel:ordner`), `befund` (Befund der Strukturansicht), `grenze` (Befund
+`markierung-verlassen`), `kante` (Kante der Strukturansicht), `funktion` und `gewaehlt`
+(Funktions-Ids; `gewaehlt` nur mit `weg`), `weg` (`vor`, `rueck`; nur mit `funktion`), `tiefe` (1
+bis 5; nur mit `weg`), `datei-funktionen` (Pfad einer Datei mit Funktionen), `von` und `nach`
+(nur zusammen; mit `ebene=funktion` Funktions-Ids, sonst Knoten-Ids). Jeder Schlüssel höchstens
+einmal; andere Schlüssel sind Fehler.
+
+**`daidalos fuehrung uebernehmen ENTWURF.json [ZIEL] [--daten DATEI] [--ausgabe ORDNER]`:** Der
+Entwurf hat dasselbe Format ohne `hashes` (vorhandene werden ignoriert und ersetzt; `schema` ist
+optional). Geprüft werden alle Regeln oben; bei einem Problem meldet der Befehl jedes, endet mit
+Exit-Code 2 und schreibt nichts. Sonst schreibt er `<ausgabe>/fuehrungen/<name>.json`
+(Standard: `<ZIEL>/docs/daidalos/`) deterministisch wie `daidalos.json` (UTF-8, LF, Einrückung 2,
+Schlüssel sortiert); eine gleichnamige Führung wird ersetzt.
+
+**Stand je Schritt:**
+
+- **kaputt:** Eine Id aus `hervorheben` oder aus `hashes`, eine Datei aus `belege` oder ein Teil
+  der `ansicht` fehlt in der aktuellen Messung.
+- **veraltet:** Nicht kaputt, aber ein Hash aus `hashes` weicht vom aktuellen `hash` ab (der
+  Gruppen-Hash eines Moduls ändert sich mit jeder Datei darin).
+- sonst **ok**. Eine Führung ist kaputt, wenn ein Schritt kaputt ist, sonst veraltet, wenn einer
+  veraltet ist.
+
+`daidalos fuehrung pruefen [NAME] [ZIEL] [--daten] [--ausgabe]` nennt je Führung den Stand und je
+nicht guten Schritt Nummer, Stand und Gründe (`Id fehlt: …`, `Datei fehlt: …`, `geändert: …`,
+Probleme der Sprungadresse). Exit-Code 0, wenn kein Schritt veraltet oder kaputt ist und alle
+Dateien lesbar sind, sonst 1; 2 bei fehlender Messung oder unbekanntem `NAME`. Steht nur ein Wert
+da, ist er `ZIEL`, wenn er ein Ordner ist oder kein gültiger Name sein kann, sonst `NAME`.
+`daidalos fuehrung liste [ZIEL] [--daten] [--ausgabe]` gibt je Führung eine Zeile aus:
+`<name>  <titel>  (<n> Schritte, <stand>)`, nach Name. Dateien, die kein gültiges JSON sind, ein
+anderes `schema` haben oder deren `name` nicht zum Dateinamen passt, werden mit Warnung auf stderr
+übersprungen (`pruefen` endet dann mit 1).
+
+**Zusammenfassung:** Unter **Offen** steht je veralteter oder kaputter Führung eine Zeile
+``- Führung `<name>` <stand> (Schritte <nummern>)`` mit allen nicht guten Schritten; `--json`:
+`offen.fuehrungen` als Liste `{ "name", "stand", "schritte": [Nummern] }` (leer ohne solche
+Führungen). Die Führungen liest die Zusammenfassung aus `fuehrungen/` neben der `deutung.json`
+(`--deutung`). `daidalos deutung pruefen` bleibt davon unberührt.
+
 ## Zusammenfassung (`daidalos zusammenfassung`, seit A06)
 
 Markdown auf stdout (`--json`: dasselbe als JSON), nur aus Messung und Deutung, schreibt nichts.
@@ -807,9 +886,12 @@ laufen wie bei Dateien über den `hash` des Funktionsknotens.
 - Tote Verweise: Ids in `beschreibungen`, `bereiche[].knoten`, `einschaetzungen[].befund` und
   `kanten`, die es in der Messung nicht gibt.
 
+- Seit A10: Führungen mit veralteten oder kaputten Schritten (siehe [Führungen](#führungen-fuehrungenname-json-schema-1-seit-a10)).
+
 Sind alle offenen Beschreibungen bzw. Befunde einer Art offen, nennt das Markdown nur die Zahl;
 über 40 Einträge ebenso. `--json` listet immer alle: `offen.beschreibungen` (`id`, `stand`),
-`offen.befunde_ohne_einschaetzung`, `offen.tote_verweise` (`"<wo>: <id>"`).
+`offen.befunde_ohne_einschaetzung`, `offen.tote_verweise` (`"<wo>: <id>"`), seit A10
+`offen.fuehrungen`.
 
 `daidalos deutung pruefen` meldet genau diese Liste und endet mit 0, wenn sie leer ist, sonst
 mit 1 (fehlende oder ungültige Messung bzw. ungültige `deutung.json`: 2; fehlende
@@ -928,7 +1010,9 @@ absoluten Pfade).
   Lesezugriffe standardmäßig (die Markierungs-Kette zählt sie mit); der gemerkte Stand des
   Schalters bleibt dabei unberührt. Zählzeile, „wer … nutzt“ und Hinweise stehen in einer Leiste
   untereinander. Gemerkte Positionen unter dem Schlüssel
-  `…|funktion:<pfad>` (Wirkungswege `…|funktion-weg:<id>:<richtung>:<tiefe>`).
+  `…|funktion:<pfad>` (Wirkungswege `…|funktion-weg:<id>:<richtung>:<tiefe>`). Seit A10 nutzt
+  „Einpassen“ im Wegmodus dieselbe Regel wie das Öffnen, und Grenzkanten liegen über den anderen
+  Kanten (`z-index`), damit ein Strang, in dem eine Grenzkante läuft, die Befundfarbe trägt.
 - **Funktionsblock (seit A09):** ein vierter Block `<script type="application/json"
   id="funktionen">`, nur für die Karte; `daidalos.json` bleibt unverändert. Die Karte liest ihn
   erst beim ersten Öffnen der Funktionsebene. Ohne Funktionsknoten steht `null` darin. Aufbau
@@ -965,6 +1049,30 @@ absoluten Pfade).
     Index in `texte`) und bei unsicheren Kanten der Grund des ersten unsicheren Belegs (`grund`,
     Index in `texte`); `-1` für keinen. Die volle Liste steht in `daidalos.json`. Bei `jni` ist
     `ersteZeile` die Kotlin-Zeile, bei `ueberschreibt`/`actual` `null`.
+- **Führungen (seit A10):** ein fünfter Block `<script type="application/json"
+  id="daidalos-fuehrungen">` mit allen gültigen Führungen aus `fuehrungen/` im Ausgabeordner, nach
+  Name, als Liste `{ "name", "titel", "frage", "stand", "schritte": [{ "ansicht", "hervorheben",
+  "titel", "text", "belege", "stand" }] }` (ohne `hashes`; `stand` wie bei `daidalos fuehrung
+  pruefen`); ohne Führungen `[]`. Der Knopf „Führungen“ in der Kopfleiste (nur mit Führungen)
+  zeigt in der Seitenleiste eine Liste mit Titel, Frage und Zahl der Schritte. Sprungadresse
+  `#fuehrung=<name>[&schritt=n]` (n ab 1); während einer Führung bleibt sie in der Adresszeile
+  stehen, auch wenn der Nutzer etwas auswählt. Über der Seitenleiste steht die Leiste der Führung
+  mit Titel, „Schritt n von m“, Text, Belegen mit Editor-Link und den Knöpfen „Zurück“, „Weiter“,
+  „Ansicht“ (stellt die Ansicht des Schritts wieder her) und „Beenden“. Je Schritt öffnet die Karte
+  die `ansicht`, die Kamera gleitet in 600 ms dorthin (ohne Animation bei
+  `prefers-reduced-motion`; liegt eine hervorgehobene Id außerhalb, wird auf alle eingepasst), und
+  die Ids aus `hervorheben` bekommen der Reihe nach im Abstand von 400 ms einen Rand wie eine
+  Auswahl; alle bleiben stehen. Ids, die die Ansicht nicht zeigt, nennt die Leiste. Veraltete
+  Schritte tragen den Hinweis „Code hat sich geändert, Text evtl. veraltet“; kaputte werden
+  übersprungen und die Leiste nennt sie. Tastatur: `→` und Leertaste weiter, `←` zurück, `Esc`
+  beenden. **Vorlesen** über die Web Speech API, Sprache `de-DE`, nur mit Stimmen, deren
+  `localService` `true` ist (Netzstimmen senden den Text an einen Dienst; Leitplanke 4); gibt es
+  keine lokale deutsche Stimme, ist der Schalter aus und nennt den Grund. „Automatisch“ geht nach
+  dem Ende des Vorlesens plus 1,5 s weiter, „Pause“ hält an. Stimme (`daidalos-stimme`, `voiceURI`)
+  und Tempo (`daidalos-tempo`, 0,8–1,4) merkt sich `localStorage`. `KARTE.md` hat nach dem
+  Überblick den Abschnitt „Führungen“: je Führung der Titel als Link `karte.html#fuehrung=<name>`,
+  die Frage und die Schritt-Titel als nummerierte Liste (veraltete mit „*(Code geändert, Text evtl.
+  veraltet)*“, kaputte mit „*(kaputt, wird übersprungen)*“); ohne Führungen fehlt er.
 - **Im Editor öffnen:** Die Karte setzt den Link zur Laufzeit zusammen: Verzeichnis der eigenen
   `file://`-Adresse plus `wurzel` plus Pfad der Datei. `{pfad}` ist der absolute Pfad mit `/`, ohne
   führenden Schrägstrich (`E:/Repo/app/A.kt`, unter Linux `home/u/repo/app/A.kt`), jedes Segment

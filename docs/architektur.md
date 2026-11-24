@@ -103,11 +103,11 @@ Geflecht zum Hineinzoomen, Cytoscape.js eingebettet, offline, kein Netzwerk zur 
 - **Vom Element zum Code:** Code-Vorschau in der Seitenleiste (live über `daidalos serve`, nie in `karte.html` eingebettet) und „Im Editor öffnen“ (Standard VS Code, `code -g datei:zeile`, ohne Server `vscode://file/...:zeile`). Symbole Code / Editor / Schloss an jedem Datei-Element, in der Code-Ansicht ein Editor-Symbol je Funktion.
 - **Sprungadressen** wie `karte.html#befund-2`.
 
-Ausgabe: `docs/daidalos/` im Zielrepo, committet: `daidalos.json`, `deutung.json`, `karte.html`, `KARTE.md`, später `fuehrungen/`.
+Ausgabe: `docs/daidalos/` im Zielrepo, committet: `daidalos.json`, `deutung.json`, `karte.html`, `KARTE.md`, `fuehrungen/` (seit A10).
 
 ## Führungen
 
-Claude führt auf Zuruf durch die Karte („vom aufgelegten Stift bis zum fertigen Strich“): `daidalos pfad --von … --nach …` liefert den belegten Weg → Führung als `docs/daidalos/fuehrungen/<name>.json` (Schritte mit Ebene, Knoten, Kanten, Text) → `daidalos fuehrung pruefen` → Spieler in `karte.html` mit Weiter/Zurück/Pause und Sprachausgabe (Web Speech, Windows-Stimmen offline). Später Live-Modus über `daidalos serve` + MCP, in dem Claude die Führung jederzeit umplanen und Erkenntnisse als Befund in `deutung.json` festhalten kann. Optional später: Perfetto-Trace für echte Häufigkeiten.
+Claude führt auf Zuruf durch die Karte („vom aufgelegten Stift bis zum fertigen Strich“). Seit A10: Der Skill findet den Weg mit `daidalos pfad`, `daidalos aufrufe` und Arbeitsblättern, liest die Funktionskörper und schreibt einen Entwurf (Schritte mit Sprungadresse der Karte, hervorzuhebenden Ids, Text und Belegen) → `daidalos fuehrung uebernehmen` prüft Ids und Sprungadressen und setzt Hashes ein → `docs/daidalos/fuehrungen/<name>.json` → `daidalos fuehrung pruefen` meldet veraltete und kaputte Schritte → `render` bettet die Führungen ein → Spieler in `karte.html` mit Weiter/Zurück/Pause und Vorlesen (Web Speech, nur lokale Stimmen). Später Live-Modus über `daidalos serve` + MCP, in dem Claude die Führung jederzeit umplanen und Erkenntnisse als Befund in `deutung.json` festhalten kann. Optional später: Perfetto-Trace für echte Häufigkeiten.
 
 ## Technik
 
