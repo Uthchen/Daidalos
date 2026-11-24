@@ -15,7 +15,7 @@ from urllib.parse import quote
 
 import pytest
 
-from conftest import BEISPIELE, ERWARTET
+from conftest import BEISPIELE, ERWARTET, js
 from daidalos.cli import main
 from daidalos.pfad import suche_weg
 from daidalos.render import baue_karte, einstellungen_fuer_karte
@@ -165,7 +165,7 @@ _RUHIG_SICHTBAR = """(id) => {
 
 def warte_bis_ruhig_sichtbar(s: Any, knoten_id: str) -> None:
     """Wartet auf das Ende des Zeichnens und eine sichtbare, ruhige Position des Knotens."""
-    s.evaluate("window.__daidalosRuhe = null")
+    js(s, "window.__daidalosRuhe = null")
     s.wait_for_function(_RUHIG_SICHTBAR, arg=knoten_id, polling=50, timeout=30000)
 
 
@@ -351,7 +351,7 @@ def test_weitere_ordner_und_plugin_kanten(seite: tuple[Any, list[str]], karte: P
     regeln = s.evaluate("daidalos.cy.getElementById('modul::regeln').data('label')")
     assert "Plugin" not in regeln
     # Klick auf „Weitere Ordner“ listet die Ordner mit Dateien und Zeilen.
-    s.evaluate("daidalos.zeigeKnoten('sammel:ordner')")
+    js(s, "daidalos.zeigeKnoten('sammel:ordner')")
     warte(s)
     text = s.inner_text("#seite")
     assert "(Wurzel)" in text and "4 Dateien" in text and "21 Zeilen" in text
@@ -365,7 +365,7 @@ def test_kanten_im_paket_blasser(seite: tuple[Any, list[str]], karte: Path) -> N
     assert ANFANG_MITTE in innen
     assert s.evaluate("daidalos.cy.edges('.innen')[0].style('opacity')") == "0.32"
     befund = _zyklus_befund()
-    s.evaluate(f"daidalos.zeigeBefund({json.dumps(befund['id'])})")
+    js(s, f"daidalos.zeigeBefund({json.dumps(befund['id'])})")
     warte(s, 300)
     # Im Zyklus normal gezeichnet.
     deck = s.evaluate(f"daidalos.cy.getElementById({json.dumps(ANFANG_MITTE)}).style('opacity')")
@@ -473,7 +473,7 @@ def test_fokus_stufen(
     s, fehler = seite
     oeffne(s, karte, "#ebene=datei")
     s.click(f".thema button[data-thema={thema}]")
-    s.evaluate(f"daidalos.zeigeKnoten('{STRICH}')")
+    js(s, f"daidalos.zeigeKnoten('{STRICH}')")
     warte(s, 400)
     r = s.evaluate(FOKUS_PRUEFUNG % json.dumps(STRICH))
     assert r["n1Zahl"] >= 2 and r["n2Zahl"] >= 1
@@ -494,7 +494,7 @@ def test_fluss_nur_bei_auswahl(seite: tuple[Any, list[str]], karte: Path) -> Non
     s, fehler = seite
     oeffne(s, karte, "#ebene=datei")
     assert s.evaluate("daidalos.fluss()")["laeuft"] is False
-    s.evaluate(f"daidalos.zeigeKnoten('{STRICH}')")
+    js(s, f"daidalos.zeigeKnoten('{STRICH}')")
     warte(s, 200)
     eins = s.evaluate("daidalos.fluss()")
     s.wait_for_timeout(300)
@@ -530,7 +530,7 @@ def test_fluss_nur_bei_auswahl(seite: tuple[Any, list[str]], karte: Path) -> Non
 def test_keine_bewegung_bei_reduced_motion(browser: Any, karte: Path) -> None:
     kontext, s, fehler = _neue_seite(browser, reduced_motion="reduce")
     oeffne(s, karte, "#ebene=datei")
-    s.evaluate(f"daidalos.zeigeKnoten('{STRICH}')")
+    js(s, f"daidalos.zeigeKnoten('{STRICH}')")
     warte(s, 100)
     eins = s.evaluate("daidalos.fluss()")
     versatz = s.evaluate("daidalos.cy.edges('.fluss')[0].style('line-dash-offset')")
@@ -564,8 +564,8 @@ def test_fokus_zoom_haelt_dateinamen_lesbar(browser: Any, karte: Path) -> None:
     )
     assert mindest * schrift == pytest.approx(11)
     s.add_style_tag(content="#cy { width: 300px !important; height: 220px !important; }")
-    s.evaluate("void daidalos.cy.resize()")
-    s.evaluate(f"daidalos.zeigeKnoten('{STRICH}')")
+    js(s, "daidalos.cy.resize()")
+    js(s, f"daidalos.zeigeKnoten('{STRICH}')")
     warte(s, 100)
     r = s.evaluate(FOKUS_ZOOM % json.dumps(STRICH))
     assert r["passend"] < mindest
@@ -581,8 +581,8 @@ def test_fokus_zoom_haelt_dateinamen_lesbar(browser: Any, karte: Path) -> None:
     if r["passend"] < mindest:
         assert abs(r["dx"]) < 1 and abs(r["dy"]) < 1
     # Auf der vollen Fläche: nie unter dem Mindestzoom.
-    s.evaluate("document.querySelector('style:last-of-type').remove(); void daidalos.cy.resize()")
-    s.evaluate(f"daidalos.zeigeKnoten('{STRICH}')")
+    js(s, "document.querySelector('style:last-of-type').remove(), daidalos.cy.resize()")
+    js(s, f"daidalos.zeigeKnoten('{STRICH}')")
     warte(s, 100)
     r = s.evaluate(FOKUS_ZOOM % json.dumps(STRICH))
     assert r["zoom"] >= mindest - 1e-9
@@ -593,7 +593,7 @@ def test_fokus_zoom_haelt_dateinamen_lesbar(browser: Any, karte: Path) -> None:
 def test_gewaehlte_kante_fliesst_allein(seite: tuple[Any, list[str]], karte: Path) -> None:
     s, fehler = seite
     oeffne(s, karte, "#ebene=datei")
-    s.evaluate(f"daidalos.zeigeKante({json.dumps(ANFANG_MITTE)})")
+    js(s, f"daidalos.zeigeKante({json.dumps(ANFANG_MITTE)})")
     warte(s, 200)
     stand = s.evaluate("daidalos.fluss()")
     assert stand["laeuft"] is True
@@ -645,10 +645,11 @@ def test_positionen_alter_schluessel_wird_uebernommen(
     assert "karte.html" in neu
     vorher = position(s, STRICH)
     gemerkt = [vorher["x"] + 123.0, vorher["y"] + 45.0]
-    s.evaluate(
-        f"localStorage.removeItem({json.dumps(neu)});"
+    js(
+        s,
+        f"localStorage.removeItem({json.dumps(neu)}),"
         f"localStorage.setItem({json.dumps(alt)}, JSON.stringify({{[{json.dumps(STRICH)}]: "
-        f"{json.dumps(gemerkt)}}}))"
+        f"{json.dumps(gemerkt)}}}))",
     )
     s.reload()
     s.wait_for_function(BEREIT)
@@ -656,7 +657,7 @@ def test_positionen_alter_schluessel_wird_uebernommen(
     assert s.evaluate(f"localStorage.getItem({json.dumps(alt)})") is None
     assert json.loads(s.evaluate(f"localStorage.getItem({json.dumps(neu)})")) == {STRICH: gemerkt}
     # Nur einmal: ein später wieder auftauchender alter Eintrag überschreibt den neuen nicht.
-    s.evaluate(f"localStorage.setItem({json.dumps(alt)}, '{{}}')")
+    js(s, f"localStorage.setItem({json.dumps(alt)}, '{{}}')")
     s.reload()
     s.wait_for_function(BEREIT)
     assert position(s, STRICH) == pytest.approx({"x": gemerkt[0], "y": gemerkt[1]}, abs=0.2)
@@ -694,7 +695,7 @@ def test_kantenklick_zeigt_belege_grenze_und_zyklus(
     assert hrefs and all(h.startswith("vscode://file/") for h in hrefs)
     # Über eine Modulgrenze: einzige Verbindung der Pakete und Module.
     kante = f"kante:nutzt:{START}->{STRICH}:produktiv"
-    s.evaluate(f"daidalos.zeigeKante({json.dumps(kante)})")
+    js(s, f"daidalos.zeigeKante({json.dumps(kante)})")
     warte(s, 200)
     text = s.inner_text("#seite")
     assert "über eine Modulgrenze" in text
@@ -712,7 +713,7 @@ def test_verdichtete_kante_listet_datei_kanten(seite: tuple[Any, list[str]], kar
         if k["art"] == "nutzt" and k["von"].startswith("paket:") and k["rolle"] == "produktiv"
     )
     oeffne(s, karte, "#ebene=paket")
-    s.evaluate(f"daidalos.zeigeKante({json.dumps(paket_kante['id'])})")
+    js(s, f"daidalos.zeigeKante({json.dumps(paket_kante['id'])})")
     warte(s, 200)
     text = s.inner_text("#seite")
     assert "getragen von" in text.lower()
@@ -720,7 +721,7 @@ def test_verdichtete_kante_listet_datei_kanten(seite: tuple[Any, list[str]], kar
     assert traeger and all(t.startswith("kante:nutzt:datei:") for t in traeger)
     # Gradle-Kante: tragende nutzt-Kanten.
     gradle = "kante:gradle-impl:modul::anwendung->modul::kern"
-    s.evaluate(f"daidalos.zeigeKante({json.dumps(gradle)})")
+    js(s, f"daidalos.zeigeKante({json.dumps(gradle)})")
     warte(s, 200)
     text = s.inner_text("#seite")
     assert "verwendet von" in text.lower() and "anwendung/build.gradle.kts:6" in text
@@ -764,7 +765,7 @@ def test_sprung_klappt_modul_aus(browser: Any, grosse_karte: Path) -> None:
     oeffne(s, grosse_karte, "#ebene=datei")
     assert s.evaluate("daidalos.gross") is True
     assert s.evaluate("[...daidalos.zustand.offen]") == ["modul::nativ"]
-    s.evaluate(f"daidalos.zeigeKnoten('{STRICH}')")
+    js(s, f"daidalos.zeigeKnoten('{STRICH}')")
     warte(s, 200)
     assert "modul::kern" in s.evaluate("[...daidalos.zustand.offen]")
     s.click(f'#seite [data-knoten="{START}"]')
@@ -878,7 +879,7 @@ def test_editor_ohne_file_ausgegraut(seite: tuple[Any, list[str]], karte: Path) 
     s.set_content(karte.read_text(encoding="utf-8"))
     s.wait_for_function(BEREIT, timeout=30000)
     assert s.evaluate("daidalos.editorLink('a.kt', 1)") is None
-    s.evaluate(f"daidalos.zeigeKnoten('{STRICH}')")
+    js(s, f"daidalos.zeigeKnoten('{STRICH}')")
     warte(s, 200)
     knopf = "#seite .symbole button[aria-label^='Im Editor öffnen geht nur']"
     assert s.is_disabled(knopf)
@@ -1044,7 +1045,7 @@ def test_zeitgrenze_fuehrt_zum_ersatzlayout(seite: tuple[Any, list[str]], karte:
     assert "vereinfachte Anordnung" in s.inner_text("#anordnung")
     assert s.evaluate("document.documentElement.dataset.zustand") == "bereit"
     # Wieder mit ELK: Hinweis weg.
-    s.evaluate("daidalosElk.testHaengen(false); daidalos.zustand.ebene = 'datei'")
+    js(s, "daidalosElk.testHaengen(false), (daidalos.zustand.ebene = 'datei')")
     assert s.evaluate("daidalos.zeichne()") is True
     assert s.evaluate("document.getElementById('anordnung').hidden")
     assert s.evaluate("document.documentElement.dataset.anordnung") == "elk"
