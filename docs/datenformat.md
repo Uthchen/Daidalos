@@ -874,6 +874,15 @@ absoluten Pfade).
   Zielrepos (`../..` im Standardordner `docs/daidalos/`), `null`, wenn der Ausgabeordner nicht im
   Zielrepo liegt. In allen Blöcken ist jedes `<` als `\u003c` geschrieben, damit Inhalte das
   Script-Tag nicht beenden können. Quelltext wird nicht eingebettet.
+- **ELK im Web Worker (seit A09b):** Statt `elk.bundled.js` stehen `elk-api.js` und der
+  Worker-Quelltext `elk-worker.min.js` in der Karte, dieser als Text in
+  `<script type="text/plain" id="elk-worker">`. Die Hülle `elk_lauf.js` (zwischen `elk-api.js` und
+  `cytoscape-elk.js`) startet daraus einen Worker über eine Blob-URL (`file://` erlaubt keine
+  Worker-Datei) und nutzt ihn für alle Layouts. Ein laufendes Layout wird abgebrochen, sobald ein
+  neues beginnt. Nach 5 s wird der Worker beendet; dann ordnet Cytoscape an (`breadthfirst`, mit
+  Rahmen `grid`) und die Karte zeigt „vereinfachte Anordnung“ (`data-anordnung="ersatz"` am
+  `<html>`, sonst `elk`). Ersatzanordnungen werden nicht zwischengespeichert. Die Karte lädt
+  dabei nichts aus dem Netz; `blob:` ist eine lokale Adresse.
 - Auf der Dateiebene der Karte stehen Quellcode-Dateien (`kotlin`, `java`, `c`, `cpp`;
   Gradle-Skripte sind seit A05b `gradle-kotlin` und fallen damit heraus) und jede Datei mit einer
   `nutzt`- oder `jni`-Kante. Bei mehr als 150 solcher Dateien sind nur ausgeklappte Module zu sehen.
@@ -910,7 +919,15 @@ absoluten Pfade).
   Markierungs-Kette werden erreichte Ziele vorwärts um ihre Überschreibungen und `actual`
   erweitert, rückwärts jede Funktion um das, was sie überschreibt, und ihr `expect` (gleiche
   Spalte). Spalten nach Abstand, je Spalte und Datei ein Rahmen; über 150 Kästen wird die Tiefe
-  gekürzt und die Zählzeile nennt, wie viel fehlt. Gemerkte Positionen unter dem Schlüssel
+  gekürzt und die Zählzeile nennt, wie viel fehlt. Seit A09b: Beim Öffnen ist die Start-Funktion
+  gewählt, aber ohne Fluss; die Ansicht passt den ganzen Weg unter der Infoleiste ein. Wäre die
+  Schrift dabei kleiner als 9 px, steht die Startspalte bei diesem Zoom am Rand (vorwärts links,
+  rückwärts rechts), senkrecht um den Start, und eine Zeile nennt „weiter rechts: N Funktionen“
+  (auch links, darüber oder darunter). Kanten gleicher Quelle laufen als ein Strang
+  (ELK `mergeEdges`, nur im Wegmodus). Ein Wirkungsweg ab einer markierten Funktion zeigt
+  Lesezugriffe standardmäßig (die Markierungs-Kette zählt sie mit); der gemerkte Stand des
+  Schalters bleibt dabei unberührt. Zählzeile, „wer … nutzt“ und Hinweise stehen in einer Leiste
+  untereinander. Gemerkte Positionen unter dem Schlüssel
   `…|funktion:<pfad>` (Wirkungswege `…|funktion-weg:<id>:<richtung>:<tiefe>`).
 - **Funktionsblock (seit A09):** ein vierter Block `<script type="application/json"
   id="funktionen">`, nur für die Karte; `daidalos.json` bleibt unverändert. Die Karte liest ihn
@@ -960,7 +977,11 @@ absoluten Pfade).
   bei Netzlaufwerken; sonst Origin und Pfad). Seit A05b; Einträge unter dem alten Schlüssel
   `daidalos-positionen|<ziel.name>|<ebene>` übernimmt die Karte beim Öffnen einmal und löscht sie. Unbekannte Ids werden ignoriert; „Anordnung zurücksetzen“ löscht den Eintrag der Ebene.
 - `KARTE.md` fasst Module, Gradle-Abhängigkeiten, Bereiche und Befunde zusammen; jede Erwähnung
-  eines Knotens oder Befunds verlinkt auf seine Sprungadresse.
+  eines Knotens oder Befunds verlinkt auf seine Sprungadresse. Seit A09b steht zwischen
+  „Bereiche“ und „Befunde“ der Abschnitt „Wichtige Funktionen“: eine Tabellenzeile je Funktion mit
+  Beschreibung in der Deutung (Name als Link `karte.html#funktion=<id>`, `Datei:Zeile`, der Satz,
+  `*(veraltet)*` wie bei anderen Beschreibungen), sortiert nach Datei und Zeile; ohne solche
+  Beschreibungen fehlt der Abschnitt.
 
 ## `daidalos.toml`, Format v1
 
