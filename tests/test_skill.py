@@ -103,3 +103,22 @@ def test_beispiel_entwurf_passt() -> None:
     )
     messung = json.loads((ERWARTET / "mini_modulgraph.daidalos.json").read_text(encoding="utf-8"))
     assert pruefe_entwurf(entwurf, messung) == []
+
+
+def test_skill_ablauf_fuehrung() -> None:
+    """Der zweite Ablauf (A10): eigener Abschnitt mit Übernehmen, Prüfen, Render und Link."""
+    text = SKILL.read_text(encoding="utf-8")
+    assert "führe mich" in text.split("---")[1]  # Auslöser in der description
+    abschnitt = text.split("## Führung erstellen", 1)[1]
+    for befehl in (
+        "daidalos fuehrung uebernehmen",
+        "daidalos fuehrung pruefen",
+        "daidalos render",
+        "daidalos aufrufe",
+        "daidalos pfad",
+    ):
+        assert befehl in abschnitt, befehl
+    assert "karte.html#fuehrung=<name>" in abschnitt
+    assert "Körper" in abschnitt  # Funktionskörper lesen
+    assert "Nur in `docs/daidalos/`" in abschnitt or "nur in `docs/daidalos/`" in abschnitt.lower()
+    assert (SKILL.parent / "vorlagen" / "fuehrung-beispiel.json").is_file()

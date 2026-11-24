@@ -202,14 +202,17 @@ class Offen:
     beschreibungen: dict[str, str] = field(default_factory=dict)
     befunde: list[str] = field(default_factory=list)  # Befunde ohne Einschätzung
     tote_verweise: list[str] = field(default_factory=list)  # "<wo>: <id>"
+    # Führungen mit veralteten oder kaputten Schritten (seit A10): {name, stand, schritte}
+    fuehrungen: list[dict[str, Any]] = field(default_factory=list)
 
     @property
     def leer(self) -> bool:
-        return not (self.beschreibungen or self.befunde or self.tote_verweise)
+        return not (self.beschreibungen or self.befunde or self.tote_verweise or self.fuehrungen)
 
     def als_json(self) -> dict[str, Any]:
         return {
             "befunde_ohne_einschaetzung": self.befunde,
+            "fuehrungen": self.fuehrungen,
             "beschreibungen": [
                 {"id": knoten_id, "stand": stand}
                 for knoten_id, stand in sorted(self.beschreibungen.items())
@@ -340,6 +343,8 @@ def befund_kurz(befund: dict[str, Any], kanten: dict[str, dict[str, Any]]) -> st
 class Zusammenfassung:
     messung: dict[str, Any]
     deutung: dict[str, Any] | None
+    # Stand der Führungen (seit A10): {name, stand, schritte: [Nummern nicht ok]}
+    fuehrungen: list[dict[str, Any]] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         self.voll = self.messung
@@ -349,6 +354,7 @@ class Zusammenfassung:
         self.wichtig = wichtige_dateien(self.messung)
         self.wichtig_funktionen = wichtige_funktionen(self.voll)
         self.offen = finde_offenes(self.voll, self.deutung, self.wichtig)
+        self.offen.fuehrungen = [f for f in self.fuehrungen if f["stand"] != "ok"]
         self.voll_knoten = {k["id"]: k for k in self.voll["knoten"]}
         roh = (self.deutung or {}).get("beschreibungen")
         self.beschreibungen = roh if isinstance(roh, dict) else {}
@@ -678,6 +684,9 @@ class Zusammenfassung:
         else:
             aus += self._liste("Befunde ohne Einschätzung", offen.befunde)
         aus += self._liste("Tote Verweise in deutung.json", offen.tote_verweise)
+        for f in offen.fuehrungen:
+            nummern = ", ".join(str(n) for n in f["schritte"])
+            aus.append(f"- Führung `{f['name']}` {f['stand']} (Schritte {nummern})")
         return aus
 
     @staticmethod

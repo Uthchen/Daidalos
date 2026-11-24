@@ -51,6 +51,9 @@ uv run daidalos zusammenfassung <zielrepo>          # Übersicht und Offenes fü
 uv run daidalos arbeitsblatt KNOTEN <zielrepo>      # Arbeitsblatt für Modul, Paket oder Datei
 uv run daidalos deutung uebernehmen E.json <zielrepo>   # Entwurf prüfen, Hashes einsetzen
 uv run daidalos deutung pruefen <zielrepo>          # Exit 0, wenn nichts offen ist
+uv run daidalos fuehrung uebernehmen E.json <zielrepo>  # Führung prüfen, Hashes einsetzen
+uv run daidalos fuehrung pruefen [NAME] <zielrepo>  # Exit 0, wenn nichts veraltet oder kaputt ist
+uv run daidalos fuehrung liste <zielrepo>           # Führungen mit Stand
 uv run playwright install chromium        # einmalig, für die Browser-Probe (Marker browser)
 uv run python werkzeuge/hole_vendor.py --pruefen   # Prüfsummen der eingebetteten Bibliotheken
 uv run python werkzeuge/ziel_auffrischen.py NAME  # Klon eines Ziels aus lokal/ziele.toml auffrischen, scannen, rendern
@@ -67,7 +70,8 @@ uv run ruff format                        # Formatieren
   (Dateien finden und messen), `sprachen.py` (Endungstabelle), `export.py` (JSON schreiben),
   `struktur.py` (Module, Pakete, Kanten, Befunde, Metriken zusammensetzen), `aufloeser.py`
   (Kotlin-Namen → Datei-Kanten), `aufrufgraph.py` (Funktionsknoten, `ruft`-Kanten), `ids.py` (abgeleitete Ids: `ruft`-Kanten, Datei einer
-  Funktion), `markierung_text.py` (`daidalos markierung`), `deutung.py` (`deutung.json` lesen und abgleichen), `render.py`
+  Funktion), `markierung_text.py` (`daidalos markierung`), `deutung.py` (`deutung.json` lesen und abgleichen), `fuehrung.py` (Führungen prüfen,
+  Hashes, Stand je Schritt), `render.py`
   (`karte.html`, `KARTE.md`), `pfad.py` (`daidalos pfad`), `zusammenfassung.py` (Übersicht,
   wichtige Dateien, Offenes), `arbeitsblatt.py` (Arbeitsblätter); `deutung.py` auch für
   `deutung uebernehmen`.

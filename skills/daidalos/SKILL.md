@@ -1,6 +1,6 @@
 ---
 name: daidalos
-description: "Zeichnet und deutet die Daidalos-Karte einer Codebase: misst mit dem Programm daidalos, wie Module, Pakete und Dateien verflochten sind, benennt Bereiche, beschreibt Module, Pakete, wichtige Dateien und wichtige Funktionen in je einem Satz, gewichtet Befunde wie Zyklen mit Begründung und Vorschlag und rendert karte.html und KARTE.md. Verwenden bei „Karte erstellen“, „Codebase-Karte aktualisieren“, „daidalos“, „Architektur-Karte“, „was hängt woran“, „warum hängt X an Y“, „wo sind Zyklen“, auch wenn das Wort Daidalos nicht fällt."
+description: "Zeichnet und deutet die Daidalos-Karte einer Codebase: misst mit dem Programm daidalos, wie Module, Pakete und Dateien verflochten sind, benennt Bereiche, beschreibt Module, Pakete, wichtige Dateien und wichtige Funktionen in je einem Satz, gewichtet Befunde wie Zyklen mit Begründung und Vorschlag und rendert karte.html und KARTE.md. Verwenden bei „Karte erstellen“, „Codebase-Karte aktualisieren“, „daidalos“, „Architektur-Karte“, „was hängt woran“, „warum hängt X an Y“, „wo sind Zyklen“, und führt auf Zuruf Schritt für Schritt durch die Karte („führe mich …“, „zeig mir den Weg von … bis …“, „erklär mir, wie … abläuft“), auch wenn das Wort Daidalos nicht fällt."
 argument-hint: "[zielrepo]"
 ---
 
@@ -224,7 +224,68 @@ daidalos aufrufe ID --tiefe 3
 
 (`--rueckwaerts` für die Aufrufer, `--unsicher` auch für unsichere Kanten; Funktions-Ids stehen im
 Arbeitsblatt einer Datei). `daidalos pfad` nimmt auch Funktions-Ids und folgt dann `ruft`-Kanten.
-Unsichere Kanten nennst du immer als unsicher. Die Karte zeigt Funktionen noch nicht.
+Unsichere Kanten nennst du immer als unsicher. In der Karte zeigt `karte.html#funktion=<id>` eine
+Funktion, `&weg=vor&tiefe=3` ihren Wirkungsweg.
 
 „Wo verlässt markierter Code die Markierung?“ beantwortest du mit `daidalos markierung`
 (`--datei D` für eine Datei, `--unsicher` auch für Grenzkanten, die nur unsicher sind).
+
+## Führung erstellen
+
+Bei Bitten wie „führe mich vom aufgelegten Stift bis zum Strich“, „zeig mir den Weg von … bis …“
+oder „erklär mir, wie … abläuft“ schreibst du eine **Führung**: 3 bis 15 Schritte, die die Karte
+der Reihe nach zeigt und erklärt. Eine Führung ist Deutung; es gelten alle festen Regeln oben.
+
+1. **Frage klären und Namen wählen.** Eine Frage in einem Satz, dazu ein `name` aus
+   Kleinbuchstaben, Ziffern und `-` (etwa `stift-bis-strich`). Ist die Frage zu weit („erklär mir
+   alles“), frage nach oder wähle einen Ablauf und sage welchen.
+2. **Den Weg finden, dann lesen.** Mit der Zusammenfassung und Arbeitsblättern die beteiligten
+   Module und Dateien finden, mit
+
+   ```
+   daidalos pfad VON NACH
+   daidalos aufrufe ID --tiefe 3
+   daidalos markierung --datei DATEI
+   ```
+
+   den Weg zwischen den Funktionen. Dann die **Körper** der beteiligten Funktionen im Code lesen
+   (Zeilen aus Arbeitsblatt oder `daidalos aufrufe`). Ein Schritt erklärt nur, was du gelesen hast.
+3. **Ansichten zuordnen.** Jeder Schritt hat eine `ansicht`: eine Sprungadresse der Karte, wie ein
+   Mensch sie selbst aufruft. Wechsle zwischen Überblick und Nähe:
+   - Überblick: `#ebene=modul`, `#knoten=<modul-, paket- oder datei-id>`, `#befund=<id>`;
+   - Nähe: `#funktion=<id>`, `#funktion=<id>&weg=vor&tiefe=2` (Wirkungsweg, `rueck` für Aufrufer),
+     `#datei-funktionen=<pfad>`, `#grenze=<befund-id>` (Grenzkante der Markierung),
+     `#ebene=funktion&von=<id>&nach=<id>` (Weg zwischen zwei Funktionen).
+
+   Werte URL-kodiert wie in der Karte (`:` als `%3A`, `/` als `%2F`, `#` als `%23`). Dazu je Schritt
+   `hervorheben`: 1 bis 8 Ids (Knoten, Befunde, Kanten), die die Karte nacheinander hervorhebt, in
+   der Reihenfolge, in der du sie erklärst. Eine Kante zwischen Funktionen heißt
+   `kante:ruft:<von-id>-><nach-id>:<rolle>`.
+4. **Texte schreiben.** Je Schritt ein `titel` (wenige Wörter) und ein `text` aus ein bis drei
+   kurzen Sätzen in einfacher Sprache. Fachwörter nur mit kurzer Erklärung. Keine Zahl, die nicht
+   aus der Messung stammt. Jeder Schritt hat mindestens einen Beleg `{"datei": "<pfad>", "zeile":
+   <n>}` auf die Stelle, die du gelesen hast. Die Texte werden auf Wunsch vorgelesen: Schreibe so,
+   wie man spricht, ohne Klammern und Listen.
+5. **Übernehmen und rendern.** Entwurf nach `docs/daidalos/fuehrung-entwurf.json` schreiben
+   (Vorlage: `vorlagen/fuehrung-beispiel.json` neben dieser Datei; **ohne** `hashes`), dann
+
+   ```
+   daidalos fuehrung uebernehmen docs/daidalos/fuehrung-entwurf.json
+   daidalos fuehrung pruefen
+   daidalos render
+   ```
+
+   `uebernehmen` prüft Ids und Sprungadressen gegen die Messung, setzt die Hashes ein und schreibt
+   `docs/daidalos/fuehrungen/<name>.json`. Bei Problemen endet es mit Exit-Code 2, nennt jedes und
+   schreibt nichts: korrigieren und erneut übernehmen. Den Entwurf danach löschen.
+   `daidalos fuehrung liste` zeigt alle Führungen mit Stand. Liegen Messung und Ausgabe nicht im
+   Standardordner: `--daten DATEI` und `--ausgabe ORDNER` (der Ordner mit `fuehrungen/`).
+6. **Link nennen.** Dem Benutzer `docs/daidalos/karte.html#fuehrung=<name>` nennen, dazu die Zahl
+   der Schritte und wie viele Funktionskörper du gelesen hast. Hinweis: Weiter mit → oder
+   Leertaste, „Vorlesen“ liest mit einer Stimme des eigenen Rechners vor.
+
+**Veraltet und kaputt:** `daidalos fuehrung pruefen` meldet Schritte, deren Code sich geändert hat
+(veraltet: Text prüfen, Führung neu übernehmen) oder deren Ids fehlen (kaputt: Schritt neu
+schreiben). Die Zusammenfassung nennt solche Führungen unter **Offen**.
+
+Feste Regel auch hier: Schreiben nur in `docs/daidalos/`, nichts committen, keinen Code ändern.

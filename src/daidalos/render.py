@@ -202,9 +202,11 @@ def baue_karte(
     deutung: dict[str, Any] | None,
     einstellungen: dict[str, Any] | None = None,
     markierungen: tuple[str, ...] = (),
+    fuehrungen: list[dict[str, Any]] | None = None,
 ) -> str:
     """``karte.html``; ``markierungen`` (``[markierungen].annotationen``) bestimmt im
-    Funktionsblock den Träger einer Markierung."""
+    Funktionsblock den Träger einer Markierung. ``fuehrungen`` ist der Block aus
+    ``fuehrung.fuer_karte`` (seit A10)."""
     if einstellungen is None:
         einstellungen = einstellungen_fuer_karte(STANDARD_EDITOR_LINK, None)
     werte = {
@@ -217,6 +219,7 @@ def baue_karte(
         "EINSTELLUNGEN": einbett_json(einstellungen),
         # Erst beim ersten Öffnen der Funktionsebene gelesen (seit A09).
         "FUNKTIONEN": einbett_json(funktionsblock(messung, markierungen)),
+        "FUEHRUNGEN": einbett_json(fuehrungen or []),
         "SKRIPT": _paketdatei("karte.js"),
         "VERSION": _html_text(__version__),
     }
@@ -268,8 +271,10 @@ class _MdBauer:
         messung: dict[str, Any],
         deutung: dict[str, Any] | None,
         funktionen: dict[str, Knoten] | None = None,
+        fuehrungen: list[dict[str, Any]] | None = None,
     ) -> None:
         self.messung = messung
+        self.fuehrungen = fuehrungen or []
         # Funktionsknoten der vollen Messung (die Strukturansicht hat keine), nach Id.
         self.funktionen = funktionen or {}
         self.deutung = deutung or {
@@ -340,6 +345,7 @@ class _MdBauer:
             "sind getrennt: Beschreibungen und Einschätzungen stammen aus der Deutung."
         )
         z += self.ueberblick()
+        z += self.fuehrungen_md()
         z += self.module()
         z += self.gradle()
         z += self.bereiche()
@@ -383,6 +389,29 @@ class _MdBauer:
         if detekt is not None:
             anzahl = sum(1 for b in self.messung["befunde"] if b.get("quelle") == "detekt")
             z.append(f"| detekt: SARIF-Dateien · Befunde | {detekt['dateien']} · {anzahl} |")
+        return z
+
+    def fuehrungen_md(self) -> list[str]:
+        """Führungen aus der Deutung (seit A10): Titel, Frage, Sprungadresse, Schritt-Titel."""
+        if not self.fuehrungen:
+            return []
+        z = [
+            "",
+            "## Führungen",
+            "",
+            "Aus der Deutung. In der Karte mit Weiter und Zurück, auf Wunsch vorgelesen.",
+        ]
+        marken = {
+            "veraltet": " *(Code geändert, Text evtl. veraltet)*",
+            "kaputt": " *(kaputt, wird übersprungen)*",
+        }
+        for f in self.fuehrungen:
+            link = sprungadresse("fuehrung", f["name"])
+            z += ["", f"### [{_md(f['titel'])}]({link})", ""]
+            if f["frage"]:
+                z += [f"Frage: {_md(f['frage'])}", ""]
+            for nr, s in enumerate(f["schritte"], 1):
+                z.append(f"{nr}. {_md(s['titel'])}{marken.get(s['stand'], '')}")
         return z
 
     def _gruppentabelle(self, art: str) -> list[str]:
@@ -608,6 +637,10 @@ class _MdBauer:
         return z
 
 
-def baue_karte_md(messung: dict[str, Any], deutung: dict[str, Any] | None) -> str:
+def baue_karte_md(
+    messung: dict[str, Any],
+    deutung: dict[str, Any] | None,
+    fuehrungen: list[dict[str, Any]] | None = None,
+) -> str:
     funktionen = {k["id"]: k for k in messung["knoten"] if k["art"] == "funktion"}
-    return _MdBauer(strukturansicht(messung), deutung, funktionen).baue()
+    return _MdBauer(strukturansicht(messung), deutung, funktionen, fuehrungen).baue()

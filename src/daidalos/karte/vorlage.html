@@ -16,6 +16,7 @@
     <h1><span>daidalos</span> Karte · <b id="projekt"></b></h1>
     <span class="sub" id="stand"></span>
     <span class="hinweis" id="aenderungen" hidden>mit nicht committeten Änderungen</span>
+    <button type="button" class="btn fknopf" id="fuehrungen-knopf" hidden>Führungen</button>
     <div class="seg thema" role="group" aria-label="Darstellung">
       <button type="button" data-thema="dark">Dunkel</button>
       <button type="button" data-thema="light">Hell</button>
@@ -90,7 +91,10 @@
         <span>an jeder Datei: Code · Editor · Schloss</span>
       </div>
     </div>
-    <aside id="seite" aria-live="polite"></aside>
+    <div class="spalte">
+      <section class="fuehrung" id="fuehrung" aria-label="Führung" hidden></section>
+      <aside id="seite" aria-live="polite"></aside>
+    </div>
   </div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -98,6 +102,7 @@
 <script type="application/json" id="daidalos-deutung">{{DEUTUNG}}</script>
 <script type="application/json" id="daidalos-einstellungen">{{EINSTELLUNGEN}}</script>
 <script type="application/json" id="funktionen">{{FUNKTIONEN}}</script>
+<script type="application/json" id="daidalos-fuehrungen">{{FUEHRUNGEN}}</script>
 {{BIBLIOTHEKEN}}
 <script>
 {{SKRIPT}}

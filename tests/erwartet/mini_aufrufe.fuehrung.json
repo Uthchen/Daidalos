@@ -1,0 +1,93 @@
+{
+  "frage": "Was passiert, wenn zeichneAlles einen Strich zeichnet?",
+  "name": "vom-aufruf-zum-strich",
+  "schema": 1,
+  "schritte": [
+    {
+      "ansicht": "#ebene=modul",
+      "belege": [
+        {
+          "datei": "app/src/main/kotlin/de/beispiel/app/Haupt.kt",
+          "zeile": 9
+        }
+      ],
+      "hashes": {
+        "datei:app/src/main/kotlin/de/beispiel/app/Haupt.kt": "sha256:92f1a26fdb7b400c6ee716e6c36120abc529ec27a31d2e7c112950756508ec61",
+        "modul::app": "sha256:0bbcf545408799ed2d655e7bc99b7369bb7ca3d6da46dca4bec21d308fd43e9f",
+        "modul::kern": "sha256:35c5c34d8ee1caceeb0fd5d63cd08ec529a177d2612cd90f36fffd8463864354"
+      },
+      "hervorheben": [
+        "modul::app",
+        "modul::kern"
+      ],
+      "text": "Das Beispiel hat zwei Module. Die App ruft den Kern, der Kern kennt die App nicht.",
+      "titel": "Zwei Module"
+    },
+    {
+      "ansicht": "#knoten=datei%3Akern%2Fsrc%2FcommonMain%2Fkotlin%2Fde%2Fbeispiel%2Faufrufe%2FWerkzeug.kt",
+      "belege": [
+        {
+          "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt",
+          "zeile": 23
+        }
+      ],
+      "hashes": {
+        "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt": "sha256:97f0a1eee65a1e8a8afd1130d7fe455f8e1b508849f8061a621a823b824436c9",
+        "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt": "sha256:cbc6f704ef1fb0867ba54b46511db57cc97c4d75b5fdb0cb00221f725db7107d"
+      },
+      "hervorheben": [
+        "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt",
+        "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt",
+        "kante:nutzt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt->datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt:produktiv"
+      ],
+      "text": "Die Datei mit den Werkzeugen bekommt einen Strich übergeben und arbeitet mit ihm.",
+      "titel": "Werkzeug nutzt Strich"
+    },
+    {
+      "ansicht": "#funktion=funktion%3Akern%2Fsrc%2FcommonMain%2Fkotlin%2Fde%2Fbeispiel%2Faufrufe%2FWerkzeug.kt%23zeichneAlles%2F1&weg=vor&tiefe=2",
+      "belege": [
+        {
+          "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt",
+          "zeile": 24
+        }
+      ],
+      "hashes": {
+        "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt": "sha256:cbc6f704ef1fb0867ba54b46511db57cc97c4d75b5fdb0cb00221f725db7107d",
+        "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1": "sha256:0033b7e163298f1c21921fdd4bf7ad363da7e9a157c3ee745393ca5c18e7ff29",
+        "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#zeichneAlles/1": "sha256:90098311251122c1d60a5d0ddf1fa083c5e9b82373843f2cc89f88714d46fcb4"
+      },
+      "hervorheben": [
+        "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#zeichneAlles/1",
+        "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#zeichneAlles/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1:produktiv",
+        "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1"
+      ],
+      "text": "zeichneAlles lässt den Strich dreimal zeichnen. Danach rechnet es noch ein paar Werte aus, die mit dem Bild nichts zu tun haben.",
+      "titel": "Dreimal zeichnen"
+    },
+    {
+      "ansicht": "#funktion=funktion%3Akern%2Fsrc%2FcommonMain%2Fkotlin%2Fde%2Fbeispiel%2Faufrufe%2FStrich.kt%23Strich.zeichne%2F1",
+      "belege": [
+        {
+          "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt",
+          "zeile": 37
+        }
+      ],
+      "hashes": {
+        "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt": "sha256:97f0a1eee65a1e8a8afd1130d7fe455f8e1b508849f8061a621a823b824436c9",
+        "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.male/2": "sha256:191117dea9ca714232ffeefabf3c48bdd99d13f518c676b800bc71b441463349",
+        "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.sammle/1": "sha256:ae7c132cd97ef0fc01fc61f2ae40f0a754b7c8f5a0bc305289c3163971f53195",
+        "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.setze/1": "sha256:cb1a1fc1916187cb398f52c92a300c350e6b30534c791f54999b5fafcad60899",
+        "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1": "sha256:0033b7e163298f1c21921fdd4bf7ad363da7e9a157c3ee745393ca5c18e7ff29"
+      },
+      "hervorheben": [
+        "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1",
+        "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.setze/1",
+        "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.male/2",
+        "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.sammle/1"
+      ],
+      "text": "zeichne setzt einen Anfang, malt in einer Farbe und sammelt die Punkte des Strichs. Welche der beiden setze-Varianten zum Schluss gemeint ist, kann Daidalos nicht sicher sagen.",
+      "titel": "Der Strich entsteht"
+    }
+  ],
+  "titel": "Vom Aufruf bis zum Strich"
+}

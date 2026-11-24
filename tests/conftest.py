@@ -5,6 +5,7 @@ from __future__ import annotations
 import shutil
 import subprocess
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -67,3 +68,13 @@ def mini_git(mini_kopie: Path) -> Path:
     git(mini_kopie, "add", "-A")
     git(mini_kopie, "commit", "-q", "-m", "Anfang")
     return mini_kopie
+
+
+def js(seite: Any, ausdruck: str) -> None:
+    """Führt einen Ausdruck in der Browser-Probe aus, ohne seinen Wert zurückzugeben.
+
+    ``void (…)`` darum: Playwright wartet sonst auf ein zurückgegebenes Promise oder scheitert
+    daran, Cytoscape-Sammlungen zu übertragen. Für Ausdrücke, deren Wert gebraucht wird, bleibt
+    ``seite.evaluate``. Mehrere Anweisungen mit Komma statt Semikolon verbinden.
+    """
+    seite.evaluate("void (" + ausdruck + ")")

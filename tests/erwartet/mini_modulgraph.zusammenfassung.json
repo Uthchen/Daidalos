@@ -248,6 +248,7 @@
         "stand": "fehlt"
       }
     ],
+    "fuehrungen": [],
     "tote_verweise": [
       "bereiche bereich:zeichnen: paket::verschwunden/x",
       "beschreibungen: modul::gibt-es-nicht",
