@@ -68,8 +68,12 @@ table.kettenbeleg td:last-child { text-align: left; overflow-wrap: anywhere; }
 label.chk i.zugriff { border-top-width: 1px; border-color: var(--muted); }
 .legende i.ln.mark { border-color: var(--warn); }
 .legende i.ln.punkt { border-top-style: dotted; }
-.weginfo { position: absolute; top: 10px; left: 10px; right: 160px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 13px; background: var(--warn-soft); color: var(--fg); padding: 6px 10px; border-radius: 6px; z-index: 2; overflow-wrap: anywhere; }
-.flaeche.mitweg .pfadinfo { top: 58px; }
+/* Infoleiste (A09b): Zählzeile des Wegmodus, Fokuszeile, Hinweise untereinander, nie überlappend. */
+.infoleiste { position: absolute; top: 10px; left: 10px; right: 160px; z-index: 2; display: flex; flex-direction: column; align-items: stretch; gap: 6px; pointer-events: none; }
+.infoleiste > * { pointer-events: auto; }
+.weiter, .anordnung { align-self: flex-start; font-size: 12.5px; background: var(--panel); border: 1px solid var(--line); color: var(--muted); padding: 4px 10px; border-radius: 6px; }
+.anordnung { color: var(--warn); border-color: var(--warn); }
+.weginfo { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 13px; background: var(--warn-soft); color: var(--fg); padding: 6px 10px; border-radius: 6px; overflow-wrap: anywhere; }
 .wegknoepfe { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; font-size: 13px; }
 .wegknoepfe select { font: inherit; font-size: 13px; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 2px 4px; }
 .legende i.ln.verdichtet { border-top-style: dotted; }
@@ -96,7 +100,7 @@ input.suche { font: inherit; font-size: 13px; color: var(--fg); background: var(
 .schloss[aria-pressed="false"] { color: var(--accent); border-color: var(--accent); }
 .pfadinfo .m-rein { color: var(--fg); }
 .pfadinfo .m-raus { color: var(--accent); }
-.pfadinfo { position: absolute; top: 10px; left: 10px; right: 160px; font-size: 13px; background: var(--accent-soft); color: var(--fg); padding: 6px 10px; border-radius: 6px; font-family: var(--mono); overflow-wrap: anywhere; z-index: 2; }
+.pfadinfo { font-size: 13px; background: var(--accent-soft); color: var(--fg); padding: 6px 10px; border-radius: 6px; font-family: var(--mono); overflow-wrap: anywhere; z-index: 2; }
 .lade { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 8px 14px; font-size: 13px; color: var(--muted); z-index: 3; }
 
 aside { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: grid; gap: 16px; align-content: start; min-width: 0; height: calc(100vh - 190px); min-height: 560px; overflow: auto; }
