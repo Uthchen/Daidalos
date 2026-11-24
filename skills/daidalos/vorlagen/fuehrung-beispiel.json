@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "vom-aufruf-zum-strich",
+  "titel": "Vom Aufruf bis zum Strich",
+  "frage": "Was passiert, wenn zeichneAlles einen Strich zeichnet?",
+  "schritte": [
+    {
+      "ansicht": "#ebene=modul",
+      "hervorheben": ["modul::app", "modul::kern"],
+      "titel": "Zwei Module",
+      "text": "Das Beispiel hat zwei Module. Die App ruft den Kern, der Kern kennt die App nicht.",
+      "belege": [{ "datei": "app/src/main/kotlin/de/beispiel/app/Haupt.kt", "zeile": 9 }]
+    },
+    {
+      "ansicht": "#knoten=datei%3Akern%2Fsrc%2FcommonMain%2Fkotlin%2Fde%2Fbeispiel%2Faufrufe%2FWerkzeug.kt",
+      "hervorheben": [
+        "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt",
+        "datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt",
+        "kante:nutzt:datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt->datei:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt:produktiv"
+      ],
+      "titel": "Werkzeug nutzt Strich",
+      "text": "Die Datei mit den Werkzeugen bekommt einen Strich übergeben und arbeitet mit ihm.",
+      "belege": [{ "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt", "zeile": 23 }]
+    },
+    {
+      "ansicht": "#funktion=funktion%3Akern%2Fsrc%2FcommonMain%2Fkotlin%2Fde%2Fbeispiel%2Faufrufe%2FWerkzeug.kt%23zeichneAlles%2F1&weg=vor&tiefe=2",
+      "hervorheben": [
+        "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#zeichneAlles/1",
+        "kante:ruft:funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt#zeichneAlles/1->funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1:produktiv",
+        "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1"
+      ],
+      "titel": "Dreimal zeichnen",
+      "text": "zeichneAlles lässt den Strich dreimal zeichnen. Danach rechnet es noch ein paar Werte aus, die mit dem Bild nichts zu tun haben.",
+      "belege": [{ "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Werkzeug.kt", "zeile": 24 }]
+    },
+    {
+      "ansicht": "#funktion=funktion%3Akern%2Fsrc%2FcommonMain%2Fkotlin%2Fde%2Fbeispiel%2Faufrufe%2FStrich.kt%23Strich.zeichne%2F1",
+      "hervorheben": [
+        "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.zeichne/1",
+        "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.setze/1",
+        "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.male/2",
+        "funktion:kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt#Strich.sammle/1"
+      ],
+      "titel": "Der Strich entsteht",
+      "text": "zeichne setzt einen Anfang, malt in einer Farbe und sammelt die Punkte des Strichs. Welche der beiden setze-Varianten zum Schluss gemeint ist, kann Daidalos nicht sicher sagen.",
+      "belege": [{ "datei": "kern/src/commonMain/kotlin/de/beispiel/aufrufe/Strich.kt", "zeile": 37 }]
+    }
+  ]
+}
